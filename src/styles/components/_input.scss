@@ -1,0 +1,44 @@
+@use "../variables" as v;
+@use "../mixins" as m;
+@use "../pixel" as pb;
+
+// ─────────────────────────────────────────
+// .input  — 기본 픽셀 텍스트 인풋
+// ─────────────────────────────────────────
+
+.input {
+  display: block;
+  width: 100%;
+  background-color: v.$color-surface;
+  color: v.$color-text;
+  font-family: v.$font-pixel;
+  outline: none;
+
+  @include pb.pixel-borders(
+    $corner-size: 1,
+    $border-size: 3px,
+    $border-color: v.$color-border
+  );
+
+  @include m.mobile {
+    font-size: m.vw(9);
+    padding: m.vw(10) m.vw(12);
+  }
+
+  @include m.desktop {
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+
+  &::placeholder {
+    color: v.$color-muted;
+  }
+
+  &:focus {
+    @include pb.pixel-borders(
+      $corner-size: 1,
+      $border-size: 3px,
+      $border-color: v.$color-primary
+    );
+  }
+}

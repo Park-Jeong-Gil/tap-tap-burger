@@ -1,0 +1,414 @@
+@use "../variables" as v;
+@use "../mixins" as m;
+@use "../pixel" as pb;
+
+// ─── 인게임 전체 레이아웃 ────────────────────────────
+.ingame {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+  background-color: v.$color-bg;
+}
+
+// HP 바 영역
+.ingame__hp {
+  flex-shrink: 0;
+  @include m.mobile {
+    padding: m.vw(8) m.vw(12);
+  }
+  @include m.desktop {
+    padding: 8px 12px;
+  }
+}
+
+// 주문서 큐 영역
+.ingame__queue {
+  flex-shrink: 0;
+  @include m.mobile {
+    padding: 0 m.vw(12) m.vw(6);
+  }
+  @include m.desktop {
+    padding: 0 12px 6px;
+  }
+}
+
+.ingame__queue-label {
+  font-family: v.$font-pixel;
+  font-weight: bold;
+  color: v.$color-muted;
+  @include m.mobile {
+    font-size: m.vw(7);
+    margin-bottom: m.vw(3);
+  }
+  @include m.desktop {
+    font-size: 11px;
+    margin-bottom: 3px;
+  }
+}
+
+// 스코어 영역
+.ingame__score {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  @include m.mobile {
+    padding: 0 m.vw(12) m.vw(4);
+  }
+  @include m.desktop {
+    padding: 0 12px 4px;
+  }
+}
+
+// ─── 하단 인터랙션 영역 ───────────────────────────────
+// 버거 중앙 + 버튼 패널 (flex-column)
+.ingame__bottom {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  @include m.mobile {
+    padding: 0 m.vw(10) m.vw(10);
+    gap: m.vw(6);
+  }
+  @include m.desktop {
+    padding: 0 10px 10px;
+    gap: 6px;
+  }
+}
+
+// 버거 스택 중앙 영역 (남은 공간 모두 차지)
+.ingame__burger-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  min-height: 0;
+}
+
+// 액션 버튼 행 (취소 + 완성)
+.ingame__action-row {
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  @include m.mobile {
+    gap: m.vw(6);
+    height: m.vw(44);
+  }
+  @include m.desktop {
+    gap: 6px;
+    height: 44px;
+  }
+}
+
+// 재료 2×2 그리드
+.ingame__grid {
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  @include m.mobile {
+    gap: m.vw(6);
+    height: m.vw(132);
+  }
+  @include m.desktop {
+    gap: 6px;
+    height: 132px;
+  }
+}
+
+// ─── 입력 버튼 ────────────────────────────────────────
+.input-btn {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  font-family: v.$font-pixel;
+  font-weight: bold;
+  color: v.$color-bg;
+  transition:
+    filter 0.08s ease,
+    transform 0.08s ease;
+
+  @include m.mobile {
+    gap: m.vw(2);
+  }
+  @include m.desktop {
+    gap: 2px;
+  }
+
+  &:active {
+    filter: brightness(0.8);
+    transform: scale(0.97);
+  }
+
+  // 재료 이미지
+  &__img {
+    flex: 1;
+    min-height: 0;
+    width: auto;
+    max-width: 72%;
+    object-fit: contain;
+    image-rendering: pixelated;
+    filter: drop-shadow(1px 2px 0 rgba(0, 0, 0, 0.25));
+  }
+
+  &__label {
+    line-height: 1;
+    flex-shrink: 0;
+    @include m.mobile {
+      font-size: m.vw(9);
+    }
+    @include m.desktop {
+      font-size: 13px;
+    }
+  }
+
+  &__key {
+    font-family: v.$font-pixel;
+    flex-shrink: 0;
+    font-size: 7px;
+    font-style: normal;
+    background: rgba(0, 0, 0, 0.18);
+    padding: 1px 3px;
+    border-radius: 2px;
+    opacity: 0.85;
+    line-height: 1.2;
+  }
+
+  &--patty {
+    @include pb.pixel-box(
+      $corner-size: 1,
+      $border-size: 3px,
+      $background-color: #6b3a1f,
+      $border-color: v.$color-border,
+      $border-inset: true,
+      $border-inset-sides: "all"
+    );
+    color: #f5d5b0;
+  }
+  &--cheese {
+    @include pb.pixel-box(
+      $corner-size: 1,
+      $border-size: 3px,
+      $background-color: #f7c948,
+      $border-color: v.$color-border,
+      $border-inset: true,
+      $border-inset-sides: "all"
+    );
+    color: v.$color-text;
+  }
+  &--veggie {
+    @include pb.pixel-box(
+      $corner-size: 1,
+      $border-size: 3px,
+      $background-color: #3a7d44,
+      $border-color: v.$color-border,
+      $border-inset: true,
+      $border-inset-sides: "all"
+    );
+    color: #c8f0cc;
+  }
+  &--sauce {
+    @include pb.pixel-box(
+      $corner-size: 1,
+      $border-size: 3px,
+      $background-color: #c0392b,
+      $border-color: v.$color-border,
+      $border-inset: true,
+      $border-inset-sides: "all"
+    );
+    color: #fde8e8;
+  }
+  &--cancel {
+    @include pb.pixel-box(
+      $corner-size: 1,
+      $border-size: 3px,
+      $background-color: #7a7a9a,
+      $border-color: v.$color-border,
+      $border-inset: true,
+      $border-inset-sides: "all"
+    );
+    color: #f0f0f8;
+  }
+  &--submit {
+    @include pb.pixel-box(
+      $corner-size: 1,
+      $border-size: 3px,
+      $background-color: v.$color-primary,
+      $border-color: v.$color-border,
+      $border-inset: true,
+      $border-inset-sides: "all"
+    );
+    color: v.$color-bg;
+  }
+}
+
+// ─── 스코어 표시 ─────────────────────────────────────
+.score-display {
+  font-family: v.$font-pixel;
+  color: v.$color-text;
+
+  @include m.mobile {
+    font-size: m.vw(10);
+  }
+  @include m.desktop {
+    font-size: 18px;
+  }
+
+  span {
+    color: v.$color-primary;
+  }
+}
+
+.combo-display {
+  font-family: v.$font-pixel;
+  color: v.$color-success;
+  animation: combo-pop 0.3s ease-out;
+
+  @include m.mobile {
+    font-size: m.vw(10);
+  }
+  @include m.desktop {
+    font-size: 18px;
+  }
+}
+
+@keyframes combo-pop {
+  0% {
+    transform: scale(1.5);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+// ─── 게임오버 오버레이 ────────────────────────────────
+.gameover-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(26, 26, 46, 0.93);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fade-in 0.4s ease-out;
+
+  @include m.mobile {
+    gap: m.vw(20);
+    padding: m.vw(24);
+  }
+  @include m.desktop {
+    gap: 20px;
+    padding: 24px;
+  }
+
+  // 오버레이 내부는 항상 밝은 텍스트 사용
+  .btn--ghost {
+    @include pb.pixel-borders(
+      $corner-size: 2,
+      $border-size: 3px,
+      $border-color: #eaeaea
+    );
+    color: #eaeaea;
+
+    &:hover,
+    &:focus {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+}
+
+.gameover-title {
+  font-family: v.$font-pixel;
+  color: v.$color-danger;
+  text-align: center;
+
+  @include m.mobile {
+    font-size: m.vw(20);
+  }
+  @include m.desktop {
+    font-size: 32px;
+  }
+}
+
+.gameover-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: v.$font-pixel;
+  color: #eaeaea; // 오버레이 위 → 항상 밝게
+
+  @include m.mobile {
+    gap: m.vw(12);
+    font-size: m.vw(11);
+  }
+  @include m.desktop {
+    gap: 12px;
+    font-size: 20px;
+  }
+
+  span {
+    color: v.$color-primary;
+  }
+}
+
+.gameover-actions {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
+  @include m.mobile {
+    gap: m.vw(10);
+  }
+  @include m.desktop {
+    gap: 10px;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// ─── 대전 모드 미니 패널 (상대 상태) ─────────────────
+.versus-opponent {
+  @include pb.pixel-borders(
+    $corner-size: 1,
+    $border-size: 2px,
+    $border-color: v.$color-danger
+  );
+  background-color: v.$color-surface;
+  display: flex;
+  align-items: center;
+
+  @include m.mobile {
+    padding: m.vw(6) m.vw(10);
+    gap: m.vw(12);
+    font-size: m.vw(8);
+    margin: m.vw(6) m.vw(12);
+  }
+  @include m.desktop {
+    padding: 6px 10px;
+    gap: 12px;
+    font-size: 12px;
+    margin: 6px 12px;
+  }
+
+  font-family: v.$font-pixel;
+  color: v.$color-text;
+}

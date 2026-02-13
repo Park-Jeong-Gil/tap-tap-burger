@@ -1,5 +1,5 @@
 {
-  "name": "taptapburger-temp",
+  "name": "tap-tap-burger",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,16 +9,22 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.95.3",
     "next": "16.1.6",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "uuid": "^13.0.0",
+    "zustand": "^5.0.11"
   },
   "devDependencies": {
+    "@girgir/pixel-borders-modern": "^1.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/uuid": "^10.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "sass": "^1.97.3",
     "typescript": "^5"
   }
 }

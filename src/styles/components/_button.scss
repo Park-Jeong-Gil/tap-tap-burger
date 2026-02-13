@@ -1,0 +1,87 @@
+@use "../variables" as v;
+@use "../mixins" as m;
+@use "../pixel" as pb;
+
+// ─────────────────────────────────────────
+// .btn  — 기본 픽셀 버튼
+// .btn--primary   주황 강조
+// .btn--danger    붉은 위험
+// .btn--ghost     테두리만
+// ─────────────────────────────────────────
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-family: v.$font-pixel;
+  color: v.$color-text;
+  text-align: center;
+  line-height: 1.4;
+  border: none;
+  outline: none;
+  user-select: none;
+  transition: filter 0.1s ease;
+
+  // 모바일: vw 기반 크기
+  @include m.mobile {
+    font-size: m.vw(10);
+    padding: m.vw(12) m.vw(20);
+    gap: m.vw(8);
+  }
+
+  // PC: 고정 크기 (max-width 768px 컨테이너 내부)
+  @include m.desktop {
+    font-size: 18px;
+    padding: 12px 20px;
+    gap: 8px;
+  }
+
+  &:active {
+    filter: brightness(0.85);
+    transform: translateY(2px);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+}
+
+.btn--primary {
+  @include pb.pixel-box(
+    $corner-size: 2,
+    $border-size: 4px,
+    $background-color: v.$color-primary,
+    $border-color: v.$color-border,
+    $border-inset: true,
+    $border-inset-sides: "all"
+  );
+  color: v.$color-bg;
+}
+
+.btn--danger {
+  @include pb.pixel-box(
+    $corner-size: 2,
+    $border-size: 4px,
+    $background-color: v.$color-danger,
+    $border-color: v.$color-border,
+    $border-inset: true,
+    $border-inset-sides: "all"
+  );
+}
+
+.btn--ghost {
+  background-color: transparent;
+  @include pb.pixel-borders(
+    $corner-size: 2,
+    $border-size: 3px,
+    $border-color: v.$color-border
+  );
+
+  &:hover,
+  &:focus {
+    background-color: rgba(255, 255, 255, 0.08);
+  }
+}

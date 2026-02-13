@@ -1,0 +1,54 @@
+@use "variables" as v;
+@use "mixins" as m;
+
+// ─────────────────────────────────────────
+// Google Fonts
+// ─────────────────────────────────────────
+@font-face {
+  font-family: "Mulmaru";
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/2601-4@1.1/Mulmaru.woff2") format("woff2");
+  font-weight: normal;
+  font-display: swap;
+}
+
+// ─────────────────────────────────────────
+// Reset
+// ─────────────────────────────────────────
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+// ─────────────────────────────────────────
+// Base
+// ─────────────────────────────────────────
+html,
+body {
+  height: 100%;
+  font-size: 18px;
+  background-color: v.$color-bg;
+  color: v.$color-text;
+  font-family: v.$font-base;
+  -webkit-font-smoothing: antialiased;
+}
+
+// 이미지 계단현상 방지 (픽셀 아트 선명하게)
+img {
+  image-rendering: pixelated;
+}
+
+// ─────────────────────────────────────────
+// 반응형 레이아웃 컨테이너
+// - 768px 초과: 중앙 정렬 + 양옆 여백
+// - 768px 이하: vw 비율 스케일
+// ─────────────────────────────────────────
+.container {
+  width: 100%;
+  max-width: v.$max-width;
+  min-height: 100dvh;
+  margin: 0 auto;
+  position: relative;
+}

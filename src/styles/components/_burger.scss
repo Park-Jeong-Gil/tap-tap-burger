@@ -1,0 +1,84 @@
+@use "../variables" as v;
+@use "../mixins" as m;
+@use "../pixel" as pb;
+
+// ─── 버거 스택 영역 ───────────────────────────────────
+.burger-stack {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  justify-content: flex-end;
+  position: relative;
+
+  @include m.mobile {
+    width: m.vw(190);
+    min-height: m.vw(60);
+  }
+  @include m.desktop {
+    width: 210px;
+    min-height: 60px;
+  }
+}
+
+// ─── 번 이미지 ────────────────────────────────────────
+.burger-bun {
+  width: 100%;
+  display: block;
+  image-rendering: pixelated;
+}
+
+// ─── 재료 레이어 (이미지) ─────────────────────────────
+.ingredient-layer {
+  width: 100%;
+  animation: pop-in 0.15s ease-out;
+
+  img {
+    width: 100%;
+    height: auto;
+    display: block;
+    image-rendering: pixelated;
+  }
+}
+
+// ─── 제출 플래시 오버레이 ─────────────────────────────
+.burger-flash {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: v.$font-pixel;
+  pointer-events: none;
+  border-radius: 2px;
+
+  @include m.mobile { font-size: m.vw(20); }
+  @include m.desktop { font-size: 24px; }
+
+  &--correct {
+    background: rgba(46, 158, 62, 0.25);
+    color: v.$color-success;
+    animation: flash-fade 0.5s ease-out forwards;
+  }
+  &--wrong {
+    background: rgba(217, 48, 37, 0.25);
+    color: v.$color-danger;
+    animation: flash-fade 0.5s ease-out forwards;
+  }
+}
+
+// ─── 키프레임 ─────────────────────────────────────────
+@keyframes pop-in {
+  from {
+    transform: scaleY(0) translateY(8px);
+    opacity: 0;
+  }
+  to {
+    transform: scaleY(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes flash-fade {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
+}

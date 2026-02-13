@@ -1,0 +1,25 @@
+@use "variables" as v;
+
+// ─────────────────────────────────────────
+// vw 단위 변환 함수
+// 기준 뷰포트 375px 기반
+// 사용: font-size: vw(16); → 4.267vw
+// ─────────────────────────────────────────
+@function vw($px) {
+  @return #{calc($px / v.$base-viewport * 100)}vw;
+}
+
+// ─────────────────────────────────────────
+// Breakpoint
+// ─────────────────────────────────────────
+@mixin mobile {
+  @media (max-width: #{v.$max-width}) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (min-width: #{calc(v.$max-width + 1px)}) {
+    @content;
+  }
+}

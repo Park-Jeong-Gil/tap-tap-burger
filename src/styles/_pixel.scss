@@ -1,0 +1,7 @@
+// pixel-borders-modern 믹스인 re-export
+// 사용법:
+//   @use "@/styles/pixel" as pb;
+//   @include pb.pixel-borders(...);
+//   @include pb.pixel-box(...);
+
+@forward "../../node_modules/@girgir/pixel-borders-modern/src/styles/pixel-borders/pixel-borders-mixins";

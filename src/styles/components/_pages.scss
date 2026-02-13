@@ -1,0 +1,450 @@
+@use "../variables" as v;
+@use "../mixins" as m;
+@use "../pixel" as pb;
+
+// ─── 메인 페이지 ──────────────────────────────────────
+.main-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  background-color: v.$color-bg;
+
+  @include m.mobile {
+    padding: m.vw(32) m.vw(24);
+    gap: m.vw(28);
+  }
+  @include m.desktop {
+    padding: 32px 24px;
+    gap: 28px;
+  }
+}
+
+.main-title {
+  font-family: v.$font-pixel;
+  color: v.$color-primary;
+  text-align: center;
+  line-height: 1.6;
+  letter-spacing: 0.05em;
+
+  @include m.mobile {
+    font-size: m.vw(18);
+  }
+  @include m.desktop {
+    font-size: 18px;
+  }
+}
+
+.main-subtitle {
+  font-family: v.$font-pixel;
+  color: v.$color-muted;
+
+  @include m.mobile {
+    font-size: m.vw(9);
+  }
+  @include m.desktop {
+    font-size: 14px;
+  }
+}
+
+.main-nickname {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  @include m.mobile {
+    gap: m.vw(8);
+  }
+  @include m.desktop {
+    gap: 8px;
+  }
+}
+
+.main-nickname__label {
+  font-family: v.$font-pixel;
+  color: v.$color-muted;
+  @include m.mobile {
+    font-size: m.vw(8);
+  }
+  @include m.desktop {
+    font-size: 12px;
+  }
+}
+
+.main-menu {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  @include m.mobile {
+    gap: m.vw(12);
+  }
+  @include m.desktop {
+    gap: 12px;
+  }
+}
+
+// ─── 하우 투 플레이 모달 ──────────────────────────────
+.htp-modal {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(26, 26, 46, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+
+  @include m.mobile {
+    padding: m.vw(20);
+  }
+  @include m.desktop {
+    padding: 20px;
+  }
+}
+
+.htp-content {
+  width: 100%;
+  max-height: 85dvh;
+  overflow-y: auto;
+  @include pb.pixel-box(
+    $corner-size: 2,
+    $border-size: 4px,
+    $background-color: v.$color-surface,
+    $border-color: v.$color-border,
+    $border-inset: true,
+    $border-inset-sides: "all"
+  );
+
+  @include m.mobile {
+    padding: m.vw(20);
+    gap: m.vw(12);
+  }
+  @include m.desktop {
+    padding: 20px;
+    gap: 12px;
+  }
+  display: flex;
+  flex-direction: column;
+}
+
+.htp-title {
+  font-family: v.$font-pixel;
+  color: v.$color-primary;
+  @include m.mobile {
+    font-size: m.vw(13);
+  }
+  @include m.desktop {
+    font-size: 13px;
+  }
+}
+
+.htp-section {
+  display: flex;
+  flex-direction: column;
+  @include m.mobile {
+    gap: m.vw(8);
+  }
+  @include m.desktop {
+    gap: 8px;
+  }
+}
+
+.htp-section__title {
+  font-family: v.$font-pixel;
+  color: v.$color-text;
+  @include m.mobile {
+    font-size: m.vw(10);
+  }
+  @include m.desktop {
+    font-size: 18px;
+  }
+}
+
+.htp-key-row {
+  display: flex;
+  align-items: center;
+  font-family: v.$font-pixel;
+  color: v.$color-muted;
+  @include m.mobile {
+    gap: m.vw(10);
+    font-size: m.vw(8);
+  }
+  @include m.desktop {
+    gap: 10px;
+    font-size: 12px;
+  }
+
+  kbd {
+    @include pb.pixel-borders(
+      $corner-size: 1,
+      $border-size: 2px,
+      $border-color: v.$color-muted
+    );
+    background-color: v.$color-bg;
+    color: v.$color-text;
+    @include m.mobile {
+      padding: m.vw(3) m.vw(6);
+      font-size: m.vw(8);
+    }
+    @include m.desktop {
+      padding: 3px 6px;
+      font-size: 12px;
+    }
+  }
+}
+
+// ─── 리더보드 페이지 ──────────────────────────────────
+.leaderboard-page {
+  min-height: 100dvh;
+  background-color: v.$color-bg;
+  @include m.mobile {
+    padding: m.vw(20) m.vw(16);
+  }
+  @include m.desktop {
+    padding: 20px 16px;
+  }
+}
+
+.leaderboard-header {
+  display: flex;
+  align-items: center;
+  @include m.mobile {
+    gap: m.vw(12);
+    margin-bottom: m.vw(20);
+  }
+  @include m.desktop {
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  h1 {
+    font-family: v.$font-pixel;
+    color: v.$color-primary;
+    @include m.mobile {
+      font-size: m.vw(14);
+    }
+    @include m.desktop {
+      font-size: 14px;
+    }
+  }
+}
+
+.leaderboard-tabs {
+  display: flex;
+  @include m.mobile {
+    gap: m.vw(8);
+    margin-bottom: m.vw(16);
+  }
+  @include m.desktop {
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+}
+
+.leaderboard-tab {
+  cursor: pointer;
+  font-family: v.$font-pixel;
+  color: v.$color-muted;
+  background: transparent;
+  border: none;
+  @include pb.pixel-borders(
+    $corner-size: 1,
+    $border-size: 2px,
+    $border-color: v.$color-muted
+  );
+  @include m.mobile {
+    font-size: m.vw(9);
+    padding: m.vw(6) m.vw(10);
+  }
+  @include m.desktop {
+    font-size: 14px;
+    padding: 6px 10px;
+  }
+
+  &--active {
+    color: v.$color-primary;
+    @include pb.pixel-borders(
+      $corner-size: 1,
+      $border-size: 2px,
+      $border-color: v.$color-primary
+    );
+  }
+}
+
+.leaderboard-table {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  @include m.mobile {
+    gap: m.vw(6);
+  }
+  @include m.desktop {
+    gap: 6px;
+  }
+}
+
+.leaderboard-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  font-family: v.$font-pixel;
+  color: v.$color-text;
+  @include pb.pixel-borders(
+    $corner-size: 1,
+    $border-size: 2px,
+    $border-color: v.$color-border
+  );
+  background-color: v.$color-surface;
+
+  @include m.mobile {
+    gap: m.vw(10);
+    padding: m.vw(8) m.vw(10);
+    font-size: m.vw(9);
+  }
+  @include m.desktop {
+    gap: 10px;
+    padding: 8px 10px;
+    font-size: 14px;
+  }
+
+  &--mine {
+    @include pb.pixel-borders(
+      $corner-size: 1,
+      $border-size: 2px,
+      $border-color: v.$color-primary
+    );
+    color: v.$color-primary;
+  }
+
+  &--top1 {
+    color: #ffd700;
+  }
+  &--top2 {
+    color: #c0c0c0;
+  }
+  &--top3 {
+    color: #cd7f32;
+  }
+}
+
+.leaderboard-rank {
+  @include m.mobile {
+    min-width: m.vw(28);
+  }
+  @include m.desktop {
+    min-width: 28px;
+  }
+}
+
+// ─── 멀티 허브 페이지 ─────────────────────────────────
+.multi-hub {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: v.$color-bg;
+  @include m.mobile {
+    padding: m.vw(24);
+    gap: m.vw(24);
+  }
+  @include m.desktop {
+    padding: 24px;
+    gap: 24px;
+  }
+}
+
+.multi-hub__title {
+  font-family: v.$font-pixel;
+  color: v.$color-primary;
+  @include m.mobile {
+    font-size: m.vw(14);
+  }
+  @include m.desktop {
+    font-size: 14px;
+  }
+}
+
+.multi-hub__modes {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  @include m.mobile {
+    gap: m.vw(12);
+  }
+  @include m.desktop {
+    gap: 12px;
+  }
+}
+
+// 대기 룸 UI
+.room-lobby {
+  width: 100%;
+  @include pb.pixel-box(
+    $corner-size: 2,
+    $border-size: 4px,
+    $background-color: v.$color-surface,
+    $border-color: v.$color-border,
+    $border-inset: true,
+    $border-inset-sides: "all"
+  );
+  @include m.mobile {
+    padding: m.vw(20);
+    gap: m.vw(16);
+  }
+  @include m.desktop {
+    padding: 20px;
+    gap: 16px;
+  }
+  display: flex;
+  flex-direction: column;
+}
+
+.room-lobby__title {
+  font-family: v.$font-pixel;
+  color: v.$color-primary;
+  @include m.mobile {
+    font-size: m.vw(12);
+  }
+  @include m.desktop {
+    font-size: 12px;
+  }
+}
+
+.room-lobby__link {
+  display: flex;
+  @include m.mobile {
+    gap: m.vw(8);
+  }
+  @include m.desktop {
+    gap: 8px;
+  }
+}
+
+.room-lobby__players {
+  display: flex;
+  flex-direction: column;
+  @include m.mobile {
+    gap: m.vw(8);
+  }
+  @include m.desktop {
+    gap: 8px;
+  }
+}
+
+.room-lobby__player {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: v.$font-pixel;
+  color: v.$color-text;
+  @include m.mobile {
+    font-size: m.vw(9);
+  }
+  @include m.desktop {
+    font-size: 14px;
+  }
+
+  &--ready {
+    color: v.$color-success;
+  }
+}

@@ -1,66 +1,77 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client';
 
-export default function Home() {
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { usePlayerStore } from '@/stores/playerStore';
+import HowToPlay from '@/components/ui/HowToPlay';
+
+export default function MainPage() {
+  const router = useRouter();
+  const { nickname, setNickname, initSession, saveNickname, isInitialized } = usePlayerStore();
+  const [showHtp, setShowHtp] = useState(false);
+  const [inputValue, setInputValue] = useState('');
+
+  useEffect(() => {
+    initSession();
+  }, [initSession]);
+
+  useEffect(() => {
+    if (isInitialized) setInputValue(nickname);
+  }, [isInitialized, nickname]);
+
+  const handleNicknameBlur = () => {
+    setNickname(inputValue);
+    saveNickname();
+  };
+
+  const handleSingle = () => {
+    setNickname(inputValue);
+    router.push('/game/single');
+  };
+
+  const handleMulti = () => {
+    setNickname(inputValue);
+    router.push('/game/multi');
+  };
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <main className="main-page">
+      <div>
+        <h1 className="main-title">
+          TAP TAP<br />BURGER
+        </h1>
+        <p className="main-subtitle">Perfect Order</p>
+      </div>
+
+      <div className="main-nickname">
+        <label className="main-nickname__label" htmlFor="nickname">닉네임</label>
+        <input
+          id="nickname"
+          className="input"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onBlur={handleNicknameBlur}
+          placeholder="닉네임 입력..."
+          maxLength={20}
         />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      </div>
+
+      <nav className="main-menu">
+        <button className="btn btn--primary" onClick={handleSingle}>
+          싱글 게임
+        </button>
+        <button className="btn btn--ghost" onClick={handleMulti}>
+          멀티 게임
+        </button>
+        <button className="btn btn--ghost" onClick={() => router.push('/leaderboard')}>
+          리더보드
+        </button>
+        <button className="btn btn--ghost" onClick={() => setShowHtp(true)}>
+          하우 투 플레이
+        </button>
+      </nav>
+
+      {showHtp && <HowToPlay onClose={() => setShowHtp(false)} />}
+    </main>
   );
 }

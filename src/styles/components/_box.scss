@@ -1,0 +1,59 @@
+@use "../variables" as v;
+@use "../mixins" as m;
+@use "../pixel" as pb;
+
+// ─────────────────────────────────────────
+// .box        — 기본 픽셀 카드/박스
+// .box--order — 주문서 카드
+// .box--hp    — HP 바 컨테이너
+// ─────────────────────────────────────────
+
+.box {
+  @include pb.pixel-box(
+    $corner-size: 2,
+    $border-size: 4px,
+    $background-color: v.$color-surface,
+    $border-color: v.$color-border,
+    $border-inset: true,
+    $border-inset-sides: "all"
+  );
+
+  @include m.mobile {
+    padding: m.vw(16);
+  }
+
+  @include m.desktop {
+    padding: 16px;
+  }
+}
+
+// 주문서 카드 — 강조 테두리
+.box--order {
+  @include pb.pixel-box(
+    $corner-size: 2,
+    $border-size: 4px,
+    $background-color: v.$color-surface,
+    $border-color: v.$color-primary,
+    $border-inset: true,
+    $border-inset-sides: "all"
+  );
+
+  @include m.mobile {
+    padding: m.vw(12);
+  }
+
+  @include m.desktop {
+    padding: 12px;
+  }
+}
+
+// HP 바 컨테이너 — 얇은 테두리
+.box--hp {
+  @include pb.pixel-borders(
+    $corner-size: 1,
+    $border-size: 2px,
+    $border-color: v.$color-border
+  );
+  background-color: v.$color-surface;
+  overflow: hidden;
+}

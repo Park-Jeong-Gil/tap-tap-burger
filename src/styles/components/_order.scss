@@ -1,0 +1,224 @@
+@use "../variables" as v;
+@use "../mixins" as m;
+@use "../pixel" as pb;
+
+// ─── 주문서 큐 래퍼 ───────────────────────────────────
+.order-queue {
+  display: flex;
+  align-items: flex-start;
+  gap: m.vw(8);
+  overflow-x: auto;
+  overflow-y: visible;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  @include m.mobile {
+    gap: m.vw(8);
+    padding: m.vw(4) 0;
+  }
+  @include m.desktop {
+    gap: 8px;
+    padding: 4px 0;
+  }
+}
+
+.order-queue__badge {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: v.$color-surface;
+  color: v.$color-muted;
+  font-family: v.$font-pixel;
+  @include pb.pixel-borders(
+    $corner-size: 1,
+    $border-size: 2px,
+    $border-color: v.$color-muted
+  );
+
+  @include m.mobile {
+    font-size: m.vw(8);
+    padding: m.vw(6) m.vw(8);
+    min-width: m.vw(40);
+  }
+  @include m.desktop {
+    font-size: 12px;
+    padding: 6px 8px;
+    min-width: 40px;
+  }
+}
+
+// ─── 단일 주문서 카드 ────────────────────────────────
+.order-card {
+  flex-shrink: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background-color: v.$color-surface;
+  overflow: hidden;
+
+  @include pb.pixel-box(
+    $corner-size: 2,
+    $border-size: 3px,
+    $background-color: v.$color-surface,
+    $border-color: v.$color-primary,
+    $border-inset: true,
+    $border-inset-sides: "all"
+  );
+
+  @include m.mobile {
+    width: m.vw(90);
+    min-height: m.vw(100);
+    padding: m.vw(8);
+    gap: m.vw(4);
+  }
+  @include m.desktop {
+    width: 90px;
+    min-height: 100px;
+    padding: 8px;
+    gap: 4px;
+  }
+
+  // 타임아웃 경고 애니메이션
+  &--urgent {
+    animation: urgent-flash 0.4s ease-in-out infinite;
+  }
+
+  // 새 주문서 등장 애니메이션
+  &--enter {
+    animation: slide-in-right 0.3s ease-out;
+  }
+}
+
+// 타임 바 (상단)
+.order-card__timer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background-color: v.$color-primary;
+  transition:
+    width 0.1s linear,
+    background-color 0.3s ease;
+
+  &--urgent {
+    background-color: v.$color-danger;
+  }
+}
+
+// 주문 헤더 (번호 + 남은 시간)
+.order-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// 주문 번호
+.order-card__index {
+  font-family: v.$font-pixel;
+  color: v.$color-muted;
+
+  @include m.mobile {
+    font-size: m.vw(7);
+  }
+  @include m.desktop {
+    font-size: 10px;
+  }
+}
+
+// 남은 시간
+.order-card__time {
+  font-family: v.$font-pixel;
+  color: v.$color-primary;
+  font-weight: bold;
+
+  @include m.mobile {
+    font-size: m.vw(8);
+  }
+  @include m.desktop {
+    font-size: 12px;
+  }
+
+  &--urgent {
+    color: v.$color-danger;
+    animation: time-blink 0.5s ease-in-out infinite;
+  }
+}
+
+@keyframes time-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+// 재료 목록
+.order-card__ingredients {
+  display: flex;
+  flex-direction: column;
+  gap: m.vw(3);
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  @include m.desktop {
+    gap: 3px;
+  }
+}
+
+.order-card__ingredient {
+  font-family: v.$font-pixel;
+  color: v.$color-text;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  @include m.mobile {
+    font-size: m.vw(8);
+  }
+  @include m.desktop {
+    font-size: 14px;
+  }
+
+  // 입력 완료된 항목
+  &--done {
+    color: v.$color-success;
+    text-decoration: underline;
+  }
+
+  // 현재 입력 중인 항목
+  &--current {
+    color: v.$color-primary;
+    text-decoration: underline;
+  }
+}
+
+// ─── 키프레임 ─────────────────────────────────────────
+@keyframes slide-in-right {
+  from {
+    transform: translateX(60px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes urgent-flash {
+  0%,
+  100% {
+    box-shadow: 0 0 0 2px v.$color-danger;
+  }
+  50% {
+    box-shadow: 0 0 0 2px transparent;
+  }
+}

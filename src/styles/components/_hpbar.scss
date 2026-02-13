@@ -1,0 +1,51 @@
+@use "../variables" as v;
+@use "../mixins" as m;
+@use "../pixel" as pb;
+
+.hp-bar-wrap {
+  width: 100%;
+  @include pb.pixel-borders(
+    $corner-size: 1,
+    $border-size: 2px,
+    $border-color: v.$color-border
+  );
+  background-color: #e8d5c0;
+  overflow: hidden;
+
+  @include m.mobile {
+    height: m.vw(18);
+  }
+  @include m.desktop {
+    height: 18px;
+  }
+}
+
+.hp-bar-fill {
+  height: 100%;
+  background-color: v.$color-primary;
+  transition:
+    width 0.2s ease,
+    background-color 0.3s ease;
+
+  &--danger {
+    background-color: v.$color-danger;
+  }
+  &--warning {
+    background-color: #e5c007;
+  }
+}
+
+.hp-bar-label {
+  font-family: v.$font-pixel;
+  color: v.$color-text;
+  text-align: right;
+
+  @include m.mobile {
+    font-size: m.vw(8);
+    margin-bottom: m.vw(4);
+  }
+  @include m.desktop {
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+}
