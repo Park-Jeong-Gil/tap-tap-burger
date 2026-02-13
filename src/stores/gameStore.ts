@@ -56,7 +56,7 @@ function calcFreshSlotTime(ordersAhead: Order[], orderCount: number): number | u
   let time = ordersAhead[0].ingredients.length * BASE_SECONDS_PER_INGREDIENT * diff.timerMultiplier;
   // 이후 슬롯: 재료수 × timerMultiplier + 2초 여유
   for (let i = 1; i < ordersAhead.length; i++) {
-    time += ordersAhead[i].ingredients.length * BASE_SECONDS_PER_INGREDIENT * diff.timerMultiplier + 2;
+    time += ordersAhead[i].ingredients.length * BASE_SECONDS_PER_INGREDIENT * diff.timerMultiplier + 1;
   }
   return time;
 }

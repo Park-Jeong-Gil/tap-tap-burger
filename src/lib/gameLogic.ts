@@ -63,14 +63,18 @@ export function generateOrder(orderIndex: number, prevTime?: number): Order {
   const { min, max } = getIngredientCountRange(orderIndex);
   const count = Math.floor(Math.random() * (max - min + 1)) + min;
 
-  const ingredients: Ingredient[] = Array.from(
-    { length: count },
-    () => available[Math.floor(Math.random() * available.length)]
-  );
+  // 연속 동일 재료 방지: 이전 재료와 다른 재료를 우선 선택
+  const ingredients: Ingredient[] = [];
+  for (let i = 0; i < count; i++) {
+    const pool = available.length > 1 && ingredients.length > 0
+      ? available.filter(ing => ing !== ingredients[ingredients.length - 1])
+      : available;
+    ingredients.push(pool[Math.floor(Math.random() * pool.length)]);
+  }
 
   let timeLimit: number;
   if (prevTime !== undefined) {
-    timeLimit = prevTime + count * BASE_SECONDS_PER_INGREDIENT * diff.timerMultiplier + 2;
+    timeLimit = prevTime + count * BASE_SECONDS_PER_INGREDIENT * diff.timerMultiplier + 1;
   } else {
     const rawTime = count * BASE_SECONDS_PER_INGREDIENT * diff.timerMultiplier;
     timeLimit = Math.max(rawTime, count * 1.0);
