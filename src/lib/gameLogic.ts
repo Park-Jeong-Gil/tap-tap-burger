@@ -25,9 +25,9 @@ function getAvailableIngredients(_orderIndex: number): Ingredient[] {
 }
 
 // ─── 순번 기반 재료 개수 범위 ─────────────────────
-// 8주문마다 최소 재료수 1 증가 (3부터 무제한), 랜덤 폭 ±2
+// 5주문마다 최소 재료수 1 증가 (3부터 무제한), 랜덤 폭 ±2
 function getIngredientCountRange(orderIndex: number): { min: number; max: number } {
-  const min = 3 + Math.floor(orderIndex / 8);
+  const min = 3 + Math.floor(orderIndex / 5);
   const max = min + 2;
   return { min, max };
 }
