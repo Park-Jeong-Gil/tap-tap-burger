@@ -31,6 +31,11 @@ export default function BurgerStack({ ingredients }: BurgerStackProps) {
   const [freshBun, setFreshBun] = useState(false);
   const freshBunTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // 카메라 효과: 버거가 영역을 넘으면 최상단을 따라감
+  const stackRef = useRef<HTMLDivElement>(null);
+  const foodRef = useRef<HTMLDivElement>(null);
+  const [cameraY, setCameraY] = useState(0);
+
   // 600ms 후 flash 해제 (제출 애니메이션 완료 대기)
   useEffect(() => {
     if (!submitFlash) return;
@@ -53,38 +58,57 @@ export default function BurgerStack({ ingredients }: BurgerStackProps) {
   // 제출 중에는 스냅샷 재료를 표시, 그 외엔 현재 쌓는 중인 재료
   const displayIngredients = isSubmitting ? lastSubmittedBurger : ingredients;
 
+  // 재료가 변할 때마다 카메라 위치 재계산
+  useEffect(() => {
+    const stack = stackRef.current;
+    const food = foodRef.current;
+    if (!stack || !food) return;
+    const overflow = Math.max(0, food.scrollHeight - stack.clientHeight);
+    setCameraY(overflow);
+  }, [displayIngredients]);
+
   return (
-    <div className="burger-stack">
-      {/* ── 음식 레이어 (제출 시 통째로 애니메이션) ── */}
-      <div className={`burger-food${isSubmitting ? ' burger-food--submitting' : ''}`}>
-        {/* 아래 번 */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/ingredient/bun_bottom.png"
-          alt="bun-bottom"
-          className={`burger-bun${freshBun ? ' burger-bun--fresh' : ''}`}
-        />
-
-        {/* 재료 레이어 (아래→위, column-reverse로 쌓임) */}
-        {displayIngredients.map((ing, i) => (
-          <div key={i} className={`ingredient-layer ingredient-layer--${ing}`}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={INGREDIENT_IMAGES[ing]} alt={ing} />
-          </div>
-        ))}
-
-        {/* 완성 시 위 번 (food 레이어와 함께 애니메이션) */}
-        {isSubmitting && (
-          // eslint-disable-next-line @next/next/no-img-element
+    <div className="burger-stack" ref={stackRef}>
+      {/* ── 카메라 래퍼: translateY로 버거 상단을 따라감 ── */}
+      {/* 제출 중엔 전환 없음 → scale 애니메이션과 충돌 방지 */}
+      <div
+        className="burger-camera"
+        style={{
+          transform: `translateY(${cameraY}px)`,
+          transition: submitFlash !== null ? 'none' : 'transform 0.12s ease-out',
+        }}
+      >
+        {/* ── 음식 레이어 (제출 시 통째로 애니메이션) ── */}
+        <div ref={foodRef} className={`burger-food${isSubmitting ? ' burger-food--submitting' : ''}`}>
+          {/* 아래 번 */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/ingredient/bun_top.png"
-            alt="bun-top"
-            className="burger-bun burger-bun--top"
+            src="/ingredient/bun_bottom.png"
+            alt="bun-bottom"
+            className={`burger-bun${freshBun ? ' burger-bun--fresh' : ''}`}
           />
-        )}
+
+          {/* 재료 레이어 (아래→위, column-reverse로 쌓임) */}
+          {displayIngredients.map((ing, i) => (
+            <div key={i} className={`ingredient-layer ingredient-layer--${ing}`}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={INGREDIENT_IMAGES[ing]} alt={ing} />
+            </div>
+          ))}
+
+          {/* 완성 시 위 번 (food 레이어와 함께 애니메이션) */}
+          {isSubmitting && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src="/ingredient/bun_top.png"
+              alt="bun-top"
+              className="burger-bun burger-bun--top"
+            />
+          )}
+        </div>
       </div>
 
-      {/* ── 플래시 오버레이 (food 레이어 바깥 → 독립 애니메이션) ── */}
+      {/* ── 플래시 오버레이 (카메라 바깥 → 항상 중앙 고정) ── */}
       {isSubmitting && (
         <div className={`burger-flash burger-flash--correct${lastComboOnSubmit > 0 ? ' burger-flash--combo' : ''}`}>
           <span className="burger-flash__score">+{lastScoreGain}</span>

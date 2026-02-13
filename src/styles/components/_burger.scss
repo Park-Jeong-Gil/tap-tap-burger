@@ -3,19 +3,29 @@
 @use "../pixel" as pb;
 
 // ─── 버거 스택 영역 ───────────────────────────────────
-// 포지셔닝 컨테이너 역할 (실제 flex 레이아웃은 burger-food로 위임)
+// 카메라 뷰포트 역할: 높이를 채우고 넘치는 부분을 가림
 .burger-stack {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  // overflow: hidden;
+  height: 100%;
 
   @include m.mobile {
-    // 주문서 길이에 따라 영역 높이가 줄면 버거도 같이 작아짐 (container query)
     width: min(m.vw(200), 55cqh);
-    min-height: m.vw(60);
   }
   @include m.desktop {
     width: 220px;
-    min-height: 60px;
   }
+}
+
+// ─── 카메라 래퍼 (translateY로 버거 상단을 따라가는 역할) ─
+// burger-food의 제출 애니메이션(scale)과 transform이 충돌하지 않도록 분리
+.burger-camera {
+  width: 100%;
+  flex-shrink: 0;
+  will-change: transform;
 }
 
 // ─── 음식 레이어 컨테이너 (제출 시 통째로 애니메이션) ─
@@ -169,16 +179,34 @@
 
 // 제출 확정: 살짝 부풀었다가 점으로 소멸
 @keyframes burger-submit {
-  0%   { transform: scale(1);    opacity: 1; }
-  22%  { transform: scale(1.18); opacity: 1; }
-  100% { transform: scale(0);    opacity: 0; }
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  22% {
+    transform: scale(1.18);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0);
+    opacity: 0;
+  }
 }
 
 // 새 바닥 번: 점에서 스프링처럼 튀어나옴
 @keyframes bun-appear {
-  0%   { transform: scale(0.05); opacity: 0.5; }
-  65%  { transform: scale(1.1);  opacity: 1; }
-  100% { transform: scale(1);    opacity: 1; }
+  0% {
+    transform: scale(0.05);
+    opacity: 0.5;
+  }
+  65% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 // 점수가 위로 떠오르며 사라지는 모션
@@ -188,7 +216,7 @@
     opacity: 1;
   }
   60% {
-    transform: scale(1.0) translateY(-18px);
+    transform: scale(1) translateY(-18px);
     opacity: 0.9;
   }
   100% {
@@ -204,7 +232,7 @@
     opacity: 1;
   }
   40% {
-    transform: scale(1.0);
+    transform: scale(1);
     opacity: 1;
   }
   100% {

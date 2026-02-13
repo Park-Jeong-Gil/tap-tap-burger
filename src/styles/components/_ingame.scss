@@ -69,11 +69,11 @@
   overflow: hidden;
   @include m.mobile {
     padding: 0 m.vw(10) m.vw(10);
-    gap: m.vw(6);
+    gap: m.vw(16);
   }
   @include m.desktop {
     padding: 0 10px 10px;
-    gap: 6px;
+    gap: 16px;
   }
 }
 
@@ -84,7 +84,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  // overflow: hidden;
   // 컨테이너 쿼리: 버거 스택이 높이에 맞춰 스케일다운
   container-type: size;
   container-name: burger-area;
@@ -333,14 +333,18 @@
   }
 
   // 콤보 레벨별 색상
-  &--lv1 { color: v.$color-success; }
-  &--lv2 { color: #f0b429; }           // 금색 (3-5콤보)
+  &--lv1 {
+    color: v.$color-success;
+  }
+  &--lv2 {
+    color: #f0b429;
+  } // 금색 (3-5콤보)
   &--lv3 {
-    color: #ff6b2b;                    // 오렌지 (6-9콤보)
+    color: #ff6b2b; // 오렌지 (6-9콤보)
     animation: combo-pop-big 0.35s ease-out;
   }
   &--lv4 {
-    color: v.$color-danger;            // 빨강 (10+콤보)
+    color: v.$color-danger; // 빨강 (10+콤보)
     animation: combo-pop-big 0.35s ease-out;
     text-shadow: 0 0 8px rgba(217, 48, 37, 0.6);
   }
@@ -359,7 +363,7 @@
 
 @keyframes combo-pop-big {
   0% {
-    transform: scale(2.0);
+    transform: scale(2);
     opacity: 0.3;
   }
   60% {
@@ -462,15 +466,33 @@
 }
 
 @keyframes screen-shake {
-  0%   { transform: translateX(0); }
-  12%  { transform: translateX(-10px) rotate(-0.4deg); }
-  24%  { transform: translateX(9px)  rotate(0.4deg); }
-  36%  { transform: translateX(-7px); }
-  48%  { transform: translateX(6px); }
-  62%  { transform: translateX(-4px); }
-  76%  { transform: translateX(3px); }
-  88%  { transform: translateX(-1px); }
-  100% { transform: translateX(0); }
+  0% {
+    transform: translateX(0);
+  }
+  12% {
+    transform: translateX(-10px) rotate(-0.4deg);
+  }
+  24% {
+    transform: translateX(9px) rotate(0.4deg);
+  }
+  36% {
+    transform: translateX(-7px);
+  }
+  48% {
+    transform: translateX(6px);
+  }
+  62% {
+    transform: translateX(-4px);
+  }
+  76% {
+    transform: translateX(3px);
+  }
+  88% {
+    transform: translateX(-1px);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 
 // ─── 타임아웃 비네트 (주문 실패 시) ──────────────────
@@ -488,9 +510,15 @@
 }
 
 @keyframes vignette-pulse {
-  0%   { opacity: 0; }
-  20%  { opacity: 1; }
-  100% { opacity: 0; }
+  0% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 @keyframes fade-in {

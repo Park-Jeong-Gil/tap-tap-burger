@@ -20,38 +20,16 @@ export function getDifficulty(orderCount: number): DifficultyTier {
 
 // ─── 순번 기반 재료 해금 ──────────────────────────
 // 초반: 패티·치즈만 → 야채 추가 → 소스 추가 (전체 해금)
-const INGREDIENT_UNLOCK_TIERS: { minOrders: number; available: Ingredient[] }[] = [
-  { minOrders: 0,  available: ['patty', 'cheese'] },
-  { minOrders: 5,  available: ['patty', 'cheese', 'veggie'] },
-  { minOrders: 13, available: INGREDIENTS },
-];
-
-function getAvailableIngredients(orderIndex: number): Ingredient[] {
-  for (let i = INGREDIENT_UNLOCK_TIERS.length - 1; i >= 0; i--) {
-    if (orderIndex >= INGREDIENT_UNLOCK_TIERS[i].minOrders) {
-      return INGREDIENT_UNLOCK_TIERS[i].available;
-    }
-  }
-  return INGREDIENT_UNLOCK_TIERS[0].available;
+function getAvailableIngredients(_orderIndex: number): Ingredient[] {
+  return INGREDIENTS; // 모든 재료 처음부터 해금
 }
 
 // ─── 순번 기반 재료 개수 범위 ─────────────────────
-const COUNT_TIERS: { minOrders: number; min: number; max: number }[] = [
-  { minOrders: 0,  min: 2, max: 2 },
-  { minOrders: 5,  min: 2, max: 3 },
-  { minOrders: 13, min: 3, max: 4 },
-  { minOrders: 25, min: 3, max: 5 },
-  { minOrders: 45, min: 4, max: 6 },
-  { minOrders: 75, min: 5, max: 7 },
-];
-
+// 8주문마다 최소 재료수 1 증가 (3부터 무제한), 랜덤 폭 ±2
 function getIngredientCountRange(orderIndex: number): { min: number; max: number } {
-  for (let i = COUNT_TIERS.length - 1; i >= 0; i--) {
-    if (orderIndex >= COUNT_TIERS[i].minOrders) {
-      return { min: COUNT_TIERS[i].min, max: COUNT_TIERS[i].max };
-    }
-  }
-  return { min: COUNT_TIERS[0].min, max: COUNT_TIERS[0].max };
+  const min = 3 + Math.floor(orderIndex / 8);
+  const max = min + 2;
+  return { min, max };
 }
 
 // ─── 주문서 생성 ──────────────────────────────────
