@@ -62,7 +62,6 @@
 }
 
 // ─── 하단 인터랙션 영역 ───────────────────────────────
-// 버거 중앙 + 버튼 패널 (flex-column)
 .ingame__bottom {
   flex: 1;
   display: flex;
@@ -78,48 +77,50 @@
   }
 }
 
-// 버거 스택 중앙 영역 (남은 공간 모두 차지)
+// ─── 버거 표시 영역 (전체 너비, 남은 공간 차지) ─────
 .ingame__burger-area {
   flex: 1;
+  min-height: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  min-height: 0;
+  // 컨테이너 쿼리: 버거 스택이 높이에 맞춰 스케일다운
+  container-type: size;
+  container-name: burger-area;
 }
 
-// 액션 버튼 행 (취소 + 완성)
-.ingame__action-row {
+// ─── 컨트롤 영역: [취소] [재료 그리드] [완성] ────────
+.ingame__controls {
   flex-shrink: 0;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  align-items: stretch;
   @include m.mobile {
+    grid-template-columns: m.vw(76) 1fr m.vw(76);
     gap: m.vw(6);
-    height: m.vw(44);
+    height: m.vw(130);
   }
   @include m.desktop {
+    grid-template-columns: 86px 1fr 86px;
     gap: 6px;
-    height: 44px;
+    height: 130px;
   }
 }
 
-// 재료 2×2 그리드
+// 재료 2×2 그리드 (ingame__controls 내부)
 .ingame__grid {
-  flex-shrink: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
   @include m.mobile {
     gap: m.vw(6);
-    height: m.vw(132);
   }
   @include m.desktop {
     gap: 6px;
-    height: 132px;
   }
 }
 
-// ─── 입력 버튼 ────────────────────────────────────────
+// ─── 입력 버튼 (기본: 수직 레이아웃) ─────────────────
 .input-btn {
   width: 100%;
   height: 100%;
@@ -138,23 +139,22 @@
     transform 0.08s ease;
 
   @include m.mobile {
-    gap: m.vw(2);
+    gap: m.vw(3);
   }
   @include m.desktop {
-    gap: 2px;
+    gap: 3px;
   }
 
   &:active {
-    filter: brightness(0.8);
-    transform: scale(0.97);
+    filter: brightness(0.78);
+    transform: scale(0.96);
   }
 
-  // 재료 이미지
   &__img {
     flex: 1;
     min-height: 0;
     width: auto;
-    max-width: 72%;
+    max-width: 65%;
     object-fit: contain;
     image-rendering: pixelated;
     filter: drop-shadow(1px 2px 0 rgba(0, 0, 0, 0.25));
@@ -164,7 +164,7 @@
     line-height: 1;
     flex-shrink: 0;
     @include m.mobile {
-      font-size: m.vw(9);
+      font-size: m.vw(11);
     }
     @include m.desktop {
       font-size: 13px;
@@ -183,6 +183,7 @@
     line-height: 1.2;
   }
 
+  // 색상 모디파이어
   &--patty {
     @include pb.pixel-box(
       $corner-size: 1,
@@ -198,7 +199,7 @@
     @include pb.pixel-box(
       $corner-size: 1,
       $border-size: 3px,
-      $background-color: #f7c948,
+      $background-color: #f0b429,
       $border-color: v.$color-border,
       $border-inset: true,
       $border-inset-sides: "all"
@@ -209,7 +210,7 @@
     @include pb.pixel-box(
       $corner-size: 1,
       $border-size: 3px,
-      $background-color: #3a7d44,
+      $background-color: #2e8b4e,
       $border-color: v.$color-border,
       $border-inset: true,
       $border-inset-sides: "all"
@@ -251,6 +252,57 @@
   }
 }
 
+// ─── 재료 그리드 내 버튼: 가로 배치 ──────────────────
+.ingame__grid .input-btn {
+  flex-direction: row;
+  justify-content: flex-start;
+  @include m.mobile {
+    padding: 0 m.vw(6);
+    gap: m.vw(6);
+  }
+  @include m.desktop {
+    padding: 0 10px;
+    gap: 10px;
+  }
+
+  .input-btn__img {
+    flex: none;
+    max-width: none;
+
+    @include m.mobile {
+      width: m.vw(28);
+      height: m.vw(28);
+    }
+    @include m.desktop {
+      width: 40px;
+      height: 40px;
+    }
+  }
+
+  .input-btn__label {
+    @include m.mobile {
+      font-size: m.vw(13);
+    }
+    @include m.desktop {
+      font-size: 17px;
+    }
+  }
+}
+
+.input-btn--submit {
+  img.input-btn__img {
+    flex: none;
+  }
+
+  .input-btn__label {
+    @include m.mobile {
+      margin-top: m.vw(6);
+    }
+    @include m.desktop {
+      margin-top: 6px;
+    }
+  }
+}
 // ─── 스코어 표시 ─────────────────────────────────────
 .score-display {
   font-family: v.$font-pixel;
@@ -313,7 +365,7 @@
     padding: 24px;
   }
 
-  // 오버레이 내부는 항상 밝은 텍스트 사용
+  // 오버레이 내부는 항상 밝은 텍스트
   .btn--ghost {
     @include pb.pixel-borders(
       $corner-size: 2,
@@ -347,7 +399,7 @@
   flex-direction: column;
   align-items: center;
   font-family: v.$font-pixel;
-  color: #eaeaea; // 오버레이 위 → 항상 밝게
+  color: #eaeaea;
 
   @include m.mobile {
     gap: m.vw(12);

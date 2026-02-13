@@ -23,6 +23,7 @@ const INGREDIENT_IMAGES: Record<string, string> = {
   cheese: '/ingredient/cheese.png',
   veggie: '/ingredient/vegetable.png',
   sauce:  '/ingredient/sauce.png',
+  submit: '/ingredient/bun_top.png',
 };
 
 function InputBtn({
@@ -76,29 +77,29 @@ export default function InputPanel({ allowedActions }: InputPanelProps) {
 
   return (
     <div className="ingame__bottom">
-      {/* 버거 스택 (중앙, 남은 공간 차지) */}
+      {/* 버거 표시 영역 (전체 너비, 남은 공간 차지) */}
       <div className="ingame__burger-area">
         <BurgerStack ingredients={currentBurger} />
       </div>
 
-      {/* 액션 버튼 행: 취소 + 완성 */}
-      <div className="ingame__action-row">
+      {/* 컨트롤: [취소] [재료 2×2] [완성] */}
+      <div className="ingame__controls">
         <InputBtn action="cancel" label="취소" className="input-btn--cancel"
           disabled={!isAllowed('cancel')} showKey={isDesktop} onClick={() => handleAction('cancel')} />
+
+        <div className="ingame__grid">
+          <InputBtn action="veggie" label="야채" className="input-btn--veggie"
+            disabled={!isAllowed('veggie')} showKey={isDesktop} onClick={() => handleAction('veggie')} />
+          <InputBtn action="sauce" label="소스" className="input-btn--sauce"
+            disabled={!isAllowed('sauce')} showKey={isDesktop} onClick={() => handleAction('sauce')} />
+          <InputBtn action="cheese" label="치즈" className="input-btn--cheese"
+            disabled={!isAllowed('cheese')} showKey={isDesktop} onClick={() => handleAction('cheese')} />
+          <InputBtn action="patty" label="패티" className="input-btn--patty"
+            disabled={!isAllowed('patty')} showKey={isDesktop} onClick={() => handleAction('patty')} />
+        </div>
+
         <InputBtn action="submit" label="완성" className="input-btn--submit"
           disabled={!isAllowed('submit')} showKey={isDesktop} onClick={() => handleAction('submit')} />
-      </div>
-
-      {/* 재료 2×2 그리드 */}
-      <div className="ingame__grid">
-        <InputBtn action="veggie" label="야채" className="input-btn--veggie"
-          disabled={!isAllowed('veggie')} showKey={isDesktop} onClick={() => handleAction('veggie')} />
-        <InputBtn action="sauce" label="소스" className="input-btn--sauce"
-          disabled={!isAllowed('sauce')} showKey={isDesktop} onClick={() => handleAction('sauce')} />
-        <InputBtn action="cheese" label="치즈" className="input-btn--cheese"
-          disabled={!isAllowed('cheese')} showKey={isDesktop} onClick={() => handleAction('cheese')} />
-        <InputBtn action="patty" label="패티" className="input-btn--patty"
-          disabled={!isAllowed('patty')} showKey={isDesktop} onClick={() => handleAction('patty')} />
       </div>
     </div>
   );

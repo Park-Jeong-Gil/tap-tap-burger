@@ -22,6 +22,7 @@ interface GameState {
   maxCombo: number;
   orders: Order[];
   currentBurger: Ingredient[];
+  lastSubmittedBurger: Ingredient[]; // 완성 플래시 중 표시용 스냅샷
   orderCounter: number; // 총 생성된 주문서 수 (타이머 계산용)
   submitFlash: 'correct' | 'wrong' | null;
   mode: GameMode;
@@ -74,6 +75,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   maxCombo: 0,
   orders: [],
   currentBurger: [],
+  lastSubmittedBurger: [],
   orderCounter: 0,
   submitFlash: null,
   mode: 'single',
@@ -88,6 +90,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       maxCombo: 0,
       orders,
       currentBurger: [],
+      lastSubmittedBurger: [],
       orderCounter: counter,
       submitFlash: null,
       mode,
@@ -103,6 +106,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       maxCombo: 0,
       orders: [],
       currentBurger: [],
+      lastSubmittedBurger: [],
       orderCounter: 0,
       submitFlash: null,
     });
@@ -162,6 +166,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       maxCombo: newMaxCombo,
       orders: newOrders,
       currentBurger: [],
+      lastSubmittedBurger: [...currentBurger], // 플래시 동안 재료 스냅샷 유지
       orderCounter: orderCounter + 1,
       submitFlash: 'correct',
     });
@@ -196,10 +201,6 @@ export const useGameStore = create<GameState>((set, get) => ({
       orderCounter++;
     }
 
-    if (timedOutCount > 0) {
-      set({ combo: 0 }); // 타임아웃 시 콤보 초기화
-    }
-
     // 남은 시간 오름차순 정렬 (가장 급한 주문이 항상 왼쪽)
     const sorted = replenished.sort(
       (a, b) => (a.timeLimit - a.elapsed) - (b.timeLimit - b.elapsed)
@@ -210,6 +211,8 @@ export const useGameStore = create<GameState>((set, get) => ({
       orders: sorted,
       orderCounter,
       status: newHp <= 0 ? 'gameover' : 'playing',
+      // 타임아웃 발생 시 콤보 및 쌓던 재료 초기화
+      ...(timedOutCount > 0 ? { combo: 0, currentBurger: [] } : {}),
     });
   },
 
@@ -237,5 +240,5 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({ orders: sorted, orderCounter: counter });
   },
 
-  clearFlash: () => set({ submitFlash: null }),
+  clearFlash: () => set({ submitFlash: null, lastSubmittedBurger: [] }),
 }));
