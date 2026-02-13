@@ -23,8 +23,12 @@ interface GameState {
   orders: Order[];
   currentBurger: Ingredient[];
   lastSubmittedBurger: Ingredient[]; // 완성 플래시 중 표시용 스냅샷
-  orderCounter: number; // 총 생성된 주문서 수 (타이머 계산용)
+  orderCounter: number; // 총 생성된 주문서 수 (순번 기반 난이도 계산용)
   submitFlash: 'correct' | 'wrong' | null;
+  lastScoreGain: number;     // 마지막 정답 제출로 얻은 점수
+  lastComboOnSubmit: number; // 제출 시점의 콤보 수 (0 = 콤보 없음)
+  wrongFlashCount: number;   // 오답 시 증가 → 화면 흔들림 트리거
+  timeoutFlashCount: number; // 타임아웃 시 증가 → 경고 비네트 트리거
   mode: GameMode;
 
   // actions
@@ -43,15 +47,16 @@ interface GameState {
  * 새 주문이 추가될 슬롯의 "신선한 prevTime"을 계산한다.
  * 잔여시간(elapsed 반영)이 아닌 첫 번째 주문의 재료 수 × 난이도로 다시 계산해
  * 시간이 무한히 누적되는 문제를 방지한다.
+ * orderCount: 다음에 생성될 주문의 인덱스 (순번 기반 난이도 계산용)
  */
-function calcFreshSlotTime(ordersAhead: Order[], score: number): number | undefined {
+function calcFreshSlotTime(ordersAhead: Order[], orderCount: number): number | undefined {
   if (ordersAhead.length === 0) return undefined;
-  const diff = getDifficulty(score);
+  const diff = getDifficulty(orderCount);
   // 슬롯 0: 재료수 × timerMultiplier
   let time = ordersAhead[0].ingredients.length * BASE_SECONDS_PER_INGREDIENT * diff.timerMultiplier;
-  // 이후 슬롯: 재료수 × timerMultiplier + 3초 여유 (gap도 난이도 배율 적용)
+  // 이후 슬롯: 재료수 × timerMultiplier + 2초 여유
   for (let i = 1; i < ordersAhead.length; i++) {
-    time += ordersAhead[i].ingredients.length * BASE_SECONDS_PER_INGREDIENT * diff.timerMultiplier + 3;
+    time += ordersAhead[i].ingredients.length * BASE_SECONDS_PER_INGREDIENT * diff.timerMultiplier + 2;
   }
   return time;
 }
@@ -60,7 +65,7 @@ function createInitialOrders(count: number): { orders: Order[]; counter: number 
   const orders: Order[] = [];
   let prevTime: number | undefined = undefined;
   for (let i = 0; i < count; i++) {
-    const order = generateOrder(i, 0, prevTime);
+    const order = generateOrder(i, prevTime);
     orders.push(order);
     prevTime = order.timeLimit;
   }
@@ -78,6 +83,10 @@ export const useGameStore = create<GameState>((set, get) => ({
   lastSubmittedBurger: [],
   orderCounter: 0,
   submitFlash: null,
+  lastScoreGain: 0,
+  lastComboOnSubmit: 0,
+  wrongFlashCount: 0,
+  timeoutFlashCount: 0,
   mode: 'single',
 
   startGame: (mode = 'single') => {
@@ -93,6 +102,10 @@ export const useGameStore = create<GameState>((set, get) => ({
       lastSubmittedBurger: [],
       orderCounter: counter,
       submitFlash: null,
+      lastScoreGain: 0,
+      lastComboOnSubmit: 0,
+      wrongFlashCount: 0,
+      timeoutFlashCount: 0,
       mode,
     });
   },
@@ -109,6 +122,10 @@ export const useGameStore = create<GameState>((set, get) => ({
       lastSubmittedBurger: [],
       orderCounter: 0,
       submitFlash: null,
+      lastScoreGain: 0,
+      lastComboOnSubmit: 0,
+      wrongFlashCount: 0,
+      timeoutFlashCount: 0,
     });
   },
 
@@ -139,6 +156,9 @@ export const useGameStore = create<GameState>((set, get) => ({
         combo: 0,
         submitFlash: 'wrong',
         status: newHp <= 0 ? 'gameover' : 'playing',
+        wrongFlashCount: get().wrongFlashCount + 1,
+        lastScoreGain: 0,
+        lastComboOnSubmit: 0,
       });
       return;
     }
@@ -151,12 +171,11 @@ export const useGameStore = create<GameState>((set, get) => ({
     const hpDelta = wasCombo ? HP_DELTA.comboSubmit : HP_DELTA.correctSubmit;
     const newHp = Math.min(HP_MAX, hp + hpDelta);
 
-    // 소비된 주문서 제거 후 새 주문서 추가
-    // calcFreshSlotTime: 잔여시간이 아닌 슬롯 위치 기반 fresh 시간으로 계산
+    // 소비된 주문서 제거 후 새 주문서 추가 (순번 기반)
     const { orderCounter } = get();
     const remaining = orders.slice(1);
-    const freshPrevTime = calcFreshSlotTime(remaining, newScore);
-    const newOrder = generateOrder(orderCounter, newScore, freshPrevTime);
+    const freshPrevTime = calcFreshSlotTime(remaining, orderCounter);
+    const newOrder = generateOrder(orderCounter, freshPrevTime);
     const newOrders = [...remaining, newOrder];
 
     set({
@@ -169,14 +188,17 @@ export const useGameStore = create<GameState>((set, get) => ({
       lastSubmittedBurger: [...currentBurger], // 플래시 동안 재료 스냅샷 유지
       orderCounter: orderCounter + 1,
       submitFlash: 'correct',
+      lastScoreGain: points,
+      lastComboOnSubmit: wasCombo ? newCombo : 0,
     });
   },
 
   tick: (delta: number) => {
-    const { status, orders, hp, score } = get();
+    const { status, orders, hp, timeoutFlashCount } = get();
     if (status !== 'playing') return;
 
-    const diff = getDifficulty(score);
+    let { orderCounter } = get();
+    const diff = getDifficulty(orderCounter); // 순번 기반 난이도
     let newHp = hp - diff.hpDrainPerSec * delta;
     let timedOutCount = 0;
 
@@ -193,11 +215,10 @@ export const useGameStore = create<GameState>((set, get) => ({
     newHp += HP_DELTA.orderTimeout * timedOutCount;
     newHp = Math.max(0, newHp);
 
-    let { orderCounter } = get();
     const replenished = [...updatedOrders];
     for (let i = 0; i < timedOutCount; i++) {
-      const freshPrevTime = calcFreshSlotTime(replenished, score);
-      replenished.push(generateOrder(orderCounter, score, freshPrevTime));
+      const freshPrevTime = calcFreshSlotTime(replenished, orderCounter);
+      replenished.push(generateOrder(orderCounter, freshPrevTime));
       orderCounter++;
     }
 
@@ -211,8 +232,12 @@ export const useGameStore = create<GameState>((set, get) => ({
       orders: sorted,
       orderCounter,
       status: newHp <= 0 ? 'gameover' : 'playing',
-      // 타임아웃 발생 시 콤보 및 쌓던 재료 초기화
-      ...(timedOutCount > 0 ? { combo: 0, currentBurger: [] } : {}),
+      // 타임아웃 발생 시 콤보 및 쌓던 재료 초기화 + 비네트 트리거
+      ...(timedOutCount > 0 ? {
+        combo: 0,
+        currentBurger: [],
+        timeoutFlashCount: timeoutFlashCount + 1,
+      } : {}),
     });
   },
 
@@ -226,12 +251,12 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   addOrdersFromAttack: (count: number) => {
-    const { orders, orderCounter, score } = get();
+    const { orders, orderCounter } = get();
     let counter = orderCounter;
     const newOrders = [...orders];
     for (let i = 0; i < count; i++) {
-      const freshPrevTime = calcFreshSlotTime(newOrders, score);
-      newOrders.push(generateOrder(counter, score, freshPrevTime));
+      const freshPrevTime = calcFreshSlotTime(newOrders, counter);
+      newOrders.push(generateOrder(counter, freshPrevTime));
       counter++;
     }
     const sorted = newOrders.sort(
@@ -240,5 +265,5 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({ orders: sorted, orderCounter: counter });
   },
 
-  clearFlash: () => set({ submitFlash: null, lastSubmittedBurger: [] }),
+  clearFlash: () => set({ submitFlash: null, lastSubmittedBurger: [], lastScoreGain: 0, lastComboOnSubmit: 0 }),
 }));

@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Ingredient } from '@/types';
 import { useGameStore } from '@/stores/gameStore';
+import { getComboMultiplier } from '@/lib/gameLogic';
 
 const INGREDIENT_IMAGES: Record<Ingredient, string> = {
   patty:  '/ingredient/patty.png',
@@ -20,47 +21,82 @@ export default function BurgerStack({ ingredients }: BurgerStackProps) {
   const clearFlash = useGameStore((s) => s.clearFlash);
   // 완성 플래시 동안 재료 스냅샷 유지 (currentBurger는 즉시 리셋되므로)
   const lastSubmittedBurger = useGameStore((s) => s.lastSubmittedBurger);
-  const flashTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastScoreGain = useGameStore((s) => s.lastScoreGain);
+  const lastComboOnSubmit = useGameStore((s) => s.lastComboOnSubmit);
 
+  const flashTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const prevFlash = useRef<'correct' | 'wrong' | null>(null);
+
+  // 바닥 번 등장 애니메이션 트리거 (correct flash 해제 후)
+  const [freshBun, setFreshBun] = useState(false);
+  const freshBunTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // 600ms 후 flash 해제 (제출 애니메이션 완료 대기)
   useEffect(() => {
     if (!submitFlash) return;
     if (flashTimeout.current) clearTimeout(flashTimeout.current);
-    flashTimeout.current = setTimeout(clearFlash, 560);
+    flashTimeout.current = setTimeout(clearFlash, 600);
     return () => { if (flashTimeout.current) clearTimeout(flashTimeout.current); };
   }, [submitFlash, clearFlash]);
 
-  // 완성 플래시 중에는 제출 직전의 재료를 표시
-  const displayIngredients = submitFlash === 'correct' ? lastSubmittedBurger : ingredients;
+  // correct → null 전환 감지 → 바닥 번 등장 애니메이션
+  useEffect(() => {
+    if (prevFlash.current === 'correct' && submitFlash === null) {
+      if (freshBunTimer.current) clearTimeout(freshBunTimer.current);
+      setFreshBun(true);
+      freshBunTimer.current = setTimeout(() => setFreshBun(false), 400);
+    }
+    prevFlash.current = submitFlash;
+  }, [submitFlash]);
+
+  const isSubmitting = submitFlash === 'correct';
+  // 제출 중에는 스냅샷 재료를 표시, 그 외엔 현재 쌓는 중인 재료
+  const displayIngredients = isSubmitting ? lastSubmittedBurger : ingredients;
 
   return (
     <div className="burger-stack">
-      {/* 아래 번 */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/ingredient/bun_bottom.png" alt="bun-bottom" className="burger-bun" />
-
-      {/* 재료 레이어 (아래→위, column-reverse로 쌓임) */}
-      {displayIngredients.map((ing, i) => (
-        <div key={i} className={`ingredient-layer ingredient-layer--${ing}`}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={INGREDIENT_IMAGES[ing]} alt={ing} />
-        </div>
-      ))}
-
-      {/* 완성 시 위 번이 떨어지는 애니메이션 (column-reverse → 마지막 자식 = 시각적 최상단) */}
-      {submitFlash === 'correct' && (
-        // eslint-disable-next-line @next/next/no-img-element
+      {/* ── 음식 레이어 (제출 시 통째로 애니메이션) ── */}
+      <div className={`burger-food${isSubmitting ? ' burger-food--submitting' : ''}`}>
+        {/* 아래 번 */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/ingredient/bun_top.png"
-          alt="bun-top"
-          className="burger-bun burger-bun--top-drop"
+          src="/ingredient/bun_bottom.png"
+          alt="bun-bottom"
+          className={`burger-bun${freshBun ? ' burger-bun--fresh' : ''}`}
         />
-      )}
 
-      {/* 제출 결과 플래시 */}
-      {submitFlash && (
-        <div className={`burger-flash burger-flash--${submitFlash}`}>
-          {submitFlash === 'correct' ? '✓' : '✗'}
+        {/* 재료 레이어 (아래→위, column-reverse로 쌓임) */}
+        {displayIngredients.map((ing, i) => (
+          <div key={i} className={`ingredient-layer ingredient-layer--${ing}`}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={INGREDIENT_IMAGES[ing]} alt={ing} />
+          </div>
+        ))}
+
+        {/* 완성 시 위 번 (food 레이어와 함께 애니메이션) */}
+        {isSubmitting && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src="/ingredient/bun_top.png"
+            alt="bun-top"
+            className="burger-bun burger-bun--top"
+          />
+        )}
+      </div>
+
+      {/* ── 플래시 오버레이 (food 레이어 바깥 → 독립 애니메이션) ── */}
+      {isSubmitting && (
+        <div className={`burger-flash burger-flash--correct${lastComboOnSubmit > 0 ? ' burger-flash--combo' : ''}`}>
+          <span className="burger-flash__score">+{lastScoreGain}</span>
+          {lastComboOnSubmit > 0 && (
+            <span className="burger-flash__combo">
+              ×{getComboMultiplier(lastComboOnSubmit).toFixed(1)} COMBO!
+            </span>
+          )}
         </div>
+      )}
+      {submitFlash === 'wrong' && (
+        <div className="burger-flash burger-flash--wrong">MISS!</div>
       )}
     </div>
   );

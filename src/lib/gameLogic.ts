@@ -8,35 +8,69 @@ import {
   BASE_SECONDS_PER_INGREDIENT,
 } from './constants';
 
-// ─── 난이도 계산 ──────────────────────────────────────
-export function getDifficulty(score: number): DifficultyTier {
+// ─── 난이도 계산 (주문 순번 기반) ───────────────────
+export function getDifficulty(orderCount: number): DifficultyTier {
   for (let i = DIFFICULTY_TIERS.length - 1; i >= 0; i--) {
-    if (score >= DIFFICULTY_TIERS[i].minScore) {
+    if (orderCount >= DIFFICULTY_TIERS[i].minOrders) {
       return DIFFICULTY_TIERS[i].tier;
     }
   }
   return DIFFICULTY_TIERS[0].tier;
 }
 
-// ─── 주문서 생성 ──────────────────────────────────────
-// prevTime이 없으면 → 난이도 기반 기본 시간 (첫 번째 주문)
-// prevTime이 있으면 → prevTime + 3초 + 재료수 × 1초 + 2초 여유 (이후 주문)
-export function generateOrder(orderIndex: number, score: number, prevTime?: number): Order {
-  const diff = getDifficulty(score);
-  const count = Math.min(
-    Math.floor(Math.random() * diff.maxIngredients) + 2, // 최소 2개
-    diff.maxIngredients
-  );
+// ─── 순번 기반 재료 해금 ──────────────────────────
+// 초반: 패티·치즈만 → 야채 추가 → 소스 추가 (전체 해금)
+const INGREDIENT_UNLOCK_TIERS: { minOrders: number; available: Ingredient[] }[] = [
+  { minOrders: 0,  available: ['patty', 'cheese'] },
+  { minOrders: 5,  available: ['patty', 'cheese', 'veggie'] },
+  { minOrders: 13, available: INGREDIENTS },
+];
+
+function getAvailableIngredients(orderIndex: number): Ingredient[] {
+  for (let i = INGREDIENT_UNLOCK_TIERS.length - 1; i >= 0; i--) {
+    if (orderIndex >= INGREDIENT_UNLOCK_TIERS[i].minOrders) {
+      return INGREDIENT_UNLOCK_TIERS[i].available;
+    }
+  }
+  return INGREDIENT_UNLOCK_TIERS[0].available;
+}
+
+// ─── 순번 기반 재료 개수 범위 ─────────────────────
+const COUNT_TIERS: { minOrders: number; min: number; max: number }[] = [
+  { minOrders: 0,  min: 2, max: 2 },
+  { minOrders: 5,  min: 2, max: 3 },
+  { minOrders: 13, min: 3, max: 4 },
+  { minOrders: 25, min: 3, max: 5 },
+  { minOrders: 45, min: 4, max: 6 },
+  { minOrders: 75, min: 5, max: 7 },
+];
+
+function getIngredientCountRange(orderIndex: number): { min: number; max: number } {
+  for (let i = COUNT_TIERS.length - 1; i >= 0; i--) {
+    if (orderIndex >= COUNT_TIERS[i].minOrders) {
+      return { min: COUNT_TIERS[i].min, max: COUNT_TIERS[i].max };
+    }
+  }
+  return { min: COUNT_TIERS[0].min, max: COUNT_TIERS[0].max };
+}
+
+// ─── 주문서 생성 ──────────────────────────────────
+// prevTime이 없으면 → 순번 기반 기본 시간
+// prevTime이 있으면 → prevTime + 재료수 × mult + 3초 여유
+export function generateOrder(orderIndex: number, prevTime?: number): Order {
+  const diff = getDifficulty(orderIndex);
+  const available = getAvailableIngredients(orderIndex);
+  const { min, max } = getIngredientCountRange(orderIndex);
+  const count = Math.floor(Math.random() * (max - min + 1)) + min;
 
   const ingredients: Ingredient[] = Array.from(
     { length: count },
-    () => INGREDIENTS[Math.floor(Math.random() * INGREDIENTS.length)]
+    () => available[Math.floor(Math.random() * available.length)]
   );
 
   let timeLimit: number;
   if (prevTime !== undefined) {
-    // 이전 주문 시간 기준 차등 부여: 재료수 × timerMultiplier + 3초 여유
-    timeLimit = prevTime + count * BASE_SECONDS_PER_INGREDIENT * diff.timerMultiplier + 3;
+    timeLimit = prevTime + count * BASE_SECONDS_PER_INGREDIENT * diff.timerMultiplier + 2;
   } else {
     const rawTime = count * BASE_SECONDS_PER_INGREDIENT * diff.timerMultiplier;
     timeLimit = Math.max(rawTime, count * 1.0);
@@ -51,18 +85,19 @@ export function generateOrder(orderIndex: number, score: number, prevTime?: numb
   };
 }
 
-// ─── 번거 검증 ────────────────────────────────────────
+// ─── 번거 검증 ────────────────────────────────────
 export function validateBurger(submitted: Ingredient[], expected: Ingredient[]): boolean {
   if (submitted.length !== expected.length) return false;
   return submitted.every((ing, i) => ing === expected[i]);
 }
 
-// ─── 콤보 판정 ────────────────────────────────────────
+// ─── 콤보 판정 ────────────────────────────────────
+// 시간의 절반 이내에 완성해야 콤보 (빠른 플레이 요구)
 export function isCombo(elapsed: number, timeLimit: number): boolean {
-  return elapsed < timeLimit * (2 / 3);
+  return elapsed < timeLimit * 0.5;
 }
 
-// ─── 콤보 배율 ────────────────────────────────────────
+// ─── 콤보 배율 ────────────────────────────────────
 export function getComboMultiplier(combo: number): number {
   if (combo === 0) return 1.0;
   for (let i = COMBO_MULTIPLIERS.length - 1; i >= 0; i--) {
@@ -73,18 +108,18 @@ export function getComboMultiplier(combo: number): number {
   return 1.0;
 }
 
-// ─── 점수 계산 ────────────────────────────────────────
+// ─── 점수 계산 ────────────────────────────────────
 export function calcScore(combo: number): number {
   return Math.round(BASE_SCORE * getComboMultiplier(combo));
 }
 
-// ─── 랜덤 닉네임 ─────────────────────────────────────
+// ─── 랜덤 닉네임 ─────────────────────────────────
 export function generateDefaultNickname(): string {
   const num = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
   return `player${num}`;
 }
 
-// ─── 코업 키 배분 ─────────────────────────────────────
+// ─── 코업 키 배분 ─────────────────────────────────
 export function assignCoopKeys(): [string[], string[]] {
   const actions = ['patty', 'cheese', 'veggie', 'sauce', 'cancel', 'submit'];
   const shuffled = [...actions].sort(() => Math.random() - 0.5);

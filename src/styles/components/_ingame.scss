@@ -322,7 +322,7 @@
 
 .combo-display {
   font-family: v.$font-pixel;
-  color: v.$color-success;
+  font-weight: bold;
   animation: combo-pop 0.3s ease-out;
 
   @include m.mobile {
@@ -331,12 +331,40 @@
   @include m.desktop {
     font-size: 18px;
   }
+
+  // 콤보 레벨별 색상
+  &--lv1 { color: v.$color-success; }
+  &--lv2 { color: #f0b429; }           // 금색 (3-5콤보)
+  &--lv3 {
+    color: #ff6b2b;                    // 오렌지 (6-9콤보)
+    animation: combo-pop-big 0.35s ease-out;
+  }
+  &--lv4 {
+    color: v.$color-danger;            // 빨강 (10+콤보)
+    animation: combo-pop-big 0.35s ease-out;
+    text-shadow: 0 0 8px rgba(217, 48, 37, 0.6);
+  }
 }
 
 @keyframes combo-pop {
   0% {
-    transform: scale(1.5);
-    opacity: 0.5;
+    transform: scale(1.6);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes combo-pop-big {
+  0% {
+    transform: scale(2.0);
+    opacity: 0.3;
+  }
+  60% {
+    transform: scale(0.9);
+    opacity: 1;
   }
   100% {
     transform: scale(1);
@@ -426,6 +454,43 @@
   @include m.desktop {
     gap: 10px;
   }
+}
+
+// ─── 화면 흔들림 (오답 시) ────────────────────────────
+.ingame--shake {
+  animation: screen-shake 0.38s ease-out;
+}
+
+@keyframes screen-shake {
+  0%   { transform: translateX(0); }
+  12%  { transform: translateX(-10px) rotate(-0.4deg); }
+  24%  { transform: translateX(9px)  rotate(0.4deg); }
+  36%  { transform: translateX(-7px); }
+  48%  { transform: translateX(6px); }
+  62%  { transform: translateX(-4px); }
+  76%  { transform: translateX(3px); }
+  88%  { transform: translateX(-1px); }
+  100% { transform: translateX(0); }
+}
+
+// ─── 타임아웃 비네트 (주문 실패 시) ──────────────────
+.timeout-vignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 40%,
+    rgba(217, 48, 37, 0.55) 100%
+  );
+  animation: vignette-pulse 0.7s ease-out forwards;
+}
+
+@keyframes vignette-pulse {
+  0%   { opacity: 0; }
+  20%  { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 @keyframes fade-in {

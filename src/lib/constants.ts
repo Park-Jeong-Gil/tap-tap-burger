@@ -22,13 +22,15 @@ export const COMBO_MULTIPLIERS: { min: number; max: number; multiplier: number }
   { min: 10, max: Infinity, multiplier: 5.0 },
 ];
 
-// ─── 난이도 스케일링 ──────────────────────────────────
-export const DIFFICULTY_TIERS: { minScore: number; tier: DifficultyTier }[] = [
-  { minScore: 0,    tier: { maxIngredients: 3, timerMultiplier: 3.00, hpDrainPerSec: 0.7 } },
-  { minScore: 300,  tier: { maxIngredients: 4, timerMultiplier: 2.50, hpDrainPerSec: 0.7 } },
-  { minScore: 700,  tier: { maxIngredients: 5, timerMultiplier: 2.00, hpDrainPerSec: 1.0 } },
-  { minScore: 1200, tier: { maxIngredients: 6, timerMultiplier: 1.50, hpDrainPerSec: 2.0 } },
-  { minScore: 2000, tier: { maxIngredients: 7, timerMultiplier: 1.00, hpDrainPerSec: 3.0 } },
+// ─── 난이도 스케일링 (주문 순번 기반) ────────────────
+// minOrders: 해당 티어가 적용되기 시작하는 누적 주문 인덱스
+export const DIFFICULTY_TIERS: { minOrders: number; tier: DifficultyTier }[] = [
+  { minOrders: 0,  tier: { maxIngredients: 2, timerMultiplier: 2.80, hpDrainPerSec: 0.3 } }, // 튜토리얼
+  { minOrders: 5,  tier: { maxIngredients: 3, timerMultiplier: 2.30, hpDrainPerSec: 0.8 } }, // 적응
+  { minOrders: 12, tier: { maxIngredients: 4, timerMultiplier: 1.90, hpDrainPerSec: 1.5 } }, // 가속
+  { minOrders: 22, tier: { maxIngredients: 5, timerMultiplier: 1.60, hpDrainPerSec: 2.5 } }, // 압박
+  { minOrders: 38, tier: { maxIngredients: 6, timerMultiplier: 1.35, hpDrainPerSec: 4.0 } }, // 위기
+  { minOrders: 60, tier: { maxIngredients: 7, timerMultiplier: 1.15, hpDrainPerSec: 6.0 } }, // 스피드런
 ];
 
 // ─── 재료 ─────────────────────────────────────────────
