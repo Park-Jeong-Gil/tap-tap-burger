@@ -25,14 +25,14 @@
   font-family: v.$font-pixel;
   color: v.$color-primary;
   text-align: center;
-  line-height: 1.6;
+  line-height: 1;
   letter-spacing: 0.05em;
 
   @include m.mobile {
-    font-size: m.vw(18);
+    font-size: m.vw(48);
   }
   @include m.desktop {
-    font-size: 18px;
+    font-size: 48px;
   }
 }
 
