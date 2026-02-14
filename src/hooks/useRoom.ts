@@ -156,12 +156,27 @@ export function useVersusRoom(
 }
 
 // ─── 대기실 실시간 동기화 ──────────────────────────
+async function fetchRoomPlayers(roomId: string) {
+  const { data } = await supabase
+    .from('room_players')
+    .select('player_id, ready, players(nickname)')
+    .eq('room_id', roomId);
+  return (data ?? []).map((rp) => ({
+    playerId: rp.player_id as string,
+    nickname: (rp.players as unknown as { nickname: string } | null)?.nickname ?? '...',
+    ready: rp.ready as boolean,
+  }));
+}
+
 export function useLobbyRoom(roomId: string) {
   const setPlayers = useRoomStore((s) => s.setPlayers);
   const setRoomStatus = useRoomStore((s) => s.setRoomStatus);
 
   useEffect(() => {
     if (!roomId) return;
+
+    // 초기 플레이어 목록 즉시 조회
+    fetchRoomPlayers(roomId).then(setPlayers);
 
     const channel = supabase.channel(`lobby:${roomId}`);
 
@@ -172,19 +187,8 @@ export function useLobbyRoom(roomId: string) {
       table: 'room_players',
       filter: `room_id=eq.${roomId}`,
     }, async () => {
-      // 최신 플레이어 목록 재조회
-      const { data } = await supabase
-        .from('room_players')
-        .select('player_id, ready, players(nickname)')
-        .eq('room_id', roomId);
-
-      if (data) {
-        setPlayers(data.map((rp) => ({
-          playerId: rp.player_id,
-          nickname: (rp.players as unknown as { nickname: string }[] | null)?.[0]?.nickname ?? '...',
-          ready: rp.ready,
-        })));
-      }
+      const players = await fetchRoomPlayers(roomId);
+      setPlayers(players);
     });
 
     // rooms status 변경 감지

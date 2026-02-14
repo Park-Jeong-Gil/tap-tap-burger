@@ -116,7 +116,7 @@ export async function getRoomPlayers(roomId: string) {
   if (!data) return [];
   return data.map((rp) => ({
     playerId: rp.player_id as string,
-    nickname: (rp.players as unknown as { nickname: string }[] | null)?.[0]?.nickname ?? '...',
+    nickname: (rp.players as unknown as { nickname: string } | null)?.nickname ?? '...',
     ready: rp.ready as boolean,
   }));
 }
