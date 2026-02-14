@@ -214,11 +214,11 @@
   );
 
   @include m.mobile {
-    padding: m.vw(10);
+    padding: m.vw(10) m.vw(12);
     gap: m.vw(4);
   }
   @include m.desktop {
-    padding: 8px;
+    padding: 20px;
     gap: 4px;
   }
 
@@ -238,10 +238,10 @@
   font-family: v.$font-pixel;
   color: v.$color-muted;
   @include m.mobile {
-    font-size: m.vw(10);
+    font-size: m.vw(12);
   }
   @include m.desktop {
-    font-size: 11px;
+    font-size: 14px;
   }
 }
 
@@ -253,7 +253,7 @@
     font-size: m.vw(12);
   }
   @include m.desktop {
-    font-size: 13px;
+    font-size: 14px;
   }
 
   &--urgent {

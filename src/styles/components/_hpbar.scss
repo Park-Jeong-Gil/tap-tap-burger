@@ -13,10 +13,10 @@
   overflow: hidden;
 
   @include m.mobile {
-    height: m.vw(18);
+    height: m.vw(24);
   }
   @include m.desktop {
-    height: 18px;
+    height: 24px;
   }
 }
 

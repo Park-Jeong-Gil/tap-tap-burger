@@ -396,11 +396,11 @@
   align-items: center;
 
   @include m.mobile {
-    padding: m.vw(8) m.vw(12) m.vw(4);
+    padding: m.vw(10) m.vw(12) m.vw(4);
     row-gap: m.vw(4);
   }
   @include m.desktop {
-    padding: 8px 12px 4px;
+    padding: 10px 12px 4px;
     row-gap: 4px;
   }
 
