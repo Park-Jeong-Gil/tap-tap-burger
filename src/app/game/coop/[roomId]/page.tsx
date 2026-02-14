@@ -7,9 +7,9 @@ import { useRoomStore } from "@/stores/roomStore";
 import { useGameStore } from "@/stores/gameStore";
 import { useGameLoop } from "@/hooks/useGameLoop";
 import { useCoopRoom, useLobbyRoom } from "@/hooks/useRoom";
-import { supabase } from "@/lib/supabase";
+import { supabase, getRoomInfo } from "@/lib/supabase";
 import { assignCoopKeys } from "@/lib/gameLogic";
-import { KEY_MAP } from "@/lib/constants";
+import { KEY_MAP, NICKNAME_STORAGE_KEY } from "@/lib/constants";
 import HpBar from "@/components/game/HpBar";
 import ScoreBoard from "@/components/game/ScoreBoard";
 import InputPanel from "@/components/game/InputPanel";
@@ -22,7 +22,7 @@ export default function CoopGamePage() {
   const roomId = params.roomId as string;
   const router = useRouter();
 
-  const { playerId, nickname, initSession, isInitialized } = usePlayerStore();
+  const { playerId, nickname, setNickname, saveNickname, initSession, isInitialized } = usePlayerStore();
   const {
     isHost,
     players,
@@ -45,11 +45,20 @@ export default function CoopGamePage() {
 
   const [assignedKeys, setAssignedKeys] = useState<string[]>([]);
   const [joined, setJoined] = useState(false);
+  const [expired, setExpired] = useState(false);
   const [countingDown, setCountingDown] = useState(false);
+  const [nicknameInput, setNicknameInput] = useState("");
 
   useEffect(() => {
     initSession();
   }, [initSession]);
+
+  // 닉네임 입력 초기화 (저장된 값 or 현재 닉네임)
+  useEffect(() => {
+    if (!isInitialized) return;
+    const saved = localStorage.getItem(NICKNAME_STORAGE_KEY);
+    setNicknameInput(saved ?? nickname);
+  }, [isInitialized, nickname]);
 
   // 룸 참가
   useEffect(() => {
@@ -57,6 +66,13 @@ export default function CoopGamePage() {
     setJoined(true);
 
     const join = async () => {
+      // 룸 상태 확인
+      const room = await getRoomInfo(roomId);
+      if (!room || room.status === "finished") {
+        setExpired(true);
+        return;
+      }
+
       // 이미 방에 있는지 확인 (방장은 createAndJoin에서 처리)
       const { data } = await supabase
         .from("room_players")
@@ -143,6 +159,11 @@ export default function CoopGamePage() {
 
   const handleReady = async () => {
     if (!playerId) return;
+    const trimmed = nicknameInput.trim();
+    if (trimmed && trimmed !== nickname) {
+      setNickname(trimmed);
+      await saveNickname();
+    }
     await setReady(roomId, playerId);
   };
 
@@ -154,6 +175,23 @@ export default function CoopGamePage() {
   const allReady = players.length >= 2 && players.every((p) => p.ready);
   const myEntry = players.find((p) => p.playerId === playerId);
   const myReady = myEntry?.ready ?? false;
+
+  // 만료된 링크 화면
+  if (expired) {
+    return (
+      <div className="multi-hub">
+        <div className="room-lobby">
+          <p className="room-lobby__title">링크 만료</p>
+          <p style={{ fontFamily: "Mulmaru", fontSize: "0.85em", color: "#9B7060", textAlign: "center" }}>
+            이 게임 링크는 이미 사용되었거나 만료되었습니다.
+          </p>
+        </div>
+        <button className="btn btn--ghost" onClick={() => router.push("/")}>
+          메인으로
+        </button>
+      </div>
+    );
+  }
 
   // 대기실 화면
   if (roomStatus === "waiting") {
@@ -185,10 +223,29 @@ export default function CoopGamePage() {
               </p>
             )}
           </div>
-          {!myReady && (
-            <button className="btn btn--primary" onClick={handleReady}>
-              준비
-            </button>
+          {!isHost && !myReady && (
+            <>
+              <div className="main-nickname" style={{ width: "100%" }}>
+                <label className="main-nickname__label" htmlFor="coop-nickname">닉네임</label>
+                <input
+                  id="coop-nickname"
+                  className="input"
+                  value={nicknameInput}
+                  onChange={(e) => setNicknameInput(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && nicknameInput.trim() && handleReady()}
+                  placeholder="닉네임 입력..."
+                  maxLength={20}
+                  autoFocus
+                />
+              </div>
+              <button
+                className="btn btn--primary"
+                onClick={handleReady}
+                disabled={!nicknameInput.trim()}
+              >
+                준비
+              </button>
+            </>
           )}
           {isHost && (
             <button

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useCallback } from 'react';
 import type { RealtimeChannel } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
+import { supabase, getRoomInfo } from '@/lib/supabase';
 import { useRoomStore } from '@/stores/roomStore';
 import { useGameStore } from '@/stores/gameStore';
 import type { Ingredient } from '@/types';
@@ -175,8 +175,30 @@ export function useLobbyRoom(roomId: string) {
   useEffect(() => {
     if (!roomId) return;
 
-    // 초기 플레이어 목록 즉시 조회
-    fetchRoomPlayers(roomId).then(setPlayers);
+    let polling: ReturnType<typeof setInterval> | null = null;
+
+    const init = async () => {
+      // 초기 플레이어 목록 즉시 조회
+      fetchRoomPlayers(roomId).then(setPlayers);
+
+      // 초기 룸 상태 조회
+      const room = await getRoomInfo(roomId);
+      if (room?.status) {
+        setRoomStatus(room.status as 'waiting' | 'playing' | 'finished');
+        if (room.status !== 'waiting') return;
+      }
+
+      // 폴링: 2초마다 룸 상태 확인 (postgres_changes 누락 대비)
+      polling = setInterval(async () => {
+        const r = await getRoomInfo(roomId);
+        if (r?.status && r.status !== 'waiting') {
+          setRoomStatus(r.status as 'waiting' | 'playing' | 'finished');
+          if (polling) { clearInterval(polling); polling = null; }
+        }
+      }, 2000);
+    };
+
+    init();
 
     const channel = supabase.channel(`lobby:${roomId}`);
 
@@ -198,10 +220,15 @@ export function useLobbyRoom(roomId: string) {
       table: 'rooms',
       filter: `id=eq.${roomId}`,
     }, ({ new: row }) => {
-      setRoomStatus(row.status as 'waiting' | 'playing' | 'finished');
+      const status = row.status as 'waiting' | 'playing' | 'finished';
+      setRoomStatus(status);
+      if (status !== 'waiting' && polling) { clearInterval(polling); polling = null; }
     });
 
     channel.subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      if (polling) clearInterval(polling);
+      supabase.removeChannel(channel);
+    };
   }, [roomId, setPlayers, setRoomStatus]);
 }

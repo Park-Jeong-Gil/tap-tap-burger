@@ -1,12 +1,12 @@
-import { v4 as uuidv4 } from 'uuid';
-import type { Ingredient, Order, DifficultyTier } from '@/types';
+import { v4 as uuidv4 } from "uuid";
+import type { Ingredient, Order, DifficultyTier } from "@/types";
 import {
   INGREDIENTS,
   DIFFICULTY_TIERS,
   COMBO_MULTIPLIERS,
   BASE_SCORE,
   BASE_SECONDS_PER_INGREDIENT,
-} from './constants';
+} from "./constants";
 
 // ─── 난이도 계산 (주문 순번 기반) ───────────────────
 export function getDifficulty(orderCount: number): DifficultyTier {
@@ -27,25 +27,32 @@ function getAvailableIngredients(_orderIndex: number): Ingredient[] {
 // ─── 주문서 생성 ──────────────────────────────────
 // prevTime이 없으면 → 순번 기반 기본 시간
 // prevTime이 있으면 → prevTime + 재료수 × mult + 3초 여유
-export function generateOrder(orderIndex: number, prevTime?: number, maxIngredients?: number): Order {
+export function generateOrder(
+  orderIndex: number,
+  prevTime?: number,
+  maxIngredients?: number,
+): Order {
   const diff = getDifficulty(orderIndex);
   const available = getAvailableIngredients(orderIndex);
-  const count = maxIngredients !== undefined
-    ? Math.min(diff.minIngredients, maxIngredients)
-    : diff.minIngredients;
+  const count =
+    maxIngredients !== undefined
+      ? Math.min(diff.minIngredients, maxIngredients)
+      : diff.minIngredients;
 
   // 연속 동일 재료 방지: 이전 재료와 다른 재료를 우선 선택
   const ingredients: Ingredient[] = [];
   for (let i = 0; i < count; i++) {
-    const pool = available.length > 1 && ingredients.length > 0
-      ? available.filter(ing => ing !== ingredients[ingredients.length - 1])
-      : available;
+    const pool =
+      available.length > 1 && ingredients.length > 0
+        ? available.filter((ing) => ing !== ingredients[ingredients.length - 1])
+        : available;
     ingredients.push(pool[Math.floor(Math.random() * pool.length)]);
   }
 
   let timeLimit: number;
   if (prevTime !== undefined) {
-    timeLimit = prevTime + count * BASE_SECONDS_PER_INGREDIENT * diff.timerMultiplier + 1;
+    timeLimit =
+      prevTime + count * BASE_SECONDS_PER_INGREDIENT * diff.timerMultiplier + 1;
   } else {
     const rawTime = count * BASE_SECONDS_PER_INGREDIENT * diff.timerMultiplier;
     timeLimit = Math.max(rawTime, count * 1.0);
@@ -61,15 +68,18 @@ export function generateOrder(orderIndex: number, prevTime?: number, maxIngredie
 }
 
 // ─── 번거 검증 ────────────────────────────────────
-export function validateBurger(submitted: Ingredient[], expected: Ingredient[]): boolean {
+export function validateBurger(
+  submitted: Ingredient[],
+  expected: Ingredient[],
+): boolean {
   if (submitted.length !== expected.length) return false;
   return submitted.every((ing, i) => ing === expected[i]);
 }
 
 // ─── 콤보 판정 ────────────────────────────────────
-// 제한시간의 75% 이내에 완성해야 콤보
+// 제한시간의 60% 이내에 완성해야 콤보
 export function isCombo(elapsed: number, timeLimit: number): boolean {
-  return elapsed < timeLimit * 0.75;
+  return elapsed < timeLimit * 0.6;
 }
 
 // ─── 콤보 배율 ────────────────────────────────────
@@ -90,7 +100,9 @@ export function calcScore(combo: number): number {
 
 // ─── 랜덤 닉네임 ─────────────────────────────────
 export function generateDefaultNickname(): string {
-  const num = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+  const num = Math.floor(Math.random() * 10000)
+    .toString()
+    .padStart(4, "0");
   return `player${num}`;
 }
 
@@ -114,10 +126,10 @@ function seededShuffle<T>(arr: T[], seed: string): T[] {
 
 // 재료 6개를 3/3으로 나누고, 완성 버튼은 둘 다 포함
 export function assignCoopKeys(roomId: string): [string[], string[]] {
-  const ingredients = ['patty', 'cheese', 'veggie', 'sauce', 'onion', 'tomato'];
+  const ingredients = ["patty", "cheese", "veggie", "sauce", "onion", "tomato"];
   const shuffled = seededShuffle(ingredients, roomId);
   return [
-    [...shuffled.slice(0, 3), 'submit'],
-    [...shuffled.slice(3), 'submit'],
+    [...shuffled.slice(0, 3), "submit"],
+    [...shuffled.slice(3), "submit"],
   ];
 }

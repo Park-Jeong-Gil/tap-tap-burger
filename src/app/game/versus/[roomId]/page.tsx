@@ -62,7 +62,6 @@ export default function VersusGamePage() {
   const [joined, setJoined] = useState(false);
   const [expired, setExpired] = useState(false);
   const [countingDown, setCountingDown] = useState(false);
-  const [nicknameReady, setNicknameReady] = useState(false);
   const [nicknameInput, setNicknameInput] = useState("");
   const prevComboRef = useRef(0);
   const finishedRef = useRef(false);
@@ -71,28 +70,16 @@ export default function VersusGamePage() {
     initSession();
   }, [initSession]);
 
-  // 저장된 닉네임이 있으면 입력 화면 스킵
+  // 닉네임 입력 초기화 (저장된 값 or 현재 닉네임)
   useEffect(() => {
     if (!isInitialized) return;
     const saved = localStorage.getItem(NICKNAME_STORAGE_KEY);
-    if (saved) {
-      setNicknameReady(true);
-    } else {
-      setNicknameInput(nickname);
-    }
+    setNicknameInput(saved ?? nickname);
   }, [isInitialized, nickname]);
-
-  const handleNicknameEnter = async () => {
-    const trimmed = nicknameInput.trim();
-    if (!trimmed) return;
-    setNickname(trimmed);
-    await saveNickname();
-    setNicknameReady(true);
-  };
 
   // 룸 참가
   useEffect(() => {
-    if (!isInitialized || !playerId || !nicknameReady || joined) return;
+    if (!isInitialized || !playerId || joined) return;
     setJoined(true);
     const join = async () => {
       // 룸 상태 확인
@@ -126,7 +113,7 @@ export default function VersusGamePage() {
       await joinExisting(roomId, playerId, nickname);
     };
     join();
-  }, [isInitialized, playerId, nicknameReady, joined, roomId, nickname, joinExisting]);
+  }, [isInitialized, playerId, joined, roomId, nickname, joinExisting]);
 
   const handleOpponentUpdate = useCallback((state: OpponentState) => {
     setOpponent(state);
@@ -185,6 +172,11 @@ export default function VersusGamePage() {
 
   const handleReady = async () => {
     if (!playerId) return;
+    const trimmed = nicknameInput.trim();
+    if (trimmed && trimmed !== nickname) {
+      setNickname(trimmed);
+      await saveNickname();
+    }
     await setReady(roomId, playerId);
   };
 
@@ -197,40 +189,6 @@ export default function VersusGamePage() {
   const myEntry = players.find((p) => p.playerId === playerId);
   const myReady = myEntry?.ready ?? false;
   const opponentEntry = players.find((p) => p.playerId !== playerId);
-
-  // 닉네임 입력 화면 (저장된 닉네임 없는 신규 유저)
-  if (isInitialized && !nicknameReady) {
-    return (
-      <div className="multi-hub">
-        <div className="room-lobby">
-          <p className="room-lobby__title">대전 입장</p>
-          <div className="main-nickname" style={{ width: "100%" }}>
-            <label className="main-nickname__label" htmlFor="vs-nickname">닉네임</label>
-            <input
-              id="vs-nickname"
-              className="input"
-              value={nicknameInput}
-              onChange={(e) => setNicknameInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleNicknameEnter()}
-              placeholder="닉네임 입력..."
-              maxLength={20}
-              autoFocus
-            />
-          </div>
-          <button
-            className="btn btn--primary"
-            onClick={handleNicknameEnter}
-            disabled={!nicknameInput.trim()}
-          >
-            입장
-          </button>
-        </div>
-        <button className="btn btn--ghost" onClick={() => router.push("/")}>
-          취소
-        </button>
-      </div>
-    );
-  }
 
   // 만료된 링크 화면
   if (expired) {
@@ -280,9 +238,28 @@ export default function VersusGamePage() {
             )}
           </div>
           {!isHost && !myReady && (
-            <button className="btn btn--primary" onClick={handleReady}>
-              준비
-            </button>
+            <>
+              <div className="main-nickname" style={{ width: "100%" }}>
+                <label className="main-nickname__label" htmlFor="vs-nickname">닉네임</label>
+                <input
+                  id="vs-nickname"
+                  className="input"
+                  value={nicknameInput}
+                  onChange={(e) => setNicknameInput(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && nicknameInput.trim() && handleReady()}
+                  placeholder="닉네임 입력..."
+                  maxLength={20}
+                  autoFocus
+                />
+              </div>
+              <button
+                className="btn btn--primary"
+                onClick={handleReady}
+                disabled={!nicknameInput.trim()}
+              >
+                준비
+              </button>
+            </>
           )}
           {isHost && (
             <button
