@@ -181,12 +181,10 @@ export function useLobbyRoom(roomId: string) {
       // 초기 플레이어 목록 즉시 조회
       fetchRoomPlayers(roomId).then(setPlayers);
 
-      // 초기 룸 상태 조회
+      // 'waiting' 상태인 경우에만 폴링 시작 (이미 진행 중/종료된 방은 제외)
+      // 초기 상태를 roomStatus에 세팅하지 않음 — join 로직의 만료 체크와 충돌 방지
       const room = await getRoomInfo(roomId);
-      if (room?.status) {
-        setRoomStatus(room.status as 'waiting' | 'playing' | 'finished');
-        if (room.status !== 'waiting') return;
-      }
+      if (!room || room.status !== 'waiting') return;
 
       // 폴링: 2초마다 룸 상태 확인 (postgres_changes 누락 대비)
       polling = setInterval(async () => {
