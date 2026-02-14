@@ -59,13 +59,10 @@
   background-color: v.$color-surface;
   overflow: hidden;
 
-  @include pb.pixel-box(
+  @include pb.pixel-borders(
     $corner-size: 2,
     $border-size: 3px,
-    $background-color: v.$color-surface,
-    $border-color: v.$color-primary,
-    $border-inset: true,
-    $border-inset-sides: "all"
+    $border-color: v.$color-primary
   );
 
   @include m.mobile {

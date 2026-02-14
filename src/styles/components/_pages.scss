@@ -384,8 +384,7 @@
     $border-size: 4px,
     $background-color: v.$color-surface,
     $border-color: v.$color-border,
-    $border-inset: true,
-    $border-inset-sides: "all"
+    $border-inset: false
   );
   @include m.mobile {
     padding: m.vw(20);
