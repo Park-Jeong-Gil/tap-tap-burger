@@ -82,6 +82,11 @@ export default function CoopGamePage() {
         .maybeSingle();
 
       if (!data) {
+        // 방이 이미 진행 중이면 만료 처리
+        if (room.status === "playing") {
+          setExpired(true);
+          return;
+        }
         await joinExisting(roomId, playerId, nickname);
       }
 
