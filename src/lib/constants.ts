@@ -34,15 +34,15 @@ export const DIFFICULTY_TIERS: { minOrders: number; tier: DifficultyTier }[] = [
     tier: { minIngredients: 3, timerMultiplier: 1.5, hpDrainPerSec: 0.4 },
   }, // 시작
   {
-    minOrders: 3,
+    minOrders: 5,
     tier: { minIngredients: 4, timerMultiplier: 1.3, hpDrainPerSec: 0.6 },
   }, // 적응
   {
-    minOrders: 8,
+    minOrders: 10,
     tier: { minIngredients: 5, timerMultiplier: 1.2, hpDrainPerSec: 0.8 },
   }, // 적응
   {
-    minOrders: 10,
+    minOrders: 15,
     tier: { minIngredients: 6, timerMultiplier: 1.0, hpDrainPerSec: 1.2 },
   }, // 가속
   {
