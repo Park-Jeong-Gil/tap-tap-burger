@@ -98,6 +98,19 @@ export async function updateRoomStatus(roomId: string, status: string) {
   if (error) throw error;
 }
 
+export async function getRoomPlayers(roomId: string) {
+  const { data } = await supabase
+    .from('room_players')
+    .select('player_id, ready, players(nickname)')
+    .eq('room_id', roomId);
+  if (!data) return [];
+  return data.map((rp) => ({
+    playerId: rp.player_id as string,
+    nickname: (rp.players as unknown as { nickname: string }[] | null)?.[0]?.nickname ?? '...',
+    ready: rp.ready as boolean,
+  }));
+}
+
 export async function getRoomInfo(roomId: string) {
   const { data } = await supabase
     .from('rooms')

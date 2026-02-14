@@ -106,3 +106,4 @@ export const BASE_SECONDS_PER_INGREDIENT = 1.0; // 재료 1개당 기본 초
 // ─── localStorage 키 ──────────────────────────────────
 export const SESSION_STORAGE_KEY = "ttb_session_id";
 export const NICKNAME_STORAGE_KEY = "ttb_nickname";
+export const ACTIVE_ROOM_STORAGE_KEY = "ttb_active_room";

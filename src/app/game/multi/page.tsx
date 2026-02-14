@@ -5,17 +5,38 @@ import { useRouter } from 'next/navigation';
 import { usePlayerStore } from '@/stores/playerStore';
 import { useRoomStore } from '@/stores/roomStore';
 import { useLobbyRoom } from '@/hooks/useRoom';
+import { getRoomInfo, getRoomPlayers } from '@/lib/supabase';
+import { ACTIVE_ROOM_STORAGE_KEY } from '@/lib/constants';
 import type { GameMode } from '@/types';
 
 export default function MultiHubPage() {
   const router = useRouter();
   const { playerId, nickname, initSession, isInitialized } = usePlayerStore();
-  const { roomId, isHost, players, roomStatus, createAndJoin, setReady, startGame, reset } = useRoomStore();
+  const { roomId, isHost, players, roomStatus, createAndJoin, setReady, startGame, reset, restoreHostRoom } = useRoomStore();
   const [creating, setCreating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [selectedMode, setSelectedMode] = useState<GameMode | null>(null);
 
   useEffect(() => { initSession(); }, [initSession]);
+
+  // 새로고침 복원: localStorage에 활성 룸이 있으면 DB에서 상태 복원
+  useEffect(() => {
+    if (!isInitialized || roomId) return;
+    const saved = localStorage.getItem(ACTIVE_ROOM_STORAGE_KEY);
+    if (!saved) return;
+    const { roomId: savedRoomId, mode } = JSON.parse(saved) as { roomId: string; mode: GameMode };
+    const restore = async () => {
+      const room = await getRoomInfo(savedRoomId);
+      if (!room || room.status !== 'waiting') {
+        localStorage.removeItem(ACTIVE_ROOM_STORAGE_KEY);
+        return;
+      }
+      const roomPlayers = await getRoomPlayers(savedRoomId);
+      restoreHostRoom(savedRoomId, mode, roomPlayers);
+      setSelectedMode(mode);
+    };
+    restore();
+  }, [isInitialized, roomId, restoreHostRoom]);
 
   // 방장 시작 → 게임 페이지 이동
   useEffect(() => {
