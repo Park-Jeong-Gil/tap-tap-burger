@@ -35,27 +35,27 @@ export const DIFFICULTY_TIERS: { minOrders: number; tier: DifficultyTier }[] = [
   }, // 시작
   {
     minOrders: 5,
-    tier: { minIngredients: 4, timerMultiplier: 1.3, hpDrainPerSec: 0.6 },
+    tier: { minIngredients: 4, timerMultiplier: 1.4, hpDrainPerSec: 0.6 },
   }, // 적응
   {
     minOrders: 10,
-    tier: { minIngredients: 5, timerMultiplier: 1.2, hpDrainPerSec: 0.8 },
+    tier: { minIngredients: 5, timerMultiplier: 1.3, hpDrainPerSec: 0.8 },
   }, // 적응
   {
     minOrders: 15,
-    tier: { minIngredients: 6, timerMultiplier: 1.0, hpDrainPerSec: 1.2 },
+    tier: { minIngredients: 6, timerMultiplier: 1.2, hpDrainPerSec: 1.2 },
   }, // 가속
   {
     minOrders: 20,
-    tier: { minIngredients: 7, timerMultiplier: 0.82, hpDrainPerSec: 2.2 },
+    tier: { minIngredients: 7, timerMultiplier: 1, hpDrainPerSec: 2.2 },
   }, // 압박
   {
     minOrders: 30,
-    tier: { minIngredients: 8, timerMultiplier: 0.68, hpDrainPerSec: 3.2 },
+    tier: { minIngredients: 8, timerMultiplier: 0.8, hpDrainPerSec: 3.2 },
   }, // 위기
   {
     minOrders: 40,
-    tier: { minIngredients: 9, timerMultiplier: 0.56, hpDrainPerSec: 4.5 },
+    tier: { minIngredients: 9, timerMultiplier: 0.6, hpDrainPerSec: 4.5 },
   }, // 극한
   {
     minOrders: 50,
