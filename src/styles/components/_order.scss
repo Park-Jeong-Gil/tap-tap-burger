@@ -206,6 +206,7 @@
   flex-direction: column;
   height: 100%;
   background-color: v.$color-surface;
+  container-type: size; // 자식에서 cqh 단위 사용을 위해 크기 컨테이너 지정
 
   @include pb.pixel-borders(
     $corner-size: 2,
@@ -289,6 +290,8 @@
 }
 
 // 버거 비주얼 (column-reverse로 쌓음)
+// width: min(100%, 35cqh) → 재료 수가 많아져도 .order-preview 높이(cqh) 기준으로
+// food 너비가 자동 축소되어 margin-bottom % 계산도 함께 줄어 잘림 방지
 .order-preview__food {
   flex: 1;
   min-height: 0;
@@ -297,7 +300,8 @@
   align-items: center;
   justify-content: flex-start;
   overflow: hidden;
-  width: 100%;
+  width: min(100%, 35cqh);
+  align-self: center;
 }
 
 // 번 이미지
@@ -321,12 +325,14 @@
   // ingredient-layer와 동일한 오버랩 마진
   &--veggie {
     margin-bottom: -32%;
+    margin-top: -8%;
   }
   &--cheese {
     margin-bottom: -36%;
   }
   &--sauce {
     margin-bottom: -33%;
+    padding-top: 5%;
   }
   &--patty {
     margin-bottom: -32%;

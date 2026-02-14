@@ -54,14 +54,15 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-height: 0;
   // overflow: hidden;
   @include m.mobile {
-    padding: m.vw(20) m.vw(10) m.vw(10);
-    gap: m.vw(16);
+    padding: clamp(6px, 2dvh, #{m.vw(20)}) #{m.vw(10)} clamp(4px, 1.5dvh, #{m.vw(10)});
+    gap: clamp(4px, 2dvh, #{m.vw(16)});
   }
   @include m.desktop {
-    padding: 20px 10px 10px;
-    gap: 16px;
+    padding: clamp(6px, 2dvh, 20px) 10px clamp(4px, 1.5dvh, 10px);
+    gap: clamp(4px, 2dvh, 16px);
   }
 }
 
@@ -135,16 +136,14 @@
   display: grid;
   align-items: stretch;
   @include m.mobile {
-    // grid-template-columns: m.vw(76) 1fr m.vw(76);
-    grid-template-columns: 1fr m.vw(90);
-    gap: m.vw(6);
-    height: m.vw(195);
+    grid-template-columns: 1fr #{m.vw(90)};
+    gap: #{m.vw(6)};
+    height: clamp(120px, 30dvh, #{m.vw(195)});
   }
   @include m.desktop {
-    // grid-template-columns: 86px 1fr 86px;
     grid-template-columns: 1fr 160px;
     gap: 6px;
-    height: 195px;
+    height: clamp(130px, 30dvh, 195px);
   }
 }
 
@@ -343,21 +342,21 @@
     max-width: none;
 
     @include m.mobile {
-      width: m.vw(28);
-      height: m.vw(28);
+      width: clamp(18px, 5dvh, #{m.vw(28)});
+      height: clamp(18px, 5dvh, #{m.vw(28)});
     }
     @include m.desktop {
-      width: 40px;
-      height: 40px;
+      width: clamp(20px, 5dvh, 40px);
+      height: clamp(20px, 5dvh, 40px);
     }
   }
 
   .input-btn__label {
     @include m.mobile {
-      font-size: m.vw(13);
+      font-size: clamp(9px, 1.8dvh, #{m.vw(13)});
     }
     @include m.desktop {
-      font-size: 17px;
+      font-size: clamp(11px, 2dvh, 17px);
     }
   }
 }
@@ -368,22 +367,22 @@
     flex: none;
     svg {
       @include m.mobile {
-        width: m.vw(24);
-        height: m.vw(24);
+        width: clamp(14px, 4dvh, #{m.vw(24)});
+        height: clamp(14px, 4dvh, #{m.vw(24)});
       }
       @include m.desktop {
-        width: 24px;
-        height: 24px;
+        width: clamp(14px, 4dvh, 24px);
+        height: clamp(14px, 4dvh, 24px);
       }
     }
   }
 
   .input-btn__label {
     @include m.mobile {
-      margin-top: m.vw(8);
+      margin-top: clamp(2px, 1dvh, #{m.vw(8)});
     }
     @include m.desktop {
-      margin-top: 8px;
+      margin-top: clamp(2px, 1dvh, 8px);
     }
   }
 }
@@ -394,14 +393,15 @@
   grid-template-columns: 1fr auto;
   grid-template-rows: auto auto;
   align-items: center;
+  flex-shrink: 0;
 
   @include m.mobile {
-    padding: m.vw(10) m.vw(12) m.vw(4);
-    row-gap: m.vw(4);
+    padding: clamp(4px, 1.2dvh, #{m.vw(10)}) #{m.vw(12)} clamp(2px, 0.5dvh, #{m.vw(4)});
+    row-gap: clamp(2px, 0.5dvh, #{m.vw(4)});
   }
   @include m.desktop {
-    padding: 10px 12px 4px;
-    row-gap: 4px;
+    padding: clamp(4px, 1.5dvh, 10px) 12px clamp(2px, 0.5dvh, 4px);
+    row-gap: clamp(2px, 0.5dvh, 4px);
   }
 
   // .ingame__hp는 display:contents → 자식이 그리드에 직접 참여
