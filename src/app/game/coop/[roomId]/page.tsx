@@ -7,7 +7,7 @@ import { useRoomStore } from "@/stores/roomStore";
 import { useGameStore } from "@/stores/gameStore";
 import { useGameLoop } from "@/hooks/useGameLoop";
 import { useCoopRoom, useLobbyRoom } from "@/hooks/useRoom";
-import { supabase, getRoomInfo } from "@/lib/supabase";
+import { supabase, getRoomInfo, updateRoomStatus } from "@/lib/supabase";
 import { assignCoopKeys } from "@/lib/gameLogic";
 import { KEY_MAP, NICKNAME_STORAGE_KEY } from "@/lib/constants";
 import HpBar from "@/components/game/HpBar";
@@ -81,15 +81,15 @@ export default function CoopGamePage() {
         .eq("player_id", playerId)
         .maybeSingle();
 
-      // 방이 이미 진행 중이면 만료 처리 (재연결 미지원)
-      if (room.status === "playing") {
-        setExpired(true);
-        return;
-      }
-
       if (!data) {
+        // 새 플레이어: 방이 진행 중이면 만료 처리
+        if (room.status === "playing") {
+          setExpired(true);
+          return;
+        }
         await joinExisting(roomId, playerId, nickname);
       }
+      // data가 있으면 (대기실 참여자) 게임 시작 후에도 그대로 입장
 
       // 키 배분: 방장이 전체 키를 배분하고 DB에 저장
       const { data: rp } = await supabase
@@ -131,6 +131,13 @@ export default function CoopGamePage() {
       setCountingDown(true);
     }
   }, [roomStatus, gameStatus]);
+
+  // 게임 오버 시 룸 만료 처리 (링크 재사용 방지)
+  useEffect(() => {
+    if (gameStatus === "gameover") {
+      updateRoomStatus(roomId, "finished").catch(() => {});
+    }
+  }, [gameStatus, roomId]);
 
   // 키보드 입력 → 코업 브로드캐스트
   useEffect(() => {

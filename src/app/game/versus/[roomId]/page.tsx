@@ -89,7 +89,7 @@ export default function VersusGamePage() {
         return;
       }
 
-      // 이미 참여 중인지 확인
+      // 이미 참여 중인지 확인 (대기실에 있던 플레이어는 게임 시작 후에도 입장 허용)
       const { data: myRow } = await supabase
         .from("room_players")
         .select("player_id")
@@ -97,13 +97,13 @@ export default function VersusGamePage() {
         .eq("player_id", playerId)
         .maybeSingle();
 
-      // 방이 이미 진행 중이면 만료 처리 (재연결 미지원)
+      if (myRow) return; // 대기실 참여자 → 그대로 입장
+
+      // 새 플레이어: 방이 진행 중이거나 가득 찼으면 만료
       if (room.status === "playing") {
         setExpired(true);
         return;
       }
-
-      if (myRow) return; // 대기실 재접속
 
       // 플레이어 수 확인 (최대 2명)
       const { count } = await supabase
