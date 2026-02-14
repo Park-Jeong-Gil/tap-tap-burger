@@ -15,11 +15,11 @@
 .ingame__hp {
   // flex-shrink: 0;
   @include m.mobile {
-    width: 65%;
+    width: 60%;
     padding: m.vw(8) m.vw(12);
   }
   @include m.desktop {
-    width: 80%;
+    width: 70%;
     padding: 8px 12px;
   }
 }
@@ -358,9 +358,11 @@
 
   @include m.mobile {
     font-size: m.vw(10);
+    margin-left: m.vw(6);
   }
   @include m.desktop {
     font-size: 18px;
+    margin-left: 12px;
   }
 
   // 콤보 레벨별 색상
