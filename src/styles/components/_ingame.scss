@@ -272,7 +272,7 @@
     @include pb.pixel-box(
       $corner-size: 1,
       $border-size: 3px,
-      $background-color: #c0392b,
+      $background-color: #dc592a,
       $border-color: v.$color-border,
       $border-inset: true,
       $border-inset-sides: "all"
@@ -294,7 +294,7 @@
     @include pb.pixel-box(
       $corner-size: 1,
       $border-size: 3px,
-      $background-color: #e74c3c,
+      $background-color: #f03b27,
       $border-color: v.$color-border,
       $border-inset: true,
       $border-inset-sides: "all"

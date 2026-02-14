@@ -45,31 +45,11 @@ interface GameState {
   clearFlash: () => void;
 }
 
-/**
- * 새 주문이 추가될 슬롯의 "신선한 prevTime"을 계산한다.
- * 잔여시간(elapsed 반영)이 아닌 첫 번째 주문의 재료 수 × 난이도로 다시 계산해
- * 시간이 무한히 누적되는 문제를 방지한다.
- * orderCount: 다음에 생성될 주문의 인덱스 (순번 기반 난이도 계산용)
- */
-function calcFreshSlotTime(ordersAhead: Order[], orderCount: number): number | undefined {
-  if (ordersAhead.length === 0) return undefined;
-  const diff = getDifficulty(orderCount);
-  // 슬롯 0: 재료수 × timerMultiplier
-  let time = ordersAhead[0].ingredients.length * BASE_SECONDS_PER_INGREDIENT * diff.timerMultiplier;
-  // 이후 슬롯: 재료수 × timerMultiplier + 2초 여유
-  for (let i = 1; i < ordersAhead.length; i++) {
-    time += ordersAhead[i].ingredients.length * BASE_SECONDS_PER_INGREDIENT * diff.timerMultiplier + 1;
-  }
-  return time;
-}
-
+// FIFO 시스템: 각 주문은 활성화될 때 fresh 타이머로 독립 생성
 function createInitialOrders(count: number, maxIngredients?: number): { orders: Order[]; counter: number } {
   const orders: Order[] = [];
-  let prevTime: number | undefined = undefined;
   for (let i = 0; i < count; i++) {
-    const order = generateOrder(i, prevTime, maxIngredients);
-    orders.push(order);
-    prevTime = order.timeLimit;
+    orders.push(generateOrder(i, undefined, maxIngredients));
   }
   return { orders, counter: count };
 }
@@ -187,8 +167,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     const { orderCounter, mode } = get();
     const maxIng = mode !== 'single' ? MULTI_MAX_INGREDIENTS : undefined;
     const remaining = orders.slice(1);
-    const freshPrevTime = calcFreshSlotTime(remaining, orderCounter);
-    const newOrder = generateOrder(orderCounter, freshPrevTime, maxIng);
+    const newOrder = generateOrder(orderCounter, undefined, maxIng);
     const newOrders = [...remaining, newOrder];
 
     set({
@@ -234,8 +213,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     const { mode } = get();
     const maxIng = mode !== 'single' ? MULTI_MAX_INGREDIENTS : undefined;
     if (timedOut) {
-      const freshPrevTime = calcFreshSlotTime(queueOrders, orderCounter);
-      queueOrders.push(generateOrder(orderCounter, freshPrevTime, maxIng));
+      queueOrders.push(generateOrder(orderCounter, undefined, maxIng));
       orderCounter++;
     }
 
