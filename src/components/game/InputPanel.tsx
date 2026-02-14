@@ -101,7 +101,7 @@ export default function InputPanel({ allowedActions }: InputPanelProps) {
 
       {/* 컨트롤: [리셋] [재료 2×2] [완성] */}
       <div className="ingame__controls">
-        <InputBtn
+        {/* <InputBtn
           action="cancel"
           label="리셋"
           className="input-btn--cancel"
@@ -109,7 +109,7 @@ export default function InputPanel({ allowedActions }: InputPanelProps) {
           showKey={isDesktop}
           icon={<GrPowerCycle />}
           onClick={() => handleAction("cancel")}
-        />
+        /> */}
 
         <div className="ingame__grid">
           <InputBtn

@@ -38,14 +38,13 @@
 .hp-bar-label {
   font-family: v.$font-pixel;
   color: v.$color-text;
+  font-weight: bold;
   text-align: left;
 
   @include m.mobile {
-    font-size: m.vw(12);
-    margin-bottom: m.vw(4);
+    font-size: m.vw(14);
   }
   @include m.desktop {
-    font-size: 12px;
-    margin-bottom: 4px;
+    font-size: 14px;
   }
 }

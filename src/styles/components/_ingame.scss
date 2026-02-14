@@ -11,17 +11,9 @@
   background-color: v.$color-bg;
 }
 
-// HP 바 영역
+// HP 바 영역 (top-display 그리드 내에서 display:contents로 해체)
 .ingame__hp {
-  // flex-shrink: 0;
-  @include m.mobile {
-    width: 60%;
-    padding: m.vw(8) m.vw(12);
-  }
-  @include m.desktop {
-    width: 70%;
-    padding: 8px 12px;
-  }
+  display: contents;
 }
 
 // 주문서 큐 영역
@@ -49,19 +41,12 @@
   }
 }
 
-// 스코어 영역
+// 스코어 영역 (top-display 그리드 내: col 2, row 1)
 .ingame__score {
-  flex-shrink: 0;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  align-self: flex-end;
-  @include m.mobile {
-    padding: 0 m.vw(12) m.vw(4);
-  }
-  @include m.desktop {
-    padding: 0 12px 4px;
-  }
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
 }
 
 // ─── 하단 인터랙션 영역 ───────────────────────────────
@@ -99,12 +84,14 @@
   display: grid;
   align-items: stretch;
   @include m.mobile {
-    grid-template-columns: m.vw(76) 1fr m.vw(76);
+    // grid-template-columns: m.vw(76) 1fr m.vw(76);
+    grid-template-columns: 1fr m.vw(90);
     gap: m.vw(6);
     height: m.vw(130);
   }
   @include m.desktop {
-    grid-template-columns: 86px 1fr 86px;
+    // grid-template-columns: 86px 1fr 86px;
+    grid-template-columns: 1fr 160px;
     gap: 6px;
     height: 130px;
   }
@@ -327,11 +314,38 @@
     }
   }
 }
-// ───
+// ─── HP + 스코어 통합 상단 표시줄 ──────────────────────
+// 그리드: [라벨 | 스코어] / [HP바(풀너비)]
 .top-display {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
   align-items: center;
-  justify-content: space-between;
+
+  @include m.mobile {
+    padding: m.vw(8) m.vw(12) m.vw(4);
+    row-gap: m.vw(4);
+  }
+  @include m.desktop {
+    padding: 8px 12px 4px;
+    row-gap: 4px;
+  }
+
+  // .ingame__hp는 display:contents → 자식이 그리드에 직접 참여
+  .hp-bar-label {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .hp-bar-wrap {
+    grid-column: 1 / 3;
+    grid-row: 2;
+  }
+
+  .ingame__score {
+    grid-column: 2;
+    grid-row: 1;
+  }
 }
 
 // ─── 스코어 표시 ─────────────────────────────────────
@@ -340,10 +354,10 @@
   color: v.$color-text;
 
   @include m.mobile {
-    font-size: m.vw(18);
+    font-size: m.vw(14);
   }
   @include m.desktop {
-    font-size: 18px;
+    font-size: 14px;
   }
 
   span {

@@ -7,8 +7,8 @@ export const HP_INIT = 80;
 export const HP_DELTA = {
   correctSubmit: 15,
   comboSubmit: 20,
-  wrongSubmit: -20,
-  orderTimeout: -25,
+  wrongSubmit: -10,
+  orderTimeout: -20,
 } as const;
 
 // ─── 점수 ─────────────────────────────────────────────
