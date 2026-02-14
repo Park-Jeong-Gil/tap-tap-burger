@@ -2,7 +2,7 @@
 
 import { create } from 'zustand';
 import type { Ingredient, Order, GameStatus, GameMode } from '@/types';
-import { HP_MAX, HP_INIT, HP_DELTA, BASE_SECONDS_PER_INGREDIENT } from '@/lib/constants';
+import { HP_MAX, HP_INIT, HP_DELTA, BASE_SECONDS_PER_INGREDIENT, INGREDIENTS } from '@/lib/constants';
 import {
   generateOrder,
   validateBurger,
@@ -264,17 +264,24 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   addOrdersFromAttack: (count: number) => {
     const { orders, orderCounter } = get();
-    let counter = orderCounter;
-    const newOrders = [...orders];
-    for (let i = 0; i < count; i++) {
-      const freshPrevTime = calcFreshSlotTime(newOrders, counter);
-      newOrders.push(generateOrder(counter, freshPrevTime));
-      counter++;
-    }
-    const sorted = newOrders.sort(
-      (a, b) => (a.timeLimit - a.elapsed) - (b.timeLimit - b.elapsed)
+    if (orders.length === 0) return;
+
+    // 남은 시간이 가장 많은 마지막 주문서에 재료 추가
+    const lastIdx = orders.length - 1;
+    const target = orders[lastIdx];
+
+    const extra: Ingredient[] = Array.from({ length: count }, () =>
+      INGREDIENTS[Math.floor(Math.random() * INGREDIENTS.length)]
     );
-    set({ orders: sorted, orderCounter: counter });
+    const extraTime = count * BASE_SECONDS_PER_INGREDIENT * getDifficulty(orderCounter).timerMultiplier;
+
+    const newOrders = [...orders];
+    newOrders[lastIdx] = {
+      ...target,
+      ingredients: [...target.ingredients, ...extra],
+      timeLimit: target.timeLimit + extraTime,
+    };
+    set({ orders: newOrders });
   },
 
   clearFlash: () => set({ submitFlash: null, lastSubmittedBurger: [], lastScoreGain: 0, lastComboOnSubmit: 0 }),

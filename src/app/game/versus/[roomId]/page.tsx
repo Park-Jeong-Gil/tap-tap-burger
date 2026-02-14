@@ -160,9 +160,9 @@ export default function VersusGamePage() {
       status: "playing",
     });
 
-    // 콤보 증가 시 공격 이벤트 전송
-    if (combo > prevComboRef.current && combo > 0) {
-      sendAttack(combo);
+    // 콤보 종료 시 (0으로 리셋) 직전 콤보 수만큼 공격
+    if (combo === 0 && prevComboRef.current > 0) {
+      sendAttack(prevComboRef.current);
     }
     prevComboRef.current = combo;
   }, [hp, orders.length, combo, gameStatus, sendStateUpdate, sendAttack]);
