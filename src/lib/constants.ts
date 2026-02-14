@@ -68,22 +68,29 @@ export const DIFFICULTY_TIERS: { minOrders: number; tier: DifficultyTier }[] = [
 ];
 
 // ─── 재료 ─────────────────────────────────────────────
-export const INGREDIENTS: Ingredient[] = ["patty", "cheese", "veggie", "sauce"];
+export const INGREDIENTS: Ingredient[] = [
+  "patty",
+  "cheese",
+  "veggie",
+  "sauce",
+  "onion",
+  "tomato",
+];
 
 // ─── 키 맵핑 ──────────────────────────────────────────
 export const KEY_MAP: Record<string, Ingredient | "cancel" | "submit"> = {
-  ArrowUp: "patty",
   w: "patty",
   W: "patty",
-  ArrowDown: "cheese",
   s: "cheese",
   S: "cheese",
-  ArrowLeft: "veggie",
   a: "veggie",
   A: "veggie",
-  ArrowRight: "sauce",
   d: "sauce",
   D: "sauce",
+  q: "onion",
+  Q: "onion",
+  e: "tomato",
+  E: "tomato",
   Escape: "cancel",
   Backspace: "cancel",
   Enter: "submit",
@@ -96,6 +103,8 @@ export const ALL_COOP_ACTIONS = [
   "cheese",
   "veggie",
   "sauce",
+  "onion",
+  "tomato",
   "cancel",
   "submit",
 ] as const;

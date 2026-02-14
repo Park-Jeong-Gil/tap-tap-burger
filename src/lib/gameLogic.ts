@@ -96,7 +96,7 @@ export function generateDefaultNickname(): string {
 
 // ─── 코업 키 배분 ─────────────────────────────────
 export function assignCoopKeys(): [string[], string[]] {
-  const actions = ['patty', 'cheese', 'veggie', 'sauce', 'cancel', 'submit'];
+  const actions = ['patty', 'cheese', 'veggie', 'sauce', 'onion', 'tomato', 'cancel', 'submit'];
   const shuffled = [...actions].sort(() => Math.random() - 0.5);
   return [shuffled.slice(0, 3), shuffled.slice(3)];
 }

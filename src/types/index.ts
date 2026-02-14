@@ -1,4 +1,4 @@
-export type Ingredient = 'patty' | 'cheese' | 'veggie' | 'sauce';
+export type Ingredient = 'patty' | 'cheese' | 'veggie' | 'sauce' | 'onion' | 'tomato';
 export type GameMode = 'single' | 'coop' | 'versus';
 export type GameStatus = 'idle' | 'playing' | 'gameover';
 

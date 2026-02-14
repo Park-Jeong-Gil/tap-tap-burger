@@ -11,12 +11,14 @@ interface InputPanelProps {
 }
 
 const KEY_HINTS: Record<string, string> = {
-  patty: "↑ W",
-  cheese: "↓ S",
-  veggie: "← A",
-  sauce: "→ D",
+  patty: "W",
+  cheese: "S",
+  veggie: "A",
+  sauce: "D",
+  onion: "Q",
+  tomato: "E",
   cancel: "ESC",
-  submit: "SPC",
+  submit: "SPACE",
 };
 
 const INGREDIENT_IMAGES: Record<string, string> = {
@@ -24,6 +26,8 @@ const INGREDIENT_IMAGES: Record<string, string> = {
   cheese: "/ingredient/cheese.png",
   veggie: "/ingredient/vegetable.png",
   sauce: "/ingredient/sauce.png",
+  onion: "/ingredient/onion.png",
+  tomato: "/ingredient/tomato.png",
   submit: "/ingredient/bun_top.png",
 };
 
@@ -143,6 +147,22 @@ export default function InputPanel({ allowedActions }: InputPanelProps) {
             disabled={!isAllowed("patty")}
             showKey={isDesktop}
             onClick={() => handleAction("patty")}
+          />
+          <InputBtn
+            action="onion"
+            label="양파"
+            className="input-btn--onion"
+            disabled={!isAllowed("onion")}
+            showKey={isDesktop}
+            onClick={() => handleAction("onion")}
+          />
+          <InputBtn
+            action="tomato"
+            label="토마토"
+            className="input-btn--tomato"
+            disabled={!isAllowed("tomato")}
+            showKey={isDesktop}
+            onClick={() => handleAction("tomato")}
           />
         </div>
 

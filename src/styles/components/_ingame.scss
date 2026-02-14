@@ -87,21 +87,21 @@
     // grid-template-columns: m.vw(76) 1fr m.vw(76);
     grid-template-columns: 1fr m.vw(90);
     gap: m.vw(6);
-    height: m.vw(130);
+    height: m.vw(195);
   }
   @include m.desktop {
     // grid-template-columns: 86px 1fr 86px;
     grid-template-columns: 1fr 160px;
     gap: 6px;
-    height: 130px;
+    height: 195px;
   }
 }
 
-// 재료 2×2 그리드 (ingame__controls 내부)
+// 재료 2×3 그리드 (ingame__controls 내부)
 .ingame__grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
   @include m.mobile {
     gap: m.vw(6);
   }
@@ -222,6 +222,28 @@
       $corner-size: 1,
       $border-size: 3px,
       $background-color: #c0392b,
+      $border-color: v.$color-border,
+      $border-inset: true,
+      $border-inset-sides: "all"
+    );
+    color: #fde8e8;
+  }
+  &--onion {
+    @include pb.pixel-box(
+      $corner-size: 1,
+      $border-size: 3px,
+      $background-color: #7b4f9a,
+      $border-color: v.$color-border,
+      $border-inset: true,
+      $border-inset-sides: "all"
+    );
+    color: #f0d8ff;
+  }
+  &--tomato {
+    @include pb.pixel-box(
+      $corner-size: 1,
+      $border-size: 3px,
+      $background-color: #e74c3c,
       $border-color: v.$color-border,
       $border-inset: true,
       $border-inset-sides: "all"

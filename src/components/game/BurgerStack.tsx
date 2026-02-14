@@ -10,6 +10,8 @@ const INGREDIENT_IMAGES: Record<Ingredient, string> = {
   cheese: '/ingredient/cheese.png',
   veggie: '/ingredient/vegetable.png',
   sauce:  '/ingredient/sauce.png',
+  onion:  '/ingredient/onion.png',
+  tomato: '/ingredient/tomato.png',
 };
 
 interface BurgerStackProps {

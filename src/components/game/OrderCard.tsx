@@ -8,6 +8,8 @@ const INGREDIENT_LABELS: Record<Ingredient, string> = {
   cheese: "🟨 치즈",
   veggie: "🟩 야채",
   sauce: "🟥 소스",
+  onion: "🟣 양파",
+  tomato: "🍅 토마토",
 };
 
 interface OrderCardProps {
