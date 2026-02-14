@@ -39,9 +39,11 @@ export default function GameOverScreen() {
         {saved && <p style={{ color: 'var(--success, #4caf50)', fontSize: '0.8em' }}>✓ 리더보드 저장 완료</p>}
       </div>
       <div className="gameover-actions">
-        <button className="btn btn--primary" onClick={handleRestart}>
-          다시 시작
-        </button>
+        {mode !== 'versus' && (
+          <button className="btn btn--primary" onClick={handleRestart}>
+            다시 시작
+          </button>
+        )}
         <button className="btn btn--ghost" onClick={handleHome}>
           메인으로
         </button>

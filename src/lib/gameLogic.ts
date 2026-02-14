@@ -74,9 +74,9 @@ export function validateBurger(submitted: Ingredient[], expected: Ingredient[]):
 }
 
 // ─── 콤보 판정 ────────────────────────────────────
-// 시간의 절반 이내에 완성해야 콤보 (빠른 플레이 요구)
+// 제한시간의 75% 이내에 완성해야 콤보
 export function isCombo(elapsed: number, timeLimit: number): boolean {
-  return elapsed < timeLimit * 0.5;
+  return elapsed < timeLimit * 0.75;
 }
 
 // ─── 콤보 배율 ────────────────────────────────────
