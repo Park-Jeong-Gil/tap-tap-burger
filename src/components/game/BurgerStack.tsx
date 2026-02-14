@@ -60,30 +60,13 @@ export default function BurgerStack({ ingredients }: BurgerStackProps) {
   // 제출 중에는 스냅샷 재료를 표시, 그 외엔 현재 쌓는 중인 재료
   const displayIngredients = isSubmitting ? lastSubmittedBurger : ingredients;
 
-  // 재료가 변할 때마다 카메라 위치 및 스케일 재계산
+  // 재료가 변할 때마다 카메라 위치 재계산
   useEffect(() => {
     const stack = stackRef.current;
     const food = foodRef.current;
     if (!stack || !food) return;
-
-    // 자연 높이 측정을 위해 너비를 일시적으로 100%로 초기화
-    food.style.width = '100%';
-    food.style.margin = '';
-
-    const containerH = stack.clientHeight;
-    const naturalH = food.scrollHeight;
-
-    if (naturalH > containerH && containerH > 0) {
-      // 넘칠 경우: 너비를 줄여 전체가 컨테이너 안에 들어오도록 축소
-      const scale = containerH / naturalH;
-      food.style.width = `${scale * 100}%`;
-      food.style.margin = '0 auto';
-      setCameraY(0);
-    } else {
-      // 정상 범위: 카메라를 위로 올려 버거 상단이 보이게
-      const overflow = Math.max(0, naturalH - containerH);
-      setCameraY(overflow);
-    }
+    const overflow = Math.max(0, food.scrollHeight - stack.clientHeight);
+    setCameraY(overflow);
   }, [displayIngredients]);
 
   return (
