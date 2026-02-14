@@ -12,7 +12,7 @@ interface UseKeyboardOptions {
 
 export function useKeyboard({ allowedActions, enabled = true }: UseKeyboardOptions = {}) {
   const addIngredient = useGameStore((s) => s.addIngredient);
-  const removeLastIngredient = useGameStore((s) => s.removeLastIngredient);
+  const clearBurger = useGameStore((s) => s.clearBurger);
   const submitBurger = useGameStore((s) => s.submitBurger);
   const status = useGameStore((s) => s.status);
 
@@ -33,7 +33,7 @@ export function useKeyboard({ allowedActions, enabled = true }: UseKeyboardOptio
       e.preventDefault();
 
       if (action === 'cancel') {
-        removeLastIngredient();
+        clearBurger();
       } else if (action === 'submit') {
         submitBurger();
       } else {
@@ -43,5 +43,5 @@ export function useKeyboard({ allowedActions, enabled = true }: UseKeyboardOptio
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [enabled, status, allowedActions, addIngredient, removeLastIngredient, submitBurger]);
+  }, [enabled, status, allowedActions, addIngredient, clearBurger, submitBurger]);
 }

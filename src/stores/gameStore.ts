@@ -36,6 +36,7 @@ interface GameState {
   resetGame: () => void;
   addIngredient: (ingredient: Ingredient) => void;
   removeLastIngredient: () => void;
+  clearBurger: () => void;
   submitBurger: () => void;
   tick: (delta: number) => void; // delta: seconds
   saveScore: (playerId: string) => Promise<void>;
@@ -139,6 +140,12 @@ export const useGameStore = create<GameState>((set, get) => ({
     const { status, currentBurger } = get();
     if (status !== 'playing' || currentBurger.length === 0) return;
     set({ currentBurger: currentBurger.slice(0, -1) });
+  },
+
+  clearBurger: () => {
+    const { status, currentBurger } = get();
+    if (status !== 'playing' || currentBurger.length === 0) return;
+    set({ currentBurger: [] });
   },
 
   submitBurger: () => {

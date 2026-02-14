@@ -40,7 +40,7 @@ export interface ScoreRecord {
 }
 
 export interface DifficultyTier {
-  maxIngredients: number;
+  minIngredients: number;
   timerMultiplier: number;
   hpDrainPerSec: number;
 }

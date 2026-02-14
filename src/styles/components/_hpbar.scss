@@ -38,10 +38,10 @@
 .hp-bar-label {
   font-family: v.$font-pixel;
   color: v.$color-text;
-  text-align: right;
+  text-align: left;
 
   @include m.mobile {
-    font-size: m.vw(8);
+    font-size: m.vw(12);
     margin-bottom: m.vw(4);
   }
   @include m.desktop {

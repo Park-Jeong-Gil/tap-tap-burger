@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { useEffect, useRef, useState } from 'react';
-import { useGameStore } from '@/stores/gameStore';
-import { useKeyboard } from '@/hooks/useKeyboard';
-import { useGameLoop } from '@/hooks/useGameLoop';
-import HpBar from '@/components/game/HpBar';
-import OrderQueue from '@/components/game/OrderQueue';
-import ScoreBoard from '@/components/game/ScoreBoard';
-import InputPanel from '@/components/game/InputPanel';
-import GameOverScreen from '@/components/game/GameOverScreen';
+import { useEffect, useRef, useState } from "react";
+import { useGameStore } from "@/stores/gameStore";
+import { useKeyboard } from "@/hooks/useKeyboard";
+import { useGameLoop } from "@/hooks/useGameLoop";
+import HpBar from "@/components/game/HpBar";
+import OrderQueue from "@/components/game/OrderQueue";
+import ScoreBoard from "@/components/game/ScoreBoard";
+import InputPanel from "@/components/game/InputPanel";
+import GameOverScreen from "@/components/game/GameOverScreen";
 
 export default function SingleGamePage() {
   const status = useGameStore((s) => s.status);
@@ -27,7 +27,7 @@ export default function SingleGamePage() {
   const timeoutTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    startGame('single');
+    startGame("single");
   }, [startGame]);
 
   // 오답 → 화면 흔들림
@@ -47,16 +47,18 @@ export default function SingleGamePage() {
   }, [timeoutFlashCount]);
 
   useGameLoop();
-  useKeyboard({ enabled: status === 'playing' });
+  useKeyboard({ enabled: status === "playing" });
 
   return (
-    <div className={`ingame${shaking ? ' ingame--shake' : ''}`}>
+    <div className={`ingame${shaking ? " ingame--shake" : ""}`}>
       {timeoutFlashing && <div className="timeout-vignette" />}
-      <HpBar hp={hp} />
+      <div className="top-display">
+        <HpBar hp={hp} />
+        <ScoreBoard score={score} combo={combo} />
+      </div>
       <OrderQueue orders={orders} currentBurger={currentBurger} />
-      <ScoreBoard score={score} combo={combo} />
       <InputPanel />
-      {status === 'gameover' && <GameOverScreen />}
+      {status === "gameover" && <GameOverScreen />}
     </div>
   );
 }

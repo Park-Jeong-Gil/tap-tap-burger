@@ -24,10 +24,10 @@ function getAvailableIngredients(_orderIndex: number): Ingredient[] {
   return INGREDIENTS; // 모든 재료 처음부터 해금
 }
 
-// ─── 순번 기반 재료 개수 범위 ─────────────────────
-// 5주문마다 최소 재료수 1 증가 (3부터 무제한), 랜덤 폭 ±2
+// ─── 난이도 티어 기반 재료 개수 범위 ─────────────
+// 각 티어의 minIngredients를 최솟값으로, +2 랜덤 폭
 function getIngredientCountRange(orderIndex: number): { min: number; max: number } {
-  const min = 3 + Math.floor(orderIndex / 5);
+  const min = getDifficulty(orderIndex).minIngredients;
   const max = min + 2;
   return { min, max };
 }

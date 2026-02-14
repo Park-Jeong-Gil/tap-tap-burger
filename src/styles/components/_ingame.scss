@@ -13,11 +13,13 @@
 
 // HP 바 영역
 .ingame__hp {
-  flex-shrink: 0;
+  // flex-shrink: 0;
   @include m.mobile {
+    width: 65%;
     padding: m.vw(8) m.vw(12);
   }
   @include m.desktop {
+    width: 80%;
     padding: 8px 12px;
   }
 }
@@ -38,7 +40,7 @@
   font-weight: bold;
   color: v.$color-muted;
   @include m.mobile {
-    font-size: m.vw(7);
+    font-size: m.vw(10);
     margin-bottom: m.vw(3);
   }
   @include m.desktop {
@@ -53,6 +55,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  align-self: flex-end;
   @include m.mobile {
     padding: 0 m.vw(12) m.vw(4);
   }
@@ -66,13 +69,13 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  // overflow: hidden;
   @include m.mobile {
-    padding: 0 m.vw(10) m.vw(10);
+    padding: m.vw(20) m.vw(10) m.vw(10);
     gap: m.vw(16);
   }
   @include m.desktop {
-    padding: 0 10px 10px;
+    padding: 20px 10px 10px;
     gap: 16px;
   }
 }
@@ -139,10 +142,10 @@
     transform 0.08s ease;
 
   @include m.mobile {
-    gap: m.vw(3);
+    gap: m.vw(6);
   }
   @include m.desktop {
-    gap: 3px;
+    gap: 6px;
   }
 
   &:active {
@@ -158,6 +161,16 @@
     object-fit: contain;
     image-rendering: pixelated;
     filter: drop-shadow(1px 2px 0 rgba(0, 0, 0, 0.25));
+
+    // span으로 감싼 SVG 아이콘 대응
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    svg {
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+    }
   }
 
   &__label {
@@ -174,10 +187,10 @@
   &__key {
     font-family: v.$font-pixel;
     flex-shrink: 0;
-    font-size: 7px;
+    font-size: 12px;
     font-style: normal;
     background: rgba(0, 0, 0, 0.18);
-    padding: 1px 3px;
+    padding: 2px 4px;
     border-radius: 2px;
     opacity: 0.85;
     line-height: 1.2;
@@ -289,27 +302,45 @@
   }
 }
 
-.input-btn--submit {
-  img.input-btn__img {
+.input-btn--submit,
+.input-btn--cancel {
+  .input-btn__img {
     flex: none;
+    svg {
+      @include m.mobile {
+        width: m.vw(24);
+        height: m.vw(24);
+      }
+      @include m.desktop {
+        width: 24px;
+        height: 24px;
+      }
+    }
   }
 
   .input-btn__label {
     @include m.mobile {
-      margin-top: m.vw(6);
+      margin-top: m.vw(8);
     }
     @include m.desktop {
-      margin-top: 6px;
+      margin-top: 8px;
     }
   }
 }
+// ───
+.top-display {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 // ─── 스코어 표시 ─────────────────────────────────────
 .score-display {
   font-family: v.$font-pixel;
   color: v.$color-text;
 
   @include m.mobile {
-    font-size: m.vw(10);
+    font-size: m.vw(18);
   }
   @include m.desktop {
     font-size: 18px;

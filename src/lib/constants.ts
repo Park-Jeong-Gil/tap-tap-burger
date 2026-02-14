@@ -1,69 +1,108 @@
-import type { Ingredient, DifficultyTier } from '@/types';
+import type { Ingredient, DifficultyTier } from "@/types";
 
 // ─── HP ───────────────────────────────────────────────
 export const HP_MAX = 100;
 export const HP_INIT = 80;
 
 export const HP_DELTA = {
-  correctSubmit:  15,
-  comboSubmit:    20,
-  wrongSubmit:   -20,
-  orderTimeout:  -25,
+  correctSubmit: 15,
+  comboSubmit: 20,
+  wrongSubmit: -20,
+  orderTimeout: -25,
 } as const;
 
 // ─── 점수 ─────────────────────────────────────────────
 export const BASE_SCORE = 100;
 
 // combo count → multiplier
-export const COMBO_MULTIPLIERS: { min: number; max: number; multiplier: number }[] = [
-  { min: 1,  max: 2,        multiplier: 1.5 },
-  { min: 3,  max: 5,        multiplier: 2.0 },
-  { min: 6,  max: 9,        multiplier: 3.0 },
+export const COMBO_MULTIPLIERS: {
+  min: number;
+  max: number;
+  multiplier: number;
+}[] = [
+  { min: 1, max: 2, multiplier: 1.5 },
+  { min: 3, max: 5, multiplier: 2.0 },
+  { min: 6, max: 9, multiplier: 3.0 },
   { min: 10, max: Infinity, multiplier: 5.0 },
 ];
 
 // ─── 난이도 스케일링 (주문 순번 기반) ────────────────
 // minOrders: 해당 티어가 적용되기 시작하는 누적 주문 인덱스
 export const DIFFICULTY_TIERS: { minOrders: number; tier: DifficultyTier }[] = [
-  { minOrders: 0,   tier: { maxIngredients: 3,  timerMultiplier: 1.50, hpDrainPerSec: 0.4  } }, // 시작
-  { minOrders: 5,   tier: { maxIngredients: 5,  timerMultiplier: 1.20, hpDrainPerSec: 0.8  } }, // 적응
-  { minOrders: 13,  tier: { maxIngredients: 6,  timerMultiplier: 1.00, hpDrainPerSec: 1.4  } }, // 가속
-  { minOrders: 25,  tier: { maxIngredients: 7,  timerMultiplier: 0.82, hpDrainPerSec: 2.2  } }, // 압박
-  { minOrders: 40,  tier: { maxIngredients: 8,  timerMultiplier: 0.68, hpDrainPerSec: 3.2  } }, // 위기
-  { minOrders: 60,  tier: { maxIngredients: 9,  timerMultiplier: 0.56, hpDrainPerSec: 4.5  } }, // 극한
-  { minOrders: 90,  tier: { maxIngredients: 11, timerMultiplier: 0.46, hpDrainPerSec: 6.0  } }, // 광기
-  { minOrders: 125, tier: { maxIngredients: 12, timerMultiplier: 0.38, hpDrainPerSec: 8.0  } }, // 지옥
+  {
+    minOrders: 0,
+    tier: { minIngredients: 3, timerMultiplier: 1.5, hpDrainPerSec: 0.4 },
+  }, // 시작
+  {
+    minOrders: 3,
+    tier: { minIngredients: 4, timerMultiplier: 1.3, hpDrainPerSec: 0.6 },
+  }, // 적응
+  {
+    minOrders: 8,
+    tier: { minIngredients: 5, timerMultiplier: 1.2, hpDrainPerSec: 0.8 },
+  }, // 적응
+  {
+    minOrders: 10,
+    tier: { minIngredients: 6, timerMultiplier: 1.0, hpDrainPerSec: 1.2 },
+  }, // 가속
+  {
+    minOrders: 20,
+    tier: { minIngredients: 7, timerMultiplier: 0.82, hpDrainPerSec: 2.2 },
+  }, // 압박
+  {
+    minOrders: 30,
+    tier: { minIngredients: 8, timerMultiplier: 0.68, hpDrainPerSec: 3.2 },
+  }, // 위기
+  {
+    minOrders: 40,
+    tier: { minIngredients: 9, timerMultiplier: 0.56, hpDrainPerSec: 4.5 },
+  }, // 극한
+  {
+    minOrders: 50,
+    tier: { minIngredients: 11, timerMultiplier: 0.46, hpDrainPerSec: 6.0 },
+  }, // 광기
+  {
+    minOrders: 65,
+    tier: { minIngredients: 12, timerMultiplier: 0.38, hpDrainPerSec: 8.0 },
+  }, // 지옥
 ];
 
 // ─── 재료 ─────────────────────────────────────────────
-export const INGREDIENTS: Ingredient[] = ['patty', 'cheese', 'veggie', 'sauce'];
+export const INGREDIENTS: Ingredient[] = ["patty", "cheese", "veggie", "sauce"];
 
 // ─── 키 맵핑 ──────────────────────────────────────────
-export const KEY_MAP: Record<string, Ingredient | 'cancel' | 'submit'> = {
-  ArrowUp:    'patty',
-  w:          'patty',
-  W:          'patty',
-  ArrowDown:  'cheese',
-  s:          'cheese',
-  S:          'cheese',
-  ArrowLeft:  'veggie',
-  a:          'veggie',
-  A:          'veggie',
-  ArrowRight: 'sauce',
-  d:          'sauce',
-  D:          'sauce',
-  Escape:     'cancel',
-  Backspace:  'cancel',
-  Enter:      'submit',
-  ' ':        'submit',
+export const KEY_MAP: Record<string, Ingredient | "cancel" | "submit"> = {
+  ArrowUp: "patty",
+  w: "patty",
+  W: "patty",
+  ArrowDown: "cheese",
+  s: "cheese",
+  S: "cheese",
+  ArrowLeft: "veggie",
+  a: "veggie",
+  A: "veggie",
+  ArrowRight: "sauce",
+  d: "sauce",
+  D: "sauce",
+  Escape: "cancel",
+  Backspace: "cancel",
+  Enter: "submit",
+  " ": "submit",
 };
 
 // 코업: 모든 가능한 키 (랜덤 배분용)
-export const ALL_COOP_ACTIONS = ['patty', 'cheese', 'veggie', 'sauce', 'cancel', 'submit'] as const;
+export const ALL_COOP_ACTIONS = [
+  "patty",
+  "cheese",
+  "veggie",
+  "sauce",
+  "cancel",
+  "submit",
+] as const;
 
 // ─── 타이머 ───────────────────────────────────────────
 export const BASE_SECONDS_PER_INGREDIENT = 1.0; // 재료 1개당 기본 초
 
 // ─── localStorage 키 ──────────────────────────────────
-export const SESSION_STORAGE_KEY = 'ttb_session_id';
-export const NICKNAME_STORAGE_KEY = 'ttb_nickname';
+export const SESSION_STORAGE_KEY = "ttb_session_id";
+export const NICKNAME_STORAGE_KEY = "ttb_nickname";

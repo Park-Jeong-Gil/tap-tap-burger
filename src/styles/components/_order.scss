@@ -121,7 +121,7 @@
   color: v.$color-muted;
 
   @include m.mobile {
-    font-size: m.vw(7);
+    font-size: m.vw(10);
   }
   @include m.desktop {
     font-size: 10px;
@@ -135,7 +135,7 @@
   font-weight: bold;
 
   @include m.mobile {
-    font-size: m.vw(8);
+    font-size: m.vw(10);
   }
   @include m.desktop {
     font-size: 12px;
@@ -182,7 +182,7 @@
   text-overflow: ellipsis;
 
   @include m.mobile {
-    font-size: m.vw(8);
+    font-size: m.vw(12);
   }
   @include m.desktop {
     font-size: 14px;
