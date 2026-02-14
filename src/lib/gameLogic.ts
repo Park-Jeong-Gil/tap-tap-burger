@@ -27,10 +27,12 @@ function getAvailableIngredients(_orderIndex: number): Ingredient[] {
 // ─── 주문서 생성 ──────────────────────────────────
 // prevTime이 없으면 → 순번 기반 기본 시간
 // prevTime이 있으면 → prevTime + 재료수 × mult + 3초 여유
-export function generateOrder(orderIndex: number, prevTime?: number): Order {
+export function generateOrder(orderIndex: number, prevTime?: number, maxIngredients?: number): Order {
   const diff = getDifficulty(orderIndex);
   const available = getAvailableIngredients(orderIndex);
-  const count = diff.minIngredients;
+  const count = maxIngredients !== undefined
+    ? Math.min(diff.minIngredients, maxIngredients)
+    : diff.minIngredients;
 
   // 연속 동일 재료 방지: 이전 재료와 다른 재료를 우선 선택
   const ingredients: Ingredient[] = [];

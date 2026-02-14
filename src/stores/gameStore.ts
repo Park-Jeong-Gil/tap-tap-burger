@@ -2,7 +2,7 @@
 
 import { create } from 'zustand';
 import type { Ingredient, Order, GameStatus, GameMode } from '@/types';
-import { HP_MAX, HP_INIT, HP_DELTA, BASE_SECONDS_PER_INGREDIENT, INGREDIENTS } from '@/lib/constants';
+import { HP_MAX, HP_INIT, HP_DELTA, BASE_SECONDS_PER_INGREDIENT, INGREDIENTS, MULTI_MAX_INGREDIENTS } from '@/lib/constants';
 import {
   generateOrder,
   validateBurger,
@@ -63,11 +63,11 @@ function calcFreshSlotTime(ordersAhead: Order[], orderCount: number): number | u
   return time;
 }
 
-function createInitialOrders(count: number): { orders: Order[]; counter: number } {
+function createInitialOrders(count: number, maxIngredients?: number): { orders: Order[]; counter: number } {
   const orders: Order[] = [];
   let prevTime: number | undefined = undefined;
   for (let i = 0; i < count; i++) {
-    const order = generateOrder(i, prevTime);
+    const order = generateOrder(i, prevTime, maxIngredients);
     orders.push(order);
     prevTime = order.timeLimit;
   }
@@ -93,7 +93,8 @@ export const useGameStore = create<GameState>((set, get) => ({
   mode: 'single',
 
   startGame: (mode = 'single') => {
-    const { orders, counter } = createInitialOrders(INITIAL_ORDER_COUNT);
+    const maxIng = mode !== 'single' ? MULTI_MAX_INGREDIENTS : undefined;
+    const { orders, counter } = createInitialOrders(INITIAL_ORDER_COUNT, maxIng);
     set({
       status: 'playing',
       hp: HP_INIT,
@@ -183,10 +184,11 @@ export const useGameStore = create<GameState>((set, get) => ({
     const newHp = Math.min(HP_MAX, hp + hpDelta);
 
     // 소비된 주문서 제거 후 새 주문서 추가 (순번 기반)
-    const { orderCounter } = get();
+    const { orderCounter, mode } = get();
+    const maxIng = mode !== 'single' ? MULTI_MAX_INGREDIENTS : undefined;
     const remaining = orders.slice(1);
     const freshPrevTime = calcFreshSlotTime(remaining, orderCounter);
-    const newOrder = generateOrder(orderCounter, freshPrevTime);
+    const newOrder = generateOrder(orderCounter, freshPrevTime, maxIng);
     const newOrders = [...remaining, newOrder];
 
     set({
@@ -227,10 +229,12 @@ export const useGameStore = create<GameState>((set, get) => ({
     newHp += HP_DELTA.orderTimeout * timedOutCount;
     newHp = Math.max(0, newHp);
 
+    const { mode } = get();
+    const maxIng = mode !== 'single' ? MULTI_MAX_INGREDIENTS : undefined;
     const replenished = [...updatedOrders];
     for (let i = 0; i < timedOutCount; i++) {
       const freshPrevTime = calcFreshSlotTime(replenished, orderCounter);
-      replenished.push(generateOrder(orderCounter, freshPrevTime));
+      replenished.push(generateOrder(orderCounter, freshPrevTime, maxIng));
       orderCounter++;
     }
 
@@ -266,7 +270,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     const { orders, orderCounter } = get();
     if (orders.length === 0) return;
 
-    // 남은 시간이 가장 많은 마지막 주문서에 재료 추가
+    // 남은 시간이 가장 많은 마지막 주문서에 재료 추가 (최대 MULTI_MAX_INGREDIENTS까지)
     const lastIdx = orders.length - 1;
     const target = orders[lastIdx];
 
@@ -281,6 +285,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       ingredients: [...target.ingredients, ...extra],
       timeLimit: target.timeLimit + extraTime,
     };
+
     set({ orders: newOrders });
   },
 

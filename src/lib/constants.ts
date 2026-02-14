@@ -102,6 +102,7 @@ export const ALL_COOP_ACTIONS = [
 
 // ─── 타이머 ───────────────────────────────────────────
 export const BASE_SECONDS_PER_INGREDIENT = 1.0; // 재료 1개당 기본 초
+export const MULTI_MAX_INGREDIENTS = 6; // 멀티 모드 재료 최대 개수
 
 // ─── localStorage 키 ──────────────────────────────────
 export const SESSION_STORAGE_KEY = "ttb_session_id";
