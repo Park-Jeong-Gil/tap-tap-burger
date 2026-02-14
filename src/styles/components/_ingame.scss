@@ -650,6 +650,81 @@
   }
 }
 
+// ─── 게임 시작 카운트다운 오버레이 ───────────────────
+.countdown-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(26, 26, 46, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fade-in 0.25s ease-out;
+}
+
+.countdown-number {
+  font-family: v.$font-pixel;
+  font-weight: bold;
+  color: #eaeaea;
+  line-height: 1;
+  animation: countdown-pop 0.95s ease-out forwards;
+
+  @include m.mobile {
+    font-size: m.vw(96);
+  }
+  @include m.desktop {
+    font-size: 128px;
+  }
+
+  &--go {
+    color: v.$color-success;
+    animation: countdown-go 0.65s ease-out forwards;
+
+    @include m.mobile {
+      font-size: m.vw(56);
+    }
+    @include m.desktop {
+      font-size: 76px;
+    }
+  }
+}
+
+@keyframes countdown-pop {
+  0% {
+    transform: scale(2);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  65% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+}
+
+@keyframes countdown-go {
+  0% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  70% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.05);
+    opacity: 0;
+  }
+}
+
 // ─── 대전 모드 미니 패널 (상대 상태) ─────────────────
 .versus-opponent {
   @include pb.pixel-borders(

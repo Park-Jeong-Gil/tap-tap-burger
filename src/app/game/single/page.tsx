@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useGameStore } from "@/stores/gameStore";
 import { useKeyboard } from "@/hooks/useKeyboard";
 import { useGameLoop } from "@/hooks/useGameLoop";
@@ -8,6 +8,7 @@ import HpBar from "@/components/game/HpBar";
 import ScoreBoard from "@/components/game/ScoreBoard";
 import InputPanel from "@/components/game/InputPanel";
 import GameOverScreen from "@/components/game/GameOverScreen";
+import CountdownScreen from "@/components/game/CountdownScreen";
 
 export default function SingleGamePage() {
   const status = useGameStore((s) => s.status);
@@ -18,12 +19,14 @@ export default function SingleGamePage() {
   const wrongFlashCount = useGameStore((s) => s.wrongFlashCount);
   const timeoutFlashCount = useGameStore((s) => s.timeoutFlashCount);
 
+  const [countingDown, setCountingDown] = useState(true);
   const [shaking, setShaking] = useState(false);
   const [timeoutFlashing, setTimeoutFlashing] = useState(false);
   const shakeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const timeoutTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
+  const handleCountdownComplete = useCallback(() => {
+    setCountingDown(false);
     startGame("single");
   }, [startGame]);
 
@@ -48,7 +51,10 @@ export default function SingleGamePage() {
 
   return (
     <div className={`ingame${shaking ? " ingame--shake" : ""}`}>
-      {timeoutFlashing && <div className="timeout-vignette" />}
+      {countingDown && (
+        <CountdownScreen onComplete={handleCountdownComplete} />
+      )}
+      {!countingDown && timeoutFlashing && <div className="timeout-vignette" />}
       <div className="top-display">
         <HpBar hp={hp} />
         <ScoreBoard score={score} combo={combo} />
