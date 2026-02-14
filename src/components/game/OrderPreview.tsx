@@ -28,7 +28,9 @@ export default function OrderPreview({
     <div className={`order-preview${isUrgent ? " order-preview--urgent" : ""}`}>
       {/* 헤더: 주문 번호 + 남은 시간 */}
       <div className="order-preview__header">
-        <span className="order-preview__index">#{order.orderIndex + 1}</span>
+        <span className="order-preview__index">
+          주문서 #{order.orderIndex + 1}
+        </span>
         <span
           className={`order-preview__time${isUrgent ? " order-preview__time--urgent" : ""}`}
         >
@@ -85,7 +87,6 @@ export default function OrderPreview({
           className="order-preview__bun order-preview__bun--top"
         />
       </div>
-
     </div>
   );
 }

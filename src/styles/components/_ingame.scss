@@ -57,12 +57,13 @@
   min-height: 0;
   // overflow: hidden;
   @include m.mobile {
-    padding: clamp(6px, 2dvh, #{m.vw(20)}) #{m.vw(10)} clamp(4px, 1.5dvh, #{m.vw(10)});
-    gap: clamp(4px, 2dvh, #{m.vw(16)});
+    padding: clamp(6px, 2dvh, #{m.vw(20)}) #{m.vw(10)}
+      clamp(4px, 1.5dvh, #{m.vw(10)});
+    gap: clamp(8px, 2.5dvh, #{m.vw(28)});
   }
   @include m.desktop {
     padding: clamp(6px, 2dvh, 20px) 10px clamp(4px, 1.5dvh, 10px);
-    gap: clamp(4px, 2dvh, 16px);
+    gap: clamp(8px, 2.5dvh, 28px);
   }
 }
 
@@ -86,6 +87,8 @@
   min-width: 0;
   min-height: 0;
   max-width: 45%;
+  max-height: 100%;
+  align-self: center;
   position: relative;
   isolation: isolate; // 내부 z-index 독립 스택 컨텍스트
 
@@ -396,7 +399,8 @@
   flex-shrink: 0;
 
   @include m.mobile {
-    padding: clamp(4px, 1.2dvh, #{m.vw(10)}) #{m.vw(12)} clamp(2px, 0.5dvh, #{m.vw(4)});
+    padding: clamp(4px, 1.2dvh, #{m.vw(10)}) #{m.vw(12)}
+      clamp(2px, 0.5dvh, #{m.vw(4)});
     row-gap: clamp(2px, 0.5dvh, #{m.vw(4)});
   }
   @include m.desktop {

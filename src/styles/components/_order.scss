@@ -204,9 +204,7 @@
   z-index: 3; // ingame__order-col 레이어(1,2) 위에 배치
   display: flex;
   flex-direction: column;
-  height: 100%;
   background-color: v.$color-surface;
-  container-type: size; // 자식에서 cqh 단위 사용을 위해 크기 컨테이너 지정
 
   @include pb.pixel-borders(
     $corner-size: 2,
@@ -216,11 +214,11 @@
 
   @include m.mobile {
     padding: m.vw(10) m.vw(12);
-    gap: m.vw(4);
+    gap: m.vw(8);
   }
   @include m.desktop {
     padding: 20px;
-    gap: 4px;
+    gap: 8px;
   }
 
   &--urgent {
@@ -291,17 +289,21 @@
 
 // 버거 비주얼 (column-reverse로 쌓음)
 // width: min(100%, 35cqh) → 재료 수가 많아져도 .order-preview 높이(cqh) 기준으로
-// food 너비가 자동 축소되어 margin-bottom % 계산도 함께 줄어 잘림 방지
+// 버거 비주얼 영역 — 콘텐츠 자연 높이로 표시
 .order-preview__food {
-  flex: 1;
-  min-height: 0;
   display: flex;
   flex-direction: column-reverse;
   align-items: center;
   justify-content: flex-start;
   overflow: hidden;
-  width: min(100%, 35cqh);
+  width: 100%;
   align-self: center;
+  @include m.mobile {
+    margin-top: m.vw(12);
+  }
+  @include m.desktop {
+    margin-top: 12px;
+  }
 }
 
 // 번 이미지
@@ -325,7 +327,7 @@
   // ingredient-layer와 동일한 오버랩 마진
   &--veggie {
     margin-bottom: -32%;
-    margin-top: -8%;
+    margin-top: -5%;
   }
   &--cheese {
     margin-bottom: -36%;
