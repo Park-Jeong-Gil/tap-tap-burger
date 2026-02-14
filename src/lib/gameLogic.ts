@@ -24,22 +24,13 @@ function getAvailableIngredients(_orderIndex: number): Ingredient[] {
   return INGREDIENTS; // 모든 재료 처음부터 해금
 }
 
-// ─── 난이도 티어 기반 재료 개수 범위 ─────────────
-// 각 티어의 minIngredients를 최솟값으로, +2 랜덤 폭
-function getIngredientCountRange(orderIndex: number): { min: number; max: number } {
-  const min = getDifficulty(orderIndex).minIngredients;
-  const max = min + 2;
-  return { min, max };
-}
-
 // ─── 주문서 생성 ──────────────────────────────────
 // prevTime이 없으면 → 순번 기반 기본 시간
 // prevTime이 있으면 → prevTime + 재료수 × mult + 3초 여유
 export function generateOrder(orderIndex: number, prevTime?: number): Order {
   const diff = getDifficulty(orderIndex);
   const available = getAvailableIngredients(orderIndex);
-  const { min, max } = getIngredientCountRange(orderIndex);
-  const count = Math.floor(Math.random() * (max - min + 1)) + min;
+  const count = diff.minIngredients;
 
   // 연속 동일 재료 방지: 이전 재료와 다른 재료를 우선 선택
   const ingredients: Ingredient[] = [];
