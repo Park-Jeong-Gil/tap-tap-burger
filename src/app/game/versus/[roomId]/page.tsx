@@ -18,6 +18,9 @@ import GameOverScreen from "@/components/game/GameOverScreen";
 interface OpponentState {
   hp: number;
   queueCount: number;
+  score: number;
+  combo: number;
+  clearedCount: number;
   status: "playing" | "gameover";
   nickname?: string;
 }
@@ -44,12 +47,16 @@ export default function VersusGamePage() {
     combo,
     orders,
     currentBurger,
+    clearedCount,
     startGame: startLocalGame,
   } = useGameStore();
 
   const [opponent, setOpponent] = useState<OpponentState>({
     hp: 80,
     queueCount: 3,
+    score: 0,
+    combo: 0,
+    clearedCount: 0,
     status: "playing",
   });
   const [joined, setJoined] = useState(false);
@@ -98,7 +105,14 @@ export default function VersusGamePage() {
   // 내 상태 주기적으로 상대방에게 전송 + 콤보 공격
   useEffect(() => {
     if (gameStatus !== "playing") return;
-    sendStateUpdate({ hp, queueCount: orders.length, status: "playing" });
+    sendStateUpdate({
+      hp,
+      queueCount: orders.length,
+      score,
+      combo,
+      clearedCount,
+      status: "playing",
+    });
 
     // 콤보 증가 시 공격 이벤트 전송
     if (combo > prevComboRef.current && combo > 0) {
@@ -110,7 +124,7 @@ export default function VersusGamePage() {
   // 게임오버 시 상대방에게 알림
   useEffect(() => {
     if (gameStatus === "gameover") {
-      sendStateUpdate({ hp: 0, queueCount: 0, status: "gameover" });
+      sendStateUpdate({ hp: 0, queueCount: 0, score, combo, clearedCount, status: "gameover" });
     }
   }, [gameStatus, sendStateUpdate]);
 
@@ -192,18 +206,31 @@ export default function VersusGamePage() {
     >
       {/* 상단: 상대방 미니 패널 */}
       <div className="versus-opponent">
-        <span>{opponentEntry?.nickname ?? "상대방"}</span>
-        <span>❤️ HP {Math.ceil(opponent.hp)}</span>
-        <span>큐 {opponent.queueCount}</span>
-        {opponent.status === "gameover" && (
-          <span style={{ color: "#4caf50" }}>GAME OVER</span>
-        )}
+        <span className="versus-opponent__name">
+          {opponentEntry?.nickname ?? "상대방"}
+        </span>
+        <span className="versus-opponent__hp">HP {Math.ceil(opponent.hp)}</span>
+        <span className="versus-opponent__cleared">
+          ✓ {opponent.clearedCount}
+        </span>
+        <span className="versus-opponent__score">
+          {opponent.score.toLocaleString()}
+        </span>
+        {opponent.status === "gameover" ? (
+          <span className="versus-opponent__gameover">GAME OVER</span>
+        ) : opponent.combo >= 2 ? (
+          <span className="versus-opponent__combo">
+            {opponent.combo}x COMBO
+          </span>
+        ) : null}
       </div>
 
       {/* 내 게임 */}
-      <HpBar hp={hp} />
+      <div className="top-display">
+        <HpBar hp={hp} />
+        <ScoreBoard score={score} combo={combo} />
+      </div>
       <OrderQueue orders={orders} currentBurger={currentBurger} />
-      <ScoreBoard score={score} combo={combo} />
       <InputPanel />
       {gameStatus === "gameover" && <GameOverScreen />}
     </div>

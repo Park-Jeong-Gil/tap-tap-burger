@@ -587,4 +587,34 @@
 
   font-family: v.$font-pixel;
   color: v.$color-text;
+
+  &__name {
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+
+  &__hp {
+    color: v.$color-danger;
+    flex-shrink: 0;
+  }
+
+  &__cleared {
+    color: v.$color-success;
+    flex-shrink: 0;
+  }
+
+  &__score {
+    flex: 1;
+    text-align: right;
+  }
+
+  &__combo {
+    color: v.$color-primary;
+    flex-shrink: 0;
+  }
+
+  &__gameover {
+    color: v.$color-success;
+    flex-shrink: 0;
+  }
 }

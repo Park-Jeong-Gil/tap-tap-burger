@@ -70,6 +70,9 @@ export function useCoopRoom(roomId: string, playerId: string) {
 interface OpponentState {
   hp: number;
   queueCount: number;
+  score: number;
+  combo: number;
+  clearedCount: number;
   status: 'playing' | 'gameover';
 }
 
@@ -93,7 +96,14 @@ export function useVersusRoom(
     channel.on('broadcast', { event: 'state_update' }, ({ payload }) => {
       const p = payload as OpponentState & { playerId: string };
       if (p.playerId !== playerId) {
-        onOpponentUpdate({ hp: p.hp, queueCount: p.queueCount, status: p.status });
+        onOpponentUpdate({
+          hp: p.hp,
+          queueCount: p.queueCount,
+          score: p.score ?? 0,
+          combo: p.combo ?? 0,
+          clearedCount: p.clearedCount ?? 0,
+          status: p.status,
+        });
       }
     });
 

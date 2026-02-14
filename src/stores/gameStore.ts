@@ -29,6 +29,7 @@ interface GameState {
   lastComboOnSubmit: number; // 제출 시점의 콤보 수 (0 = 콤보 없음)
   wrongFlashCount: number;   // 오답 시 증가 → 화면 흔들림 트리거
   timeoutFlashCount: number; // 타임아웃 시 증가 → 경고 비네트 트리거
+  clearedCount: number;      // 정답 제출한 누적 주문서 수
   mode: GameMode;
 
   // actions
@@ -88,6 +89,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   lastComboOnSubmit: 0,
   wrongFlashCount: 0,
   timeoutFlashCount: 0,
+  clearedCount: 0,
   mode: 'single',
 
   startGame: (mode = 'single') => {
@@ -107,6 +109,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       lastComboOnSubmit: 0,
       wrongFlashCount: 0,
       timeoutFlashCount: 0,
+      clearedCount: 0,
       mode,
     });
   },
@@ -127,6 +130,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       lastComboOnSubmit: 0,
       wrongFlashCount: 0,
       timeoutFlashCount: 0,
+      clearedCount: 0,
     });
   },
 
@@ -194,6 +198,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       currentBurger: [],
       lastSubmittedBurger: [...currentBurger], // 플래시 동안 재료 스냅샷 유지
       orderCounter: orderCounter + 1,
+      clearedCount: get().clearedCount + 1,
       submitFlash: 'correct',
       lastScoreGain: points,
       lastComboOnSubmit: wasCombo ? newCombo : 0,
