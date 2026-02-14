@@ -29,11 +29,13 @@ export const useRoomStore = create<RoomState>((set) => ({
 
   createAndJoin: async (mode, playerId, nickname) => {
     const room = await createRoom(mode, playerId);
+    // 게임 생성자는 즉시 준비 완료 처리
+    await setPlayerReady(room.id, playerId, true);
     set({
       roomId: room.id,
       mode: room.mode,
       isHost: true,
-      players: [{ playerId, nickname, ready: false }],
+      players: [{ playerId, nickname, ready: true }],
       roomStatus: 'waiting',
     });
     return room.id;

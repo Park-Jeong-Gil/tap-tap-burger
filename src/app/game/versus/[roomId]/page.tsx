@@ -159,7 +159,7 @@ export default function VersusGamePage() {
               </p>
             )}
           </div>
-          {!myReady && (
+          {!isHost && !myReady && (
             <button className="btn btn--primary" onClick={handleReady}>
               준비
             </button>
@@ -170,7 +170,11 @@ export default function VersusGamePage() {
               onClick={handleStart}
               disabled={!allReady}
             >
-              {allReady ? "게임 시작" : "대기 중..."}
+              {allReady
+                ? "게임 시작"
+                : players.length < 2
+                  ? "모든 플레이어를 기다리는 중..."
+                  : "상대방이 준비를 누르면 시작할 수 있어요"}
             </button>
           )}
         </div>
