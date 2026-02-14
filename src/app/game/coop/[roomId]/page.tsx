@@ -14,6 +14,7 @@ import HpBar from "@/components/game/HpBar";
 import ScoreBoard from "@/components/game/ScoreBoard";
 import InputPanel from "@/components/game/InputPanel";
 import GameOverScreen from "@/components/game/GameOverScreen";
+import CountdownScreen from "@/components/game/CountdownScreen";
 import type { Ingredient } from "@/types";
 
 export default function CoopGamePage() {
@@ -44,6 +45,7 @@ export default function CoopGamePage() {
 
   const [assignedKeys, setAssignedKeys] = useState<string[]>([]);
   const [joined, setJoined] = useState(false);
+  const [countingDown, setCountingDown] = useState(false);
 
   useEffect(() => {
     initSession();
@@ -96,12 +98,17 @@ export default function CoopGamePage() {
   useLobbyRoom(roomId);
   useGameLoop();
 
-  // 게임 시작 시 로컬 게임 시작
+  const handleCountdownComplete = useCallback(() => {
+    setCountingDown(false);
+    startLocalGame("coop");
+  }, [startLocalGame]);
+
+  // 게임 시작 시 카운트다운 → 로컬 게임 시작
   useEffect(() => {
     if (roomStatus === "playing" && gameStatus === "idle") {
-      startLocalGame("coop");
+      setCountingDown(true);
     }
-  }, [roomStatus, gameStatus, startLocalGame]);
+  }, [roomStatus, gameStatus]);
 
   // 키보드 입력 → 코업 브로드캐스트
   useEffect(() => {
@@ -202,6 +209,7 @@ export default function CoopGamePage() {
 
   return (
     <div className="ingame">
+      {countingDown && <CountdownScreen onComplete={handleCountdownComplete} />}
       <div className="top-display">
         <HpBar hp={hp} />
         <ScoreBoard score={score} combo={combo} />

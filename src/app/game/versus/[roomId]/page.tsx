@@ -14,6 +14,7 @@ import HpBar from "@/components/game/HpBar";
 import ScoreBoard from "@/components/game/ScoreBoard";
 import InputPanel from "@/components/game/InputPanel";
 import GameOverScreen from "@/components/game/GameOverScreen";
+import CountdownScreen from "@/components/game/CountdownScreen";
 
 interface OpponentState {
   hp: number;
@@ -60,6 +61,7 @@ export default function VersusGamePage() {
   });
   const [joined, setJoined] = useState(false);
   const [expired, setExpired] = useState(false);
+  const [countingDown, setCountingDown] = useState(false);
   const [nicknameReady, setNicknameReady] = useState(false);
   const [nicknameInput, setNicknameInput] = useState("");
   const prevComboRef = useRef(0);
@@ -139,12 +141,17 @@ export default function VersusGamePage() {
   useGameLoop();
   useKeyboard({ enabled: gameStatus === "playing" });
 
-  // 게임 시작
+  const handleCountdownComplete = useCallback(() => {
+    setCountingDown(false);
+    startLocalGame("versus");
+  }, [startLocalGame]);
+
+  // 게임 시작 시 카운트다운 → 로컬 게임 시작
   useEffect(() => {
     if (roomStatus === "playing" && gameStatus === "idle") {
-      startLocalGame("versus");
+      setCountingDown(true);
     }
-  }, [roomStatus, gameStatus, startLocalGame]);
+  }, [roomStatus, gameStatus]);
 
   // 내 상태 주기적으로 상대방에게 전송 + 콤보 공격
   useEffect(() => {
@@ -303,6 +310,7 @@ export default function VersusGamePage() {
       className="ingame"
       style={{ display: "flex", flexDirection: "column" }}
     >
+      {countingDown && <CountdownScreen onComplete={handleCountdownComplete} />}
       {/* 상단: 상대방 미니 패널 */}
       <div className="versus-opponent">
         <span className="versus-opponent__name">
