@@ -97,3 +97,12 @@ export async function updateRoomStatus(roomId: string, status: string) {
 
   if (error) throw error;
 }
+
+export async function getRoomInfo(roomId: string) {
+  const { data } = await supabase
+    .from('rooms')
+    .select('id, status')
+    .eq('id', roomId)
+    .maybeSingle();
+  return data as { id: string; status: string } | null;
+}

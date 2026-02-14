@@ -8,7 +8,7 @@ import { useGameStore } from "@/stores/gameStore";
 import { useGameLoop } from "@/hooks/useGameLoop";
 import { useKeyboard } from "@/hooks/useKeyboard";
 import { useVersusRoom, useLobbyRoom } from "@/hooks/useRoom";
-import { supabase } from "@/lib/supabase";
+import { supabase, getRoomInfo, updateRoomStatus } from "@/lib/supabase";
 import HpBar from "@/components/game/HpBar";
 import OrderQueue from "@/components/game/OrderQueue";
 import ScoreBoard from "@/components/game/ScoreBoard";
@@ -60,7 +60,9 @@ export default function VersusGamePage() {
     status: "playing",
   });
   const [joined, setJoined] = useState(false);
+  const [expired, setExpired] = useState(false);
   const prevComboRef = useRef(0);
+  const finishedRef = useRef(false);
 
   useEffect(() => {
     initSession();
@@ -71,13 +73,35 @@ export default function VersusGamePage() {
     if (!isInitialized || !playerId || joined) return;
     setJoined(true);
     const join = async () => {
-      const { data } = await supabase
+      // 룸 상태 확인
+      const room = await getRoomInfo(roomId);
+      if (!room || room.status === "finished") {
+        setExpired(true);
+        return;
+      }
+
+      // 이미 참여 중인지 확인
+      const { data: myRow } = await supabase
         .from("room_players")
         .select("player_id")
         .eq("room_id", roomId)
         .eq("player_id", playerId)
         .maybeSingle();
-      if (!data) await joinExisting(roomId, playerId, nickname);
+
+      if (myRow) return; // 이미 참여 중
+
+      // 플레이어 수 확인 (최대 2명)
+      const { count } = await supabase
+        .from("room_players")
+        .select("player_id", { count: "exact", head: true })
+        .eq("room_id", roomId);
+
+      if (count !== null && count >= 2) {
+        setExpired(true);
+        return;
+      }
+
+      await joinExisting(roomId, playerId, nickname);
     };
     join();
   }, [isInitialized, playerId, joined, roomId, nickname, joinExisting]);
@@ -121,10 +145,14 @@ export default function VersusGamePage() {
     prevComboRef.current = combo;
   }, [hp, orders.length, combo, gameStatus, sendStateUpdate, sendAttack]);
 
-  // 게임오버 시 상대방에게 알림
+  // 게임오버 시 상대방에게 알림 + 룸 만료 처리
   useEffect(() => {
     if (gameStatus === "gameover") {
       sendStateUpdate({ hp: 0, queueCount: 0, score, combo, clearedCount, status: "gameover" });
+      if (!finishedRef.current) {
+        finishedRef.current = true;
+        updateRoomStatus(roomId, "finished").catch(() => {});
+      }
     }
   }, [gameStatus, sendStateUpdate]);
 
@@ -142,6 +170,23 @@ export default function VersusGamePage() {
   const myEntry = players.find((p) => p.playerId === playerId);
   const myReady = myEntry?.ready ?? false;
   const opponentEntry = players.find((p) => p.playerId !== playerId);
+
+  // 만료된 링크 화면
+  if (expired) {
+    return (
+      <div className="multi-hub">
+        <div className="room-lobby">
+          <p className="room-lobby__title">링크 만료</p>
+          <p style={{ fontFamily: "Mulmaru", fontSize: "0.85em", color: "#9B7060", textAlign: "center" }}>
+            이 게임 링크는 이미 사용되었거나 만료되었습니다.
+          </p>
+        </div>
+        <button className="btn btn--ghost" onClick={() => router.push("/")}>
+          메인으로
+        </button>
+      </div>
+    );
+  }
 
   // 대기실 화면
   if (roomStatus === "waiting") {
