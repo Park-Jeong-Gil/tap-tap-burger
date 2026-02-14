@@ -80,8 +80,8 @@ export default function CoopGamePage() {
       if (rp?.assigned_keys && rp.assigned_keys.length > 0) {
         setAssignedKeys(rp.assigned_keys);
       } else {
-        // 첫 입장 시 키 배분
-        const [keys1, keys2] = assignCoopKeys();
+        // roomId를 시드로 두 플레이어가 동일한 분할 계산
+        const [keys1, keys2] = assignCoopKeys(roomId);
         const myKeys = isHost ? keys1 : keys2;
         setAssignedKeys(myKeys);
         await supabase

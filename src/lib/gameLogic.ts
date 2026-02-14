@@ -95,8 +95,29 @@ export function generateDefaultNickname(): string {
 }
 
 // ─── 코업 키 배분 ─────────────────────────────────
-export function assignCoopKeys(): [string[], string[]] {
-  const actions = ['patty', 'cheese', 'veggie', 'sauce', 'onion', 'tomato', 'cancel', 'submit'];
-  const shuffled = [...actions].sort(() => Math.random() - 0.5);
-  return [shuffled.slice(0, 3), shuffled.slice(3)];
+// roomId를 시드로 사용해 두 플레이어가 항상 동일한 분할 결과를 계산
+function seededShuffle<T>(arr: T[], seed: string): T[] {
+  const result = [...arr];
+  // 문자열 → 32비트 정수 해시
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = (Math.imul(hash, 31) + seed.charCodeAt(i)) | 0;
+  }
+  // Fisher-Yates + LCG
+  for (let i = result.length - 1; i > 0; i--) {
+    hash = (Math.imul(hash, 1664525) + 1013904223) | 0;
+    const j = Math.abs(hash) % (i + 1);
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
+// 재료 6개를 3/3으로 나누고, 완성 버튼은 둘 다 포함
+export function assignCoopKeys(roomId: string): [string[], string[]] {
+  const ingredients = ['patty', 'cheese', 'veggie', 'sauce', 'onion', 'tomato'];
+  const shuffled = seededShuffle(ingredients, roomId);
+  return [
+    [...shuffled.slice(0, 3), 'submit'],
+    [...shuffled.slice(3), 'submit'],
+  ];
 }
