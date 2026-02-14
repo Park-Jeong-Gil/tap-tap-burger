@@ -14,11 +14,11 @@ export default function GameOverScreen() {
   const saveScore = useGameStore((s) => s.saveScore);
   const mode = useGameStore((s) => s.mode);
   const playerId = usePlayerStore((s) => s.playerId);
-  const [saved, setSaved] = useState(false);
+  const [isNewRecord, setIsNewRecord] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (!playerId) return;
-    saveScore(playerId).then(() => setSaved(true));
+    saveScore(playerId).then((newRecord) => setIsNewRecord(newRecord));
   }, [playerId, saveScore]);
 
   const handleRestart = () => {
@@ -36,7 +36,7 @@ export default function GameOverScreen() {
       <div className="gameover-stats">
         <p>SCORE <span>{score.toLocaleString()}</span></p>
         <p>MAX COMBO <span>{maxCombo}x</span></p>
-        {saved && <p style={{ color: 'var(--success, #4caf50)', fontSize: '0.8em' }}>✓ 리더보드 저장 완료</p>}
+        {isNewRecord === true && <p style={{ color: '#2E9E3E', fontSize: '0.8em' }}>🏆 신기록 달성!</p>}
       </div>
       <div className="gameover-actions">
         {mode !== 'versus' && (

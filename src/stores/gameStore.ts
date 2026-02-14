@@ -10,7 +10,7 @@ import {
   calcScore,
   getDifficulty,
 } from '@/lib/gameLogic';
-import { upsertScore } from '@/lib/supabase';
+import { upsertScore, getBestScore } from '@/lib/supabase';
 
 const INITIAL_ORDER_COUNT = 3;
 
@@ -40,7 +40,7 @@ interface GameState {
   clearBurger: () => void;
   submitBurger: () => void;
   tick: (delta: number) => void; // delta: seconds
-  saveScore: (playerId: string) => Promise<void>;
+  saveScore: (playerId: string) => Promise<boolean>;
   addOrdersFromAttack: (count: number) => void; // versus: 상대 공격
   clearFlash: () => void;
 }
@@ -260,9 +260,11 @@ export const useGameStore = create<GameState>((set, get) => ({
   saveScore: async (playerId: string) => {
     const { score, maxCombo, mode } = get();
     try {
+      const prev = await getBestScore(playerId, mode);
       await upsertScore(playerId, mode, score, maxCombo);
+      return prev === null || score > prev;
     } catch {
-      // ignore
+      return false;
     }
   },
 

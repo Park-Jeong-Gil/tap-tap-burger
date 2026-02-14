@@ -37,6 +37,16 @@ export async function upsertScore(
   if (error) throw error;
 }
 
+export async function getBestScore(playerId: string, mode: string): Promise<number | null> {
+  const { data } = await supabase
+    .from('scores')
+    .select('score')
+    .eq('player_id', playerId)
+    .eq('mode', mode)
+    .maybeSingle();
+  return (data as { score: number } | null)?.score ?? null;
+}
+
 // ─── 리더보드 ─────────────────────────────────────────
 export async function getLeaderboard(mode: string) {
   const { data, error } = await supabase
