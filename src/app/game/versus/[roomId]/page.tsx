@@ -97,13 +97,13 @@ export default function VersusGamePage() {
         .eq("player_id", playerId)
         .maybeSingle();
 
-      if (myRow) return; // 이미 참여 중 (재연결)
-
-      // 방이 이미 진행 중이면 만료 처리
+      // 방이 이미 진행 중이면 만료 처리 (재연결 미지원)
       if (room.status === "playing") {
         setExpired(true);
         return;
       }
+
+      if (myRow) return; // 대기실 재접속
 
       // 플레이어 수 확인 (최대 2명)
       const { count } = await supabase
