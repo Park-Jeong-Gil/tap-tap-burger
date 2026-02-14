@@ -11,7 +11,6 @@ import { useVersusRoom, useLobbyRoom } from "@/hooks/useRoom";
 import { supabase, getRoomInfo, updateRoomStatus } from "@/lib/supabase";
 import { NICKNAME_STORAGE_KEY } from "@/lib/constants";
 import HpBar from "@/components/game/HpBar";
-import OrderQueue from "@/components/game/OrderQueue";
 import ScoreBoard from "@/components/game/ScoreBoard";
 import InputPanel from "@/components/game/InputPanel";
 import GameOverScreen from "@/components/game/GameOverScreen";
@@ -47,7 +46,6 @@ export default function VersusGamePage() {
     score,
     combo,
     orders,
-    currentBurger,
     clearedCount,
     startGame: startLocalGame,
   } = useGameStore();
@@ -331,7 +329,6 @@ export default function VersusGamePage() {
         <HpBar hp={hp} />
         <ScoreBoard score={score} combo={combo} />
       </div>
-      <OrderQueue orders={orders} currentBurger={currentBurger} />
       <InputPanel />
       {gameStatus === "gameover" && <GameOverScreen />}
     </div>

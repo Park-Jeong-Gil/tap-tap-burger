@@ -11,7 +11,6 @@ import { supabase } from "@/lib/supabase";
 import { assignCoopKeys } from "@/lib/gameLogic";
 import { KEY_MAP } from "@/lib/constants";
 import HpBar from "@/components/game/HpBar";
-import OrderQueue from "@/components/game/OrderQueue";
 import ScoreBoard from "@/components/game/ScoreBoard";
 import InputPanel from "@/components/game/InputPanel";
 import GameOverScreen from "@/components/game/GameOverScreen";
@@ -37,8 +36,6 @@ export default function CoopGamePage() {
     hp,
     score,
     combo,
-    orders,
-    currentBurger,
     startGame: startLocalGame,
     addIngredient,
     removeLastIngredient,
@@ -209,7 +206,6 @@ export default function CoopGamePage() {
         <HpBar hp={hp} />
         <ScoreBoard score={score} combo={combo} />
       </div>
-      <OrderQueue orders={orders} currentBurger={currentBurger} />
       <InputPanel allowedActions={assignedKeys} />
       {gameStatus === "gameover" && <GameOverScreen />}
     </div>
