@@ -31,19 +31,19 @@ export const COMBO_MULTIPLIERS: {
 export const DIFFICULTY_TIERS: { minOrders: number; tier: DifficultyTier }[] = [
   {
     minOrders: 0,
-    tier: { minIngredients: 3, timerMultiplier: 1.5, hpDrainPerSec: 0.4 },
+    tier: { minIngredients: 3, timerMultiplier: 2, hpDrainPerSec: 0.4 },
   }, // 시작
   {
-    minOrders: 5,
-    tier: { minIngredients: 4, timerMultiplier: 1.4, hpDrainPerSec: 0.6 },
+    minOrders: 6,
+    tier: { minIngredients: 4, timerMultiplier: 1.6, hpDrainPerSec: 0.8 },
   }, // 적응
   {
     minOrders: 10,
-    tier: { minIngredients: 5, timerMultiplier: 1.3, hpDrainPerSec: 0.8 },
+    tier: { minIngredients: 5, timerMultiplier: 1.4, hpDrainPerSec: 1.2 },
   }, // 적응
   {
     minOrders: 15,
-    tier: { minIngredients: 6, timerMultiplier: 1.2, hpDrainPerSec: 1.2 },
+    tier: { minIngredients: 6, timerMultiplier: 1.2, hpDrainPerSec: 1.6 },
   }, // 가속
   {
     minOrders: 20,

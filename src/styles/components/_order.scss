@@ -198,6 +198,196 @@
   }
 }
 
+// ─── 주문서 미리보기 패널 ─────────────────────────────
+.order-preview {
+  position: relative;
+  z-index: 3; // ingame__order-col 레이어(1,2) 위에 배치
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: v.$color-surface;
+
+  @include pb.pixel-borders(
+    $corner-size: 2,
+    $border-size: 3px,
+    $border-color: v.$color-primary
+  );
+
+  @include m.mobile {
+    padding: m.vw(10);
+    gap: m.vw(4);
+  }
+  @include m.desktop {
+    padding: 8px;
+    gap: 4px;
+  }
+
+  &--urgent {
+    animation: urgent-flash 0.4s ease-in-out infinite;
+  }
+}
+
+.order-preview__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.order-preview__index {
+  font-family: v.$font-pixel;
+  color: v.$color-muted;
+  @include m.mobile {
+    font-size: m.vw(10);
+  }
+  @include m.desktop {
+    font-size: 11px;
+  }
+}
+
+.order-preview__time {
+  font-family: v.$font-pixel;
+  color: v.$color-primary;
+  font-weight: bold;
+  @include m.mobile {
+    font-size: m.vw(12);
+  }
+  @include m.desktop {
+    font-size: 13px;
+  }
+
+  &--urgent {
+    color: v.$color-danger;
+    animation: time-blink 0.5s ease-in-out infinite;
+  }
+}
+
+// 타이머 진행 바
+.order-preview__timer-wrap {
+  flex-shrink: 0;
+  background-color: rgba(0, 0, 0, 0.08);
+  border-radius: 2px;
+  @include m.mobile {
+    height: m.vw(4);
+  }
+  @include m.desktop {
+    height: 4px;
+  }
+}
+
+.order-preview__timer-bar {
+  height: 100%;
+  background-color: v.$color-primary;
+  border-radius: 2px;
+  transition:
+    width 0.1s linear,
+    background-color 0.3s ease;
+
+  &--urgent {
+    background-color: v.$color-danger;
+  }
+}
+
+// 버거 비주얼 (column-reverse로 쌓음)
+.order-preview__food {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: hidden;
+  width: 100%;
+}
+
+// 번 이미지
+.order-preview__bun {
+  width: 100%;
+  display: block;
+  image-rendering: pixelated;
+
+  &--top {
+    margin-bottom: -30%;
+    position: relative;
+    z-index: 2;
+  }
+}
+
+// 재료 레이어
+.order-preview__layer {
+  width: 100%;
+  position: relative;
+
+  // ingredient-layer와 동일한 오버랩 마진
+  &--veggie {
+    margin-bottom: -32%;
+  }
+  &--cheese {
+    margin-bottom: -36%;
+  }
+  &--sauce {
+    margin-bottom: -32%;
+  }
+  &--patty {
+    margin-bottom: -32%;
+  }
+  &--onion {
+    margin-bottom: -32%;
+  }
+  &--tomato {
+    margin-bottom: -30%;
+  }
+
+  img {
+    width: 100%;
+    height: auto;
+    display: block;
+    image-rendering: pixelated;
+  }
+
+  // 완료된 재료: 반투명 처리
+  &--done {
+    opacity: 0.35;
+    filter: grayscale(0.4);
+  }
+
+  // 현재 넣어야 할 재료: 강조
+  &--current img {
+    filter: drop-shadow(0 0 4px v.$color-primary) brightness(1.1);
+    animation: current-pulse 0.9s ease-in-out infinite;
+  }
+}
+
+// 체크 표시 (완료된 재료 위)
+.order-preview__check {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: v.$font-pixel;
+  font-weight: bold;
+  color: v.$color-success;
+  pointer-events: none;
+  z-index: 2;
+  @include m.mobile {
+    font-size: m.vw(14);
+  }
+  @include m.desktop {
+    font-size: 14px;
+  }
+}
+
+@keyframes current-pulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 4px v.$color-primary) brightness(1.1);
+  }
+  50% {
+    filter: drop-shadow(0 0 2px v.$color-primary) brightness(1);
+  }
+}
+
 // ─── 키프레임 ─────────────────────────────────────────
 @keyframes slide-in-right {
   from {

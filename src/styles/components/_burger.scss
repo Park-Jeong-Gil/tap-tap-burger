@@ -13,10 +13,11 @@
   height: 100%;
 
   @include m.mobile {
-    width: min(m.vw(200), 55cqh);
+    // 컨테이너 너비(cqw)와 높이(cqh) 중 작은 값으로 제한
+    width: min(90cqw, 55cqh);
   }
   @include m.desktop {
-    width: 220px;
+    width: min(90cqw, 55cqh);
   }
 }
 
@@ -75,10 +76,10 @@
     margin-bottom: -32%;
   }
   &.ingredient-layer--cheese {
-    margin-bottom: -40%;
+    margin-bottom: -36%;
   }
   &.ingredient-layer--sauce {
-    margin-bottom: -32%;
+    margin-bottom: -31%;
   }
   &.ingredient-layer--patty {
     margin-bottom: -32%;
@@ -87,7 +88,7 @@
     margin-bottom: -32%;
   }
   &.ingredient-layer--tomato {
-    margin-bottom: -32%;
+    margin-bottom: -30%;
   }
 
   img {

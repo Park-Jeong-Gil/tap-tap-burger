@@ -209,47 +209,42 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   tick: (delta: number) => {
     const { status, orders, hp, timeoutFlashCount } = get();
-    if (status !== 'playing') return;
+    if (status !== 'playing' || orders.length === 0) return;
 
     let { orderCounter } = get();
-    const diff = getDifficulty(orderCounter); // 순번 기반 난이도
+    const diff = getDifficulty(orderCounter);
     let newHp = hp - diff.hpDrainPerSec * delta;
-    let timedOutCount = 0;
 
-    const updatedOrders = orders.map((order) => {
-      const newElapsed = order.elapsed + delta;
-      if (newElapsed >= order.timeLimit) {
-        timedOutCount++;
-        return null;
-      }
-      return { ...order, elapsed: newElapsed };
-    }).filter(Boolean) as Order[];
+    // 첫 번째 주문서만 타이머 진행 (나머지는 FIFO 대기, 타이머 정지)
+    const active = orders[0];
+    const newElapsed = active.elapsed + delta;
+    const timedOut = newElapsed >= active.timeLimit;
 
-    // 타임아웃된 주문서만큼 HP 감소 + 새 주문서 보충
-    newHp += HP_DELTA.orderTimeout * timedOutCount;
+    let queueOrders: Order[];
+    if (timedOut) {
+      queueOrders = orders.slice(1);
+      newHp += HP_DELTA.orderTimeout;
+    } else {
+      queueOrders = [{ ...active, elapsed: newElapsed }, ...orders.slice(1)];
+    }
+
     newHp = Math.max(0, newHp);
 
+    // 타임아웃 시 새 주문서 보충
     const { mode } = get();
     const maxIng = mode !== 'single' ? MULTI_MAX_INGREDIENTS : undefined;
-    const replenished = [...updatedOrders];
-    for (let i = 0; i < timedOutCount; i++) {
-      const freshPrevTime = calcFreshSlotTime(replenished, orderCounter);
-      replenished.push(generateOrder(orderCounter, freshPrevTime, maxIng));
+    if (timedOut) {
+      const freshPrevTime = calcFreshSlotTime(queueOrders, orderCounter);
+      queueOrders.push(generateOrder(orderCounter, freshPrevTime, maxIng));
       orderCounter++;
     }
 
-    // 남은 시간 오름차순 정렬 (가장 급한 주문이 항상 왼쪽)
-    const sorted = replenished.sort(
-      (a, b) => (a.timeLimit - a.elapsed) - (b.timeLimit - b.elapsed)
-    );
-
     set({
       hp: newHp,
-      orders: sorted,
+      orders: queueOrders, // FIFO 순서 유지, 정렬 없음
       orderCounter,
       status: newHp <= 0 ? 'gameover' : 'playing',
-      // 타임아웃 발생 시 콤보 및 쌓던 재료 초기화 + 비네트 트리거
-      ...(timedOutCount > 0 ? {
+      ...(timedOut ? {
         combo: 0,
         currentBurger: [],
         timeoutFlashCount: timeoutFlashCount + 1,

@@ -5,6 +5,7 @@ import { GrPowerCycle } from "@react-icons/all-files/gr/GrPowerCycle";
 import type { Ingredient } from "@/types";
 import { useGameStore } from "@/stores/gameStore";
 import BurgerStack from "./BurgerStack";
+import OrderPreview from "./OrderPreview";
 
 interface InputPanelProps {
   allowedActions?: string[];
@@ -76,6 +77,9 @@ export default function InputPanel({ allowedActions }: InputPanelProps) {
   const submitBurger = useGameStore((s) => s.submitBurger);
   const currentBurger = useGameStore((s) => s.currentBurger);
   const status = useGameStore((s) => s.status);
+  const orders = useGameStore((s) => s.orders);
+
+  const firstOrder = orders[0] ?? null;
 
   const [isDesktop, setIsDesktop] = useState(false);
   useEffect(() => {
@@ -98,9 +102,19 @@ export default function InputPanel({ allowedActions }: InputPanelProps) {
 
   return (
     <div className="ingame__bottom">
-      {/* 버거 표시 영역 (전체 너비, 남은 공간 차지) */}
-      <div className="ingame__burger-area">
-        <BurgerStack ingredients={currentBurger} />
+      {/* 플레이 영역: 목표 주문서(좌) | 현재 버거 스택(우) */}
+      <div className="ingame__play-area">
+        <div className="ingame__order-col">
+          {firstOrder && (
+            <OrderPreview
+              order={firstOrder}
+              submittedCount={currentBurger.length}
+            />
+          )}
+        </div>
+        <div className="ingame__burger-area">
+          <BurgerStack ingredients={currentBurger} />
+        </div>
       </div>
 
       {/* 컨트롤: [리셋] [재료 2×2] [완성] */}

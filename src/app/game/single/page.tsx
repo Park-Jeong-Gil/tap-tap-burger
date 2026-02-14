@@ -5,7 +5,6 @@ import { useGameStore } from "@/stores/gameStore";
 import { useKeyboard } from "@/hooks/useKeyboard";
 import { useGameLoop } from "@/hooks/useGameLoop";
 import HpBar from "@/components/game/HpBar";
-import OrderQueue from "@/components/game/OrderQueue";
 import ScoreBoard from "@/components/game/ScoreBoard";
 import InputPanel from "@/components/game/InputPanel";
 import GameOverScreen from "@/components/game/GameOverScreen";
@@ -15,8 +14,6 @@ export default function SingleGamePage() {
   const hp = useGameStore((s) => s.hp);
   const score = useGameStore((s) => s.score);
   const combo = useGameStore((s) => s.combo);
-  const orders = useGameStore((s) => s.orders);
-  const currentBurger = useGameStore((s) => s.currentBurger);
   const startGame = useGameStore((s) => s.startGame);
   const wrongFlashCount = useGameStore((s) => s.wrongFlashCount);
   const timeoutFlashCount = useGameStore((s) => s.timeoutFlashCount);
@@ -56,7 +53,6 @@ export default function SingleGamePage() {
         <HpBar hp={hp} />
         <ScoreBoard score={score} combo={combo} />
       </div>
-      <OrderQueue orders={orders} currentBurger={currentBurger} />
       <InputPanel />
       {status === "gameover" && <GameOverScreen />}
     </div>
