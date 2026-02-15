@@ -24,14 +24,29 @@ function getAvailableIngredients(_orderIndex: number): Ingredient[] {
   return INGREDIENTS; // 모든 재료 처음부터 해금
 }
 
+// ─── 시드 기반 랜덤 (협동 모드에서 두 클라이언트가 동일한 주문서를 생성하기 위해) ──
+function makeRng(seed?: number): () => number {
+  if (seed === undefined) return Math.random;
+  // mulberry32 PRNG — 같은 시드는 항상 같은 시퀀스를 생성
+  let s = seed + 0x6D2B79F5;
+  return () => {
+    s = Math.imul(s ^ (s >>> 15), 1 | s);
+    s = s + Math.imul(s ^ (s >>> 7), 61 | s) ^ s;
+    return ((s ^ (s >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 // ─── 주문서 생성 ──────────────────────────────────
 // prevTime이 없으면 → 순번 기반 기본 시간
 // prevTime이 있으면 → prevTime + 재료수 × mult + 3초 여유
+// seed를 전달하면 결정론적 생성 (협동 모드: 두 클라이언트 동기화)
 export function generateOrder(
   orderIndex: number,
   prevTime?: number,
   maxIngredients?: number,
+  seed?: number,
 ): Order {
+  const rng = makeRng(seed);
   const diff = getDifficulty(orderIndex);
   const available = getAvailableIngredients(orderIndex);
   const count =
@@ -46,7 +61,7 @@ export function generateOrder(
       available.length > 1 && ingredients.length > 0
         ? available.filter((ing) => ing !== ingredients[ingredients.length - 1])
         : available;
-    ingredients.push(pool[Math.floor(Math.random() * pool.length)]);
+    ingredients.push(pool[Math.floor(rng() * pool.length)]);
   }
 
   let timeLimit: number;

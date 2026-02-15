@@ -49,10 +49,11 @@ interface GameState {
 }
 
 // FIFO 시스템: 각 주문은 활성화될 때 fresh 타이머로 독립 생성
-function createInitialOrders(count: number, maxIngredients?: number): { orders: Order[]; counter: number } {
+// coop 모드에서는 seed를 사용해 두 클라이언트가 동일한 주문서를 생성
+function createInitialOrders(count: number, maxIngredients?: number, useSeed = false): { orders: Order[]; counter: number } {
   const orders: Order[] = [];
   for (let i = 0; i < count; i++) {
-    orders.push(generateOrder(i, undefined, maxIngredients));
+    orders.push(generateOrder(i, undefined, maxIngredients, useSeed ? i : undefined));
   }
   return { orders, counter: count };
 }
@@ -80,7 +81,7 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   startGame: (mode = 'single') => {
     const maxIng = mode !== 'single' ? MULTI_MAX_INGREDIENTS : undefined;
-    const { orders, counter } = createInitialOrders(INITIAL_ORDER_COUNT, maxIng);
+    const { orders, counter } = createInitialOrders(INITIAL_ORDER_COUNT, maxIng, mode === 'coop');
     set({
       status: 'playing',
       hp: HP_INIT,
@@ -181,7 +182,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     const { orderCounter, mode } = get();
     const maxIng = mode !== 'single' ? MULTI_MAX_INGREDIENTS : undefined;
     const remaining = orders.slice(1);
-    const newOrder = generateOrder(orderCounter, undefined, maxIng);
+    const newOrder = generateOrder(orderCounter, undefined, maxIng, mode === 'coop' ? orderCounter : undefined);
     const newOrders = [...remaining, newOrder];
 
     set({
@@ -228,7 +229,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     const { mode } = get();
     const maxIng = mode !== 'single' ? MULTI_MAX_INGREDIENTS : undefined;
     if (timedOut) {
-      queueOrders.push(generateOrder(orderCounter, undefined, maxIng));
+      queueOrders.push(generateOrder(orderCounter, undefined, maxIng, mode === 'coop' ? orderCounter : undefined));
       orderCounter++;
     }
 

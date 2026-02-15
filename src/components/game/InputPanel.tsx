@@ -9,6 +9,7 @@ import OrderPreview from "./OrderPreview";
 
 interface InputPanelProps {
   allowedActions?: string[];
+  onAction?: (action: string) => void;
 }
 
 const KEY_HINTS: Record<string, string> = {
@@ -71,7 +72,7 @@ function InputBtn({
   );
 }
 
-export default function InputPanel({ allowedActions }: InputPanelProps) {
+export default function InputPanel({ allowedActions, onAction }: InputPanelProps) {
   const addIngredient = useGameStore((s) => s.addIngredient);
   const clearBurger = useGameStore((s) => s.clearBurger);
   const submitBurger = useGameStore((s) => s.submitBurger);
@@ -108,6 +109,7 @@ export default function InputPanel({ allowedActions }: InputPanelProps) {
     if (action === "cancel") clearBurger();
     else if (action === "submit") submitBurger();
     else addIngredient(action as Ingredient);
+    onAction?.(action as string);
   };
 
   return (

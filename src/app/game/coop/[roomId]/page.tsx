@@ -319,7 +319,7 @@ export default function CoopGamePage() {
         <HpBar hp={hp} />
         <ScoreBoard score={score} />
       </div>
-      <InputPanel allowedActions={assignedKeys} />
+      <InputPanel allowedActions={assignedKeys} onAction={sendInput} />
       {gameStatus === "gameover" && <GameOverScreen />}
     </div>
   );
