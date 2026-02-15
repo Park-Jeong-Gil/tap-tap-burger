@@ -84,8 +84,15 @@ export function useVersusRoom(
 ) {
   const channelRef = useRef<RealtimeChannel | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  // playerId를 ref로 관리: 채널을 재생성하지 않고 최신값을 핸들러에서 참조
+  const playerIdRef = useRef(playerId);
   const addOrdersFromAttack = useGameStore((s) => s.addOrdersFromAttack);
   const setRoomStatus = useRoomStore((s) => s.setRoomStatus);
+
+  // playerId가 바뀌어도 채널은 유지하고 ref만 갱신
+  useEffect(() => {
+    playerIdRef.current = playerId;
+  }, [playerId]);
 
   useEffect(() => {
     if (!roomId) return;
@@ -97,7 +104,7 @@ export function useVersusRoom(
     // 상대방 상태 업데이트
     channel.on('broadcast', { event: 'state_update' }, ({ payload }) => {
       const p = payload as OpponentState & { playerId: string };
-      if (p.playerId !== playerId) {
+      if (p.playerId !== playerIdRef.current) {
         onOpponentUpdate({
           hp: p.hp,
           queueCount: p.queueCount,
@@ -113,7 +120,7 @@ export function useVersusRoom(
     // 공격 이벤트 (상대 콤보 → 내 큐에 주문서 추가)
     channel.on('broadcast', { event: 'attack' }, ({ payload }) => {
       const { count, fromPlayerId } = payload as { count: number; fromPlayerId: string };
-      if (fromPlayerId !== playerId) {
+      if (fromPlayerId !== playerIdRef.current) {
         addOrdersFromAttack(count);
       }
     });
@@ -135,7 +142,6 @@ export function useVersusRoom(
       } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
         setIsConnected(false);
       }
-      // CLOSED는 정리 함수에서 처리하므로 여기서 channelRef를 건드리지 않음
     });
 
     return () => {
@@ -143,21 +149,22 @@ export function useVersusRoom(
       setIsConnected(false);
       supabase.removeChannel(channel);
     };
-  }, [roomId, playerId, onOpponentUpdate, addOrdersFromAttack, setRoomStatus]);
+  }, [roomId, onOpponentUpdate, addOrdersFromAttack, setRoomStatus]); // playerId 제거 — ref로 관리
 
+  // sendStateUpdate/sendAttack도 ref 사용 → 안정적인 함수 참조 유지
   const sendStateUpdate = useCallback((state: Omit<OpponentState, 'nickname'>) => {
     channelRef.current?.send({
       type: 'broadcast', event: 'state_update',
-      payload: { ...state, playerId },
+      payload: { ...state, playerId: playerIdRef.current },
     });
-  }, [playerId]);
+  }, []);
 
   const sendAttack = useCallback((count: number) => {
     channelRef.current?.send({
       type: 'broadcast', event: 'attack',
-      payload: { count, fromPlayerId: playerId },
+      payload: { count, fromPlayerId: playerIdRef.current },
     });
-  }, [playerId]);
+  }, []);
 
   return { sendStateUpdate, sendAttack, isConnected };
 }

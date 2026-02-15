@@ -219,7 +219,7 @@ export default function VersusGamePage() {
       attackSentTimer.current = setTimeout(() => setAttackSent(null), 1300);
     }
     prevComboRef.current = combo;
-  }, [hp, orders, combo, gameStatus, sendStateUpdate, sendAttack]);
+  }, [hp, orders, combo, gameStatus]); // sendStateUpdate/sendAttack은 stable ref이므로 deps 불필요
 
   // 게임오버 시 상대방에게 알림 + 룸 만료 처리
   useEffect(() => {
