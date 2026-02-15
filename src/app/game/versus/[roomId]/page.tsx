@@ -8,7 +8,7 @@ import { useGameStore } from "@/stores/gameStore";
 import { useGameLoop } from "@/hooks/useGameLoop";
 import { useKeyboard } from "@/hooks/useKeyboard";
 import { useVersusRoom, useLobbyRoom } from "@/hooks/useRoom";
-import { supabase, getRoomInfo, updateRoomStatus } from "@/lib/supabase";
+import { supabase, getRoomInfo, updateRoomStatus, markRoomFinishedBeacon } from "@/lib/supabase";
 import { NICKNAME_STORAGE_KEY } from "@/lib/constants";
 import HpBar from "@/components/game/HpBar";
 import ScoreBoard from "@/components/game/ScoreBoard";
@@ -65,6 +65,8 @@ export default function VersusGamePage() {
   const [nicknameInput, setNicknameInput] = useState("");
   const prevComboRef = useRef(0);
   const finishedRef = useRef(false);
+  const gameStatusRef = useRef(gameStatus);
+  gameStatusRef.current = gameStatus;
 
   useEffect(() => {
     initSession();
@@ -175,6 +177,38 @@ export default function VersusGamePage() {
       }
     }
   }, [gameStatus, sendStateUpdate]);
+
+  // 게임 중 나가기 (탭 닫기 / 언마운트) → 마지막 플레이어면 룸 만료
+  useEffect(() => {
+    const markFinished = () => {
+      if (gameStatusRef.current === "playing" && !finishedRef.current) {
+        finishedRef.current = true;
+        markRoomFinishedBeacon(roomId);
+      }
+    };
+    window.addEventListener("beforeunload", markFinished);
+    return () => {
+      window.removeEventListener("beforeunload", markFinished);
+      markFinished(); // 컴포넌트 언마운트 (SPA 이동) 시에도 실행
+    };
+  }, [roomId]);
+
+  // 대기실 10분 타임아웃 → 자동 만료
+  useEffect(() => {
+    if (roomStatus !== "waiting") return;
+    const timer = setTimeout(async () => {
+      await updateRoomStatus(roomId, "finished").catch(() => {});
+      setExpired(true);
+    }, 10 * 60 * 1000);
+    return () => clearTimeout(timer);
+  }, [roomId, roomStatus]);
+
+  // 상대방이 만료 처리한 경우 (게임 미시작 상태) → 만료 화면
+  useEffect(() => {
+    if (roomStatus === "finished" && gameStatus === "idle" && !countingDown) {
+      setExpired(true);
+    }
+  }, [roomStatus, gameStatus, countingDown]);
 
   const handleReady = async () => {
     if (!playerId) return;

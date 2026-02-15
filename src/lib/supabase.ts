@@ -129,3 +129,21 @@ export async function getRoomInfo(roomId: string) {
     .maybeSingle();
   return data as { id: string; status: string } | null;
 }
+
+// 페이지 언로드 시에도 완료되는 keepalive PATCH (탭 닫기 대비)
+export function markRoomFinishedBeacon(roomId: string): void {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) return;
+  fetch(`${url}/rest/v1/rooms?id=eq.${roomId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': key,
+      'Authorization': `Bearer ${key}`,
+      'Prefer': 'return=minimal',
+    },
+    body: JSON.stringify({ status: 'finished' }),
+    keepalive: true,
+  }).catch(() => {});
+}

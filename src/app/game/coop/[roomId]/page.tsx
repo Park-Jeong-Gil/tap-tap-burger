@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { usePlayerStore } from "@/stores/playerStore";
 import { useRoomStore } from "@/stores/roomStore";
 import { useGameStore } from "@/stores/gameStore";
 import { useGameLoop } from "@/hooks/useGameLoop";
 import { useCoopRoom, useLobbyRoom } from "@/hooks/useRoom";
-import { supabase, getRoomInfo, updateRoomStatus } from "@/lib/supabase";
+import { supabase, getRoomInfo, updateRoomStatus, markRoomFinishedBeacon } from "@/lib/supabase";
 import { assignCoopKeys } from "@/lib/gameLogic";
 import { KEY_MAP, NICKNAME_STORAGE_KEY } from "@/lib/constants";
 import HpBar from "@/components/game/HpBar";
@@ -48,6 +48,9 @@ export default function CoopGamePage() {
   const [expired, setExpired] = useState(false);
   const [countingDown, setCountingDown] = useState(false);
   const [nicknameInput, setNicknameInput] = useState("");
+  const finishedRef = useRef(false);
+  const gameStatusRef = useRef(gameStatus);
+  gameStatusRef.current = gameStatus;
 
   useEffect(() => {
     initSession();
@@ -134,10 +137,43 @@ export default function CoopGamePage() {
 
   // 게임 오버 시 룸 만료 처리 (링크 재사용 방지)
   useEffect(() => {
-    if (gameStatus === "gameover") {
+    if (gameStatus === "gameover" && !finishedRef.current) {
+      finishedRef.current = true;
       updateRoomStatus(roomId, "finished").catch(() => {});
     }
   }, [gameStatus, roomId]);
+
+  // 게임 중 나가기 (탭 닫기 / 언마운트) → 룸 만료
+  useEffect(() => {
+    const markFinished = () => {
+      if (gameStatusRef.current === "playing" && !finishedRef.current) {
+        finishedRef.current = true;
+        markRoomFinishedBeacon(roomId);
+      }
+    };
+    window.addEventListener("beforeunload", markFinished);
+    return () => {
+      window.removeEventListener("beforeunload", markFinished);
+      markFinished(); // 컴포넌트 언마운트 (SPA 이동) 시에도 실행
+    };
+  }, [roomId]);
+
+  // 대기실 10분 타임아웃 → 자동 만료
+  useEffect(() => {
+    if (roomStatus !== "waiting") return;
+    const timer = setTimeout(async () => {
+      await updateRoomStatus(roomId, "finished").catch(() => {});
+      setExpired(true);
+    }, 10 * 60 * 1000);
+    return () => clearTimeout(timer);
+  }, [roomId, roomStatus]);
+
+  // 상대방이 만료 처리한 경우 (게임 미시작 상태) → 만료 화면
+  useEffect(() => {
+    if (roomStatus === "finished" && gameStatus === "idle" && !countingDown) {
+      setExpired(true);
+    }
+  }, [roomStatus, gameStatus, countingDown]);
 
   // 키보드 입력 → 코업 브로드캐스트
   useEffect(() => {
