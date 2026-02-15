@@ -27,9 +27,11 @@ interface GameState {
   submitFlash: 'correct' | 'wrong' | null;
   lastScoreGain: number;     // 마지막 정답 제출로 얻은 점수
   lastComboOnSubmit: number; // 제출 시점의 콤보 수 (0 = 콤보 없음)
-  wrongFlashCount: number;   // 오답 시 증가 → 화면 흔들림 트리거
-  timeoutFlashCount: number; // 타임아웃 시 증가 → 경고 비네트 트리거
-  clearedCount: number;      // 정답 제출한 누적 주문서 수
+  wrongFlashCount: number;          // 오답 시 증가 → 화면 흔들림 트리거
+  timeoutFlashCount: number;        // 타임아웃 시 증가 → 경고 비네트 트리거
+  clearedCount: number;             // 정답 제출한 누적 주문서 수
+  attackReceivedFlashCount: number; // 공격 받을 때 증가 → 피격 오버레이 트리거
+  attackReceivedCount: number;      // 마지막 피격 주문서 수
   mode: GameMode;
 
   // actions
@@ -70,6 +72,8 @@ export const useGameStore = create<GameState>((set, get) => ({
   wrongFlashCount: 0,
   timeoutFlashCount: 0,
   clearedCount: 0,
+  attackReceivedFlashCount: 0,
+  attackReceivedCount: 0,
   mode: 'single',
 
   startGame: (mode = 'single') => {
@@ -91,6 +95,8 @@ export const useGameStore = create<GameState>((set, get) => ({
       wrongFlashCount: 0,
       timeoutFlashCount: 0,
       clearedCount: 0,
+      attackReceivedFlashCount: 0,
+      attackReceivedCount: 0,
       mode,
     });
   },
@@ -112,6 +118,8 @@ export const useGameStore = create<GameState>((set, get) => ({
       wrongFlashCount: 0,
       timeoutFlashCount: 0,
       clearedCount: 0,
+      attackReceivedFlashCount: 0,
+      attackReceivedCount: 0,
     });
   },
 
@@ -261,7 +269,11 @@ export const useGameStore = create<GameState>((set, get) => ({
       timeLimit: target.timeLimit + extraTime,
     };
 
-    set({ orders: newOrders });
+    set({
+      orders: newOrders,
+      attackReceivedFlashCount: get().attackReceivedFlashCount + 1,
+      attackReceivedCount: count,
+    });
   },
 
   clearFlash: () => set({ submitFlash: null, lastSubmittedBurger: [], lastScoreGain: 0, lastComboOnSubmit: 0 }),

@@ -9,6 +9,7 @@ import ScoreBoard from "@/components/game/ScoreBoard";
 import InputPanel from "@/components/game/InputPanel";
 import GameOverScreen from "@/components/game/GameOverScreen";
 import CountdownScreen from "@/components/game/CountdownScreen";
+import ComboPopup from "@/components/game/ComboPopup";
 
 export default function SingleGamePage() {
   const status = useGameStore((s) => s.status);
@@ -55,6 +56,7 @@ export default function SingleGamePage() {
         <CountdownScreen onComplete={handleCountdownComplete} />
       )}
       {!countingDown && timeoutFlashing && <div className="timeout-vignette" />}
+      <ComboPopup />
       <div className="top-display">
         <HpBar hp={hp} />
         <ScoreBoard score={score} combo={combo} />

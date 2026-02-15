@@ -77,9 +77,9 @@ export function validateBurger(
 }
 
 // ─── 콤보 판정 ────────────────────────────────────
-// 제한시간의 60% 이내에 완성해야 콤보
+// 제한시간의 65% 이내에 완성해야 콤보
 export function isCombo(elapsed: number, timeLimit: number): boolean {
-  return elapsed < timeLimit * 0.6;
+  return elapsed < timeLimit * 0.65;
 }
 
 // ─── 콤보 배율 ────────────────────────────────────

@@ -730,6 +730,174 @@
   }
 }
 
+// ─── 콤보 팝업 (뿌요뿌요 스타일 연쇄 표시) ────────────
+.combo-popup-wrap {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  // 버거 스택 영역 기준으로 살짝 위에 표시
+  padding-bottom: 30dvh;
+}
+
+.combo-popup {
+  font-family: v.$font-pixel;
+  font-weight: bold;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.05;
+  will-change: transform, opacity;
+
+  &__number {
+    line-height: 1;
+    @include m.mobile { font-size: m.vw(52); }
+    @include m.desktop { font-size: 64px; }
+  }
+
+  &__text {
+    letter-spacing: 0.04em;
+    @include m.mobile { font-size: m.vw(18); }
+    @include m.desktop { font-size: 22px; }
+  }
+
+  &__mult {
+    opacity: 0.85;
+    @include m.mobile { font-size: m.vw(13); }
+    @include m.desktop { font-size: 15px; }
+  }
+
+  // 레벨별 색상 + 글로우
+  &--lv1 {
+    color: v.$color-success;
+  }
+  &--lv2 {
+    color: #f0b429;
+    text-shadow: 0 0 16px rgba(240, 180, 41, 0.7);
+  }
+  &--lv3 {
+    color: #ff6b2b;
+    text-shadow: 0 0 20px rgba(255, 107, 43, 0.8), 0 0 40px rgba(255, 107, 43, 0.4);
+  }
+  &--lv4 {
+    color: v.$color-danger;
+    text-shadow: 0 0 24px rgba(217, 48, 37, 0.9), 0 0 48px rgba(217, 48, 37, 0.5);
+  }
+}
+
+// ─── 공격 발사 배너 (대전: 내가 콤보 공격 시) ─────────
+.attack-sent-wrap {
+  position: fixed;
+  // 상대방 패널 바로 아래에 표시
+  top: clamp(52px, 10dvh, 80px);
+  left: 50%;
+  pointer-events: none;
+  z-index: 65;
+}
+
+.attack-sent-banner {
+  display: flex;
+  align-items: center;
+  font-family: v.$font-pixel;
+  font-weight: bold;
+  background: rgba(26, 26, 46, 0.85);
+  border: 2px solid #ffd700;
+  border-radius: 4px;
+  white-space: nowrap;
+  will-change: transform, opacity;
+
+  @include m.mobile {
+    gap: m.vw(6);
+    padding: m.vw(6) m.vw(14);
+    font-size: m.vw(14);
+  }
+  @include m.desktop {
+    gap: 6px;
+    padding: 6px 16px;
+    font-size: 16px;
+  }
+
+  &__bolt {
+    font-size: 1.2em;
+  }
+
+  &__text {
+    color: #ffd700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+  }
+}
+
+// ─── 공격 피격 오버레이 (대전: 상대 공격 받을 때) ──────
+.attack-received-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 55;
+  background: v.$color-danger;
+  will-change: opacity;
+}
+
+.attack-received-label {
+  position: fixed;
+  top: clamp(52px, 10dvh, 80px);
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 65;
+  display: flex;
+  align-items: center;
+  font-family: v.$font-pixel;
+  font-weight: bold;
+  background: rgba(26, 26, 46, 0.9);
+  border: 2px solid v.$color-danger;
+  border-radius: 4px;
+  white-space: nowrap;
+  will-change: transform, opacity;
+
+  @include m.mobile {
+    gap: m.vw(6);
+    padding: m.vw(6) m.vw(14);
+    font-size: m.vw(14);
+  }
+  @include m.desktop {
+    gap: 6px;
+    padding: 6px 16px;
+    font-size: 16px;
+  }
+
+  &__icon {
+    font-size: 1.1em;
+  }
+
+  &__text {
+    color: v.$color-danger;
+    text-shadow: 0 0 10px rgba(217, 48, 37, 0.8);
+  }
+}
+
+// ─── 공격 피격 화면 흔들림 (오답 흔들림보다 강하게) ────
+.ingame--attack-shake {
+  animation: attack-shake 0.58s ease-out;
+}
+
+@keyframes attack-shake {
+  0%   { transform: translateX(0); }
+  7%   { transform: translateX(-18px) rotate(-0.8deg); }
+  16%  { transform: translateX(16px) rotate(0.8deg); }
+  25%  { transform: translateX(-14px) rotate(-0.5deg); }
+  34%  { transform: translateX(12px) rotate(0.4deg); }
+  44%  { transform: translateX(-9px); }
+  55%  { transform: translateX(7px); }
+  66%  { transform: translateX(-4px); }
+  78%  { transform: translateX(3px); }
+  90%  { transform: translateX(-1px); }
+  100% { transform: translateX(0); }
+}
+
 // ─── 대전 모드 미니 패널 (상대 상태) ─────────────────
 .versus-opponent {
   @include pb.pixel-borders(

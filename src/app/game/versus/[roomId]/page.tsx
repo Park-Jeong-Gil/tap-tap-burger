@@ -15,6 +15,9 @@ import ScoreBoard from "@/components/game/ScoreBoard";
 import InputPanel from "@/components/game/InputPanel";
 import GameOverScreen from "@/components/game/GameOverScreen";
 import CountdownScreen from "@/components/game/CountdownScreen";
+import ComboPopup from "@/components/game/ComboPopup";
+import AttackSentBanner from "@/components/game/AttackSentBanner";
+import AttackReceivedOverlay from "@/components/game/AttackReceivedOverlay";
 
 interface OpponentState {
   hp: number;
@@ -51,6 +54,8 @@ export default function VersusGamePage() {
     startGame: startLocalGame,
   } = useGameStore();
 
+  const attackReceivedFlashCount = useGameStore((s) => s.attackReceivedFlashCount);
+
   const [opponent, setOpponent] = useState<OpponentState>({
     hp: 80,
     queueCount: 3,
@@ -63,6 +68,11 @@ export default function VersusGamePage() {
   const [expired, setExpired] = useState(false);
   const [countingDown, setCountingDown] = useState(false);
   const [nicknameInput, setNicknameInput] = useState("");
+  const [attackSent, setAttackSent] = useState<{ id: number; count: number } | null>(null);
+  const [attackShaking, setAttackShaking] = useState(false);
+  const attackSentIdRef = useRef(0);
+  const attackSentTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const attackShakeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevComboRef = useRef(0);
   const finishedRef = useRef(false);
   const gameStatusRef = useRef(gameStatus);
@@ -163,6 +173,11 @@ export default function VersusGamePage() {
     // 콤보 종료 시 (0으로 리셋) 직전 콤보 수만큼 공격
     if (combo === 0 && prevComboRef.current > 0) {
       sendAttack(prevComboRef.current);
+      // 공격 발사 UI 피드백
+      if (attackSentTimer.current) clearTimeout(attackSentTimer.current);
+      attackSentIdRef.current++;
+      setAttackSent({ id: attackSentIdRef.current, count: prevComboRef.current });
+      attackSentTimer.current = setTimeout(() => setAttackSent(null), 1300);
     }
     prevComboRef.current = combo;
   }, [hp, orders.length, combo, gameStatus, sendStateUpdate, sendAttack]);
@@ -177,6 +192,14 @@ export default function VersusGamePage() {
       }
     }
   }, [gameStatus, sendStateUpdate]);
+
+  // 공격 받기 → 화면 강한 흔들림
+  useEffect(() => {
+    if (attackReceivedFlashCount === 0) return;
+    if (attackShakeTimer.current) clearTimeout(attackShakeTimer.current);
+    setAttackShaking(true);
+    attackShakeTimer.current = setTimeout(() => setAttackShaking(false), 620);
+  }, [attackReceivedFlashCount]);
 
   // 게임 중 나가기 (탭 닫기 / 언마운트) → 마지막 플레이어면 룸 만료
   useEffect(() => {
@@ -324,10 +347,13 @@ export default function VersusGamePage() {
 
   return (
     <div
-      className="ingame"
+      className={`ingame${attackShaking ? " ingame--attack-shake" : ""}`}
       style={{ display: "flex", flexDirection: "column" }}
     >
       {countingDown && <CountdownScreen onComplete={handleCountdownComplete} />}
+      <ComboPopup />
+      <AttackSentBanner attackInfo={attackSent} />
+      <AttackReceivedOverlay />
       {/* 상단: 상대방 미니 패널 */}
       <div className="versus-opponent">
         <span className="versus-opponent__name">
