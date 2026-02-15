@@ -95,6 +95,7 @@ export default function VersusGamePage() {
   const attackSentTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const attackShakeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevComboRef = useRef(0);
+  const lastSendRef = useRef(0);
   const finishedRef = useRef(false);
   const gameStatusRef = useRef(gameStatus);
   gameStatusRef.current = gameStatus;
@@ -179,20 +180,26 @@ export default function VersusGamePage() {
     }
   }, [roomStatus, gameStatus]);
 
-  // 내 상태 주기적으로 상대방에게 전송 + 콤보 공격
+  // 내 상태 주기적으로 상대방에게 전송 (최대 10fps 스로틀) + 콤보 공격
   useEffect(() => {
     if (gameStatus !== "playing") return;
-    sendStateUpdate({
-      hp,
-      queueCount: orders.length,
-      score,
-      combo,
-      clearedCount,
-      targetIngredients: orders[0]?.ingredients ?? [],
-      status: "playing",
-    });
 
-    // 콤보 종료 시 (0으로 리셋) 직전 콤보 수만큼 공격
+    // 상태 전송: 100ms 간격으로 제한 (Supabase 브로드캐스트 과부하 방지)
+    const now = Date.now();
+    if (now - lastSendRef.current >= 100) {
+      lastSendRef.current = now;
+      sendStateUpdate({
+        hp,
+        queueCount: orders.length,
+        score,
+        combo,
+        clearedCount,
+        targetIngredients: orders[0]?.ingredients ?? [],
+        status: "playing",
+      });
+    }
+
+    // 콤보 종료 시 (0으로 리셋) 직전 콤보 수만큼 공격 (스로틀 없이 즉시 처리)
     if (combo === 0 && prevComboRef.current > 0) {
       sendAttack(prevComboRef.current);
       // 공격 발사 UI 피드백
