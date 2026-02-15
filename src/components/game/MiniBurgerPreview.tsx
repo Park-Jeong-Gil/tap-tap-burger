@@ -51,7 +51,7 @@ export default function MiniBurgerPreview({ ingredients }: MiniBurgerPreviewProp
           </div>
         ))}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/ingredient/bun_top.png" alt="" className="mini-burger__bun" />
+        <img src="/ingredient/bun_top.png" alt="" className="mini-burger__bun mini-burger__bun--top" />
       </div>
     </div>
   );

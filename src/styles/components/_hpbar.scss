@@ -34,11 +34,19 @@
   &--warning {
     background-color: #e5c007;
   }
+  &--safe {
+    background-color: #00c000;
+  }
 }
 
 @keyframes hp-danger-pulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.55; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
 }
 
 .hp-bar-label {
