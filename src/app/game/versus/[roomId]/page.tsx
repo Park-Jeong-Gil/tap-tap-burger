@@ -159,7 +159,7 @@ export default function VersusGamePage() {
     setOpponent(state);
   }, []);
 
-  const { sendStateUpdate, sendAttack } = useVersusRoom(
+  const { sendStateUpdate, sendAttack, isConnected } = useVersusRoom(
     roomId,
     playerId ?? "",
     handleOpponentUpdate,
@@ -179,6 +179,13 @@ export default function VersusGamePage() {
       setCountingDown(true);
     }
   }, [roomStatus, gameStatus]);
+
+  // 채널 연결 완료 시 스로틀 초기화 → 즉시 상태 전송
+  useEffect(() => {
+    if (isConnected) {
+      lastSendRef.current = 0;
+    }
+  }, [isConnected]);
 
   // 내 상태 주기적으로 상대방에게 전송 (최대 10fps 스로틀) + 콤보 공격
   useEffect(() => {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import { supabase, getRoomInfo } from '@/lib/supabase';
 import { useRoomStore } from '@/stores/roomStore';
@@ -83,6 +83,7 @@ export function useVersusRoom(
   onOpponentUpdate: (state: OpponentState) => void,
 ) {
   const channelRef = useRef<RealtimeChannel | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
   const addOrdersFromAttack = useGameStore((s) => s.addOrdersFromAttack);
   const setRoomStatus = useRoomStore((s) => s.setRoomStatus);
 
@@ -132,10 +133,19 @@ export function useVersusRoom(
       if (row.status === 'finished') setRoomStatus('finished');
     });
 
-    channel.subscribe();
-    channelRef.current = channel;
+    channel.subscribe((status) => {
+      if (status === 'SUBSCRIBED') {
+        channelRef.current = channel;
+        setIsConnected(true);
+      } else {
+        channelRef.current = null;
+        setIsConnected(false);
+      }
+    });
 
     return () => {
+      channelRef.current = null;
+      setIsConnected(false);
       supabase.removeChannel(channel);
     };
   }, [roomId, playerId, onOpponentUpdate, addOrdersFromAttack, setRoomStatus]);
@@ -154,7 +164,7 @@ export function useVersusRoom(
     });
   }, [playerId]);
 
-  return { sendStateUpdate, sendAttack };
+  return { sendStateUpdate, sendAttack, isConnected };
 }
 
 // ─── 대기실 실시간 동기화 ──────────────────────────
