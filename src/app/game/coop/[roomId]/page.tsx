@@ -90,8 +90,9 @@ export default function CoopGamePage() {
           return;
         }
         await joinExisting(roomId, playerId, nickname);
-      } else if (room.status === "playing") {
-        // 기존 참여자가 게임 진행 중에 재접속 → 재연결 미지원, 만료 처리
+      } else if (room.status === "playing" && roomStatus !== "playing") {
+        // 기존 참여자가 게임 진행 중에 재접속(새로고침 등) → 만료 처리
+        // 단, roomStatus가 이미 'playing'이면 방장이 multi 페이지에서 게임 시작 후 정상 첫 진입한 것
         setExpired(true);
         return;
       }
