@@ -18,6 +18,8 @@ import CountdownScreen from "@/components/game/CountdownScreen";
 import ComboPopup from "@/components/game/ComboPopup";
 import AttackSentBanner from "@/components/game/AttackSentBanner";
 import AttackReceivedOverlay from "@/components/game/AttackReceivedOverlay";
+import MiniBurgerPreview from "@/components/game/MiniBurgerPreview";
+import type { Ingredient } from "@/types";
 
 interface OpponentState {
   hp: number;
@@ -25,6 +27,7 @@ interface OpponentState {
   score: number;
   combo: number;
   clearedCount: number;
+  currentBurger: Ingredient[];
   status: "playing" | "gameover";
   nickname?: string;
 }
@@ -50,6 +53,7 @@ export default function VersusGamePage() {
     score,
     combo,
     orders,
+    currentBurger,
     clearedCount,
     startGame: startLocalGame,
   } = useGameStore();
@@ -62,6 +66,7 @@ export default function VersusGamePage() {
     score: 0,
     combo: 0,
     clearedCount: 0,
+    currentBurger: [],
     status: "playing",
   });
   const [joined, setJoined] = useState(false);
@@ -167,6 +172,7 @@ export default function VersusGamePage() {
       score,
       combo,
       clearedCount,
+      currentBurger,
       status: "playing",
     });
 
@@ -180,12 +186,12 @@ export default function VersusGamePage() {
       attackSentTimer.current = setTimeout(() => setAttackSent(null), 1300);
     }
     prevComboRef.current = combo;
-  }, [hp, orders.length, combo, gameStatus, sendStateUpdate, sendAttack]);
+  }, [hp, orders.length, combo, currentBurger, gameStatus, sendStateUpdate, sendAttack]);
 
   // 게임오버 시 상대방에게 알림 + 룸 만료 처리
   useEffect(() => {
     if (gameStatus === "gameover") {
-      sendStateUpdate({ hp: 0, queueCount: 0, score, combo, clearedCount, status: "gameover" });
+      sendStateUpdate({ hp: 0, queueCount: 0, score, combo, clearedCount, currentBurger: [], status: "gameover" });
       if (!finishedRef.current) {
         finishedRef.current = true;
         updateRoomStatus(roomId, "finished").catch(() => {});
@@ -373,6 +379,7 @@ export default function VersusGamePage() {
             {opponent.combo}x COMBO
           </span>
         ) : null}
+        <MiniBurgerPreview ingredients={opponent.currentBurger} />
       </div>
 
       {/* 내 게임 */}

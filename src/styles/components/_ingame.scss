@@ -955,3 +955,38 @@
     flex-shrink: 0;
   }
 }
+
+// ─── 상대방 미니 버거 미리보기 ────────────────────────
+.mini-burger {
+  display: flex;
+  flex-direction: column-reverse; // 재료가 아래→위로 쌓임
+  align-items: center;
+  flex-shrink: 0;
+
+  @include m.mobile { width: m.vw(28); }
+  @include m.desktop { width: 32px; }
+
+  &__bun {
+    width: 100%;
+    display: block;
+    image-rendering: pixelated;
+    @include m.mobile { margin-top: m.vw(-7); }
+    @include m.desktop { margin-top: -8px; }
+  }
+
+  &__ing {
+    width: 100%;
+    img {
+      width: 100%;
+      height: auto;
+      display: block;
+      image-rendering: pixelated;
+    }
+    &--veggie  { @include m.mobile { margin-bottom: m.vw(-9); } @include m.desktop { margin-bottom: -10px; } }
+    &--cheese  { @include m.mobile { margin-bottom: m.vw(-10); } @include m.desktop { margin-bottom: -12px; } }
+    &--sauce   { @include m.mobile { margin-bottom: m.vw(-9); } @include m.desktop { margin-bottom: -11px; } }
+    &--patty   { @include m.mobile { margin-bottom: m.vw(-9); } @include m.desktop { margin-bottom: -10px; } }
+    &--onion   { @include m.mobile { margin-bottom: m.vw(-9); } @include m.desktop { margin-bottom: -10px; } }
+    &--tomato  { @include m.mobile { margin-bottom: m.vw(-8); } @include m.desktop { margin-bottom: -9px; } }
+  }
+}

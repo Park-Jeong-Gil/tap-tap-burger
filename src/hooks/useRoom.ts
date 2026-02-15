@@ -73,6 +73,7 @@ interface OpponentState {
   score: number;
   combo: number;
   clearedCount: number;
+  currentBurger: Ingredient[];
   status: 'playing' | 'gameover';
 }
 
@@ -102,6 +103,7 @@ export function useVersusRoom(
           score: p.score ?? 0,
           combo: p.combo ?? 0,
           clearedCount: p.clearedCount ?? 0,
+          currentBurger: p.currentBurger ?? [],
           status: p.status,
         });
       }
@@ -138,7 +140,7 @@ export function useVersusRoom(
     };
   }, [roomId, playerId, onOpponentUpdate, addOrdersFromAttack, setRoomStatus]);
 
-  const sendStateUpdate = useCallback((state: OpponentState) => {
+  const sendStateUpdate = useCallback((state: Omit<OpponentState, 'nickname'>) => {
     channelRef.current?.send({
       type: 'broadcast', event: 'state_update',
       payload: { ...state, playerId },
