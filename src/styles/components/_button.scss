@@ -25,7 +25,7 @@
 
   // 모바일: vw 기반 크기
   @include m.mobile {
-    font-size: m.vw(10);
+    font-size: m.vw(14);
     padding: m.vw(12) m.vw(20);
     gap: m.vw(8);
   }

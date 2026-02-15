@@ -64,10 +64,10 @@
   font-family: v.$font-pixel;
   color: v.$color-muted;
   @include m.mobile {
-    font-size: m.vw(8);
+    font-size: m.vw(12);
   }
   @include m.desktop {
-    font-size: 12px;
+    font-size: 14px;
   }
 }
 

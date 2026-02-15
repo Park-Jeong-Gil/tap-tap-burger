@@ -21,12 +21,12 @@
   );
 
   @include m.mobile {
-    font-size: m.vw(9);
+    font-size: m.vw(14);
     padding: m.vw(10) m.vw(12);
   }
 
   @include m.desktop {
-    font-size: 14px;
+    font-size: 16px;
     padding: 10px 12px;
   }
 

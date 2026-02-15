@@ -457,9 +457,17 @@
 }
 
 @keyframes score-value-pop {
-  0%   { transform: scale(1.35); color: #f0b429; }
-  60%  { transform: scale(0.96); }
-  100% { transform: scale(1);    color: v.$color-primary; }
+  0% {
+    transform: scale(1.35);
+    color: #f0b429;
+  }
+  60% {
+    transform: scale(0.96);
+  }
+  100% {
+    transform: scale(1);
+    color: v.$color-primary;
+  }
 }
 
 .combo-display {
@@ -563,10 +571,10 @@
   text-align: center;
 
   @include m.mobile {
-    font-size: m.vw(20);
+    font-size: m.vw(36);
   }
   @include m.desktop {
-    font-size: 32px;
+    font-size: 40px;
   }
 }
 
@@ -579,7 +587,7 @@
 
   @include m.mobile {
     gap: m.vw(12);
-    font-size: m.vw(11);
+    font-size: m.vw(18);
   }
   @include m.desktop {
     gap: 12px;
@@ -774,20 +782,32 @@
 
   &__number {
     line-height: 1;
-    @include m.mobile { font-size: m.vw(52); }
-    @include m.desktop { font-size: 64px; }
+    @include m.mobile {
+      font-size: m.vw(52);
+    }
+    @include m.desktop {
+      font-size: 64px;
+    }
   }
 
   &__text {
     letter-spacing: 0.04em;
-    @include m.mobile { font-size: m.vw(18); }
-    @include m.desktop { font-size: 22px; }
+    @include m.mobile {
+      font-size: m.vw(18);
+    }
+    @include m.desktop {
+      font-size: 22px;
+    }
   }
 
   &__mult {
     opacity: 0.85;
-    @include m.mobile { font-size: m.vw(13); }
-    @include m.desktop { font-size: 15px; }
+    @include m.mobile {
+      font-size: m.vw(13);
+    }
+    @include m.desktop {
+      font-size: 15px;
+    }
   }
 
   // 레벨별 색상 + 글로우
@@ -800,11 +820,15 @@
   }
   &--lv3 {
     color: #ff6b2b;
-    text-shadow: 0 0 20px rgba(255, 107, 43, 0.8), 0 0 40px rgba(255, 107, 43, 0.4);
+    text-shadow:
+      0 0 20px rgba(255, 107, 43, 0.8),
+      0 0 40px rgba(255, 107, 43, 0.4);
   }
   &--lv4 {
     color: v.$color-danger;
-    text-shadow: 0 0 24px rgba(217, 48, 37, 0.9), 0 0 48px rgba(217, 48, 37, 0.5);
+    text-shadow:
+      0 0 24px rgba(217, 48, 37, 0.9),
+      0 0 48px rgba(217, 48, 37, 0.5);
   }
 }
 
@@ -904,17 +928,39 @@
 }
 
 @keyframes attack-shake {
-  0%   { transform: translateX(0); }
-  7%   { transform: translateX(-18px) rotate(-0.8deg); }
-  16%  { transform: translateX(16px) rotate(0.8deg); }
-  25%  { transform: translateX(-14px) rotate(-0.5deg); }
-  34%  { transform: translateX(12px) rotate(0.4deg); }
-  44%  { transform: translateX(-9px); }
-  55%  { transform: translateX(7px); }
-  66%  { transform: translateX(-4px); }
-  78%  { transform: translateX(3px); }
-  90%  { transform: translateX(-1px); }
-  100% { transform: translateX(0); }
+  0% {
+    transform: translateX(0);
+  }
+  7% {
+    transform: translateX(-18px) rotate(-0.8deg);
+  }
+  16% {
+    transform: translateX(16px) rotate(0.8deg);
+  }
+  25% {
+    transform: translateX(-14px) rotate(-0.5deg);
+  }
+  34% {
+    transform: translateX(12px) rotate(0.4deg);
+  }
+  44% {
+    transform: translateX(-9px);
+  }
+  55% {
+    transform: translateX(7px);
+  }
+  66% {
+    transform: translateX(-4px);
+  }
+  78% {
+    transform: translateX(3px);
+  }
+  90% {
+    transform: translateX(-1px);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 
 // ─── 대전 모드 미니 패널 (상대 상태) ─────────────────
@@ -982,15 +1028,23 @@
   align-items: center;
   flex-shrink: 0;
 
-  @include m.mobile { width: m.vw(28); }
-  @include m.desktop { width: 32px; }
+  @include m.mobile {
+    width: m.vw(28);
+  }
+  @include m.desktop {
+    width: 32px;
+  }
 
   &__bun {
     width: 100%;
     display: block;
     image-rendering: pixelated;
-    @include m.mobile { margin-top: m.vw(-7); }
-    @include m.desktop { margin-top: -8px; }
+    @include m.mobile {
+      margin-top: m.vw(-7);
+    }
+    @include m.desktop {
+      margin-top: -8px;
+    }
   }
 
   &__ing {
@@ -1001,11 +1055,53 @@
       display: block;
       image-rendering: pixelated;
     }
-    &--veggie  { @include m.mobile { margin-bottom: m.vw(-9); } @include m.desktop { margin-bottom: -10px; } }
-    &--cheese  { @include m.mobile { margin-bottom: m.vw(-10); } @include m.desktop { margin-bottom: -12px; } }
-    &--sauce   { @include m.mobile { margin-bottom: m.vw(-9); } @include m.desktop { margin-bottom: -11px; } }
-    &--patty   { @include m.mobile { margin-bottom: m.vw(-9); } @include m.desktop { margin-bottom: -10px; } }
-    &--onion   { @include m.mobile { margin-bottom: m.vw(-9); } @include m.desktop { margin-bottom: -10px; } }
-    &--tomato  { @include m.mobile { margin-bottom: m.vw(-8); } @include m.desktop { margin-bottom: -9px; } }
+    &--veggie {
+      @include m.mobile {
+        margin-bottom: m.vw(-9);
+      }
+      @include m.desktop {
+        margin-bottom: -10px;
+      }
+    }
+    &--cheese {
+      @include m.mobile {
+        margin-bottom: m.vw(-10);
+      }
+      @include m.desktop {
+        margin-bottom: -12px;
+      }
+    }
+    &--sauce {
+      @include m.mobile {
+        margin-bottom: m.vw(-9);
+      }
+      @include m.desktop {
+        margin-bottom: -11px;
+      }
+    }
+    &--patty {
+      @include m.mobile {
+        margin-bottom: m.vw(-9);
+      }
+      @include m.desktop {
+        margin-bottom: -10px;
+      }
+    }
+    &--onion {
+      @include m.mobile {
+        margin-bottom: m.vw(-9);
+      }
+      @include m.desktop {
+        margin-bottom: -10px;
+      }
+    }
+    &--tomato {
+      @include m.mobile {
+        margin-bottom: m.vw(-8);
+      }
+      @include m.desktop {
+        margin-bottom: -9px;
+      }
+    }
   }
 }
