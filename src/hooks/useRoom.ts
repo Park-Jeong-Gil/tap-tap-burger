@@ -123,24 +123,19 @@ export function useVersusRoom(
       setRoomStatus('playing');
     });
 
-    channel.on('postgres_changes', {
-      event: 'UPDATE',
-      schema: 'public',
-      table: 'rooms',
-      filter: `id=eq.${roomId}`,
-    }, ({ new: row }) => {
-      if (row.status === 'playing') setRoomStatus('playing');
-      if (row.status === 'finished') setRoomStatus('finished');
-    });
+    // NOTE: postgres_changes 제거 — useLobbyRoom이 rooms 상태 변경을 이미 처리함.
+    // postgres_changes 필터 검증 실패 시 채널 전체가 unsubscribe되어 broadcast가 깨지는 문제 방지.
+
+    // 채널 참조를 동기적으로 설정 (broadcast 미전송 시 REST fallback이 작동하도록)
+    channelRef.current = channel;
 
     channel.subscribe((status) => {
       if (status === 'SUBSCRIBED') {
-        channelRef.current = channel;
         setIsConnected(true);
-      } else {
-        channelRef.current = null;
+      } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
         setIsConnected(false);
       }
+      // CLOSED는 정리 함수에서 처리하므로 여기서 channelRef를 건드리지 않음
     });
 
     return () => {
