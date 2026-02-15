@@ -199,6 +199,16 @@
     transform: scale(0.96);
   }
 
+  &:disabled {
+    opacity: 0.28;
+    cursor: not-allowed;
+
+    &:active {
+      filter: none;
+      transform: none;
+    }
+  }
+
   &__img {
     flex: 1;
     min-height: 0;
