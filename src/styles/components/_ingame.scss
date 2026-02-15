@@ -1022,11 +1022,13 @@
 }
 
 // ─── 상대방 미니 버거 미리보기 ────────────────────────
-.mini-burger {
-  display: flex;
-  flex-direction: column-reverse; // 재료가 아래→위로 쌓임
-  align-items: center;
+// 래퍼: versus-opponent 패널 높이를 기준으로 스케일 조정
+.mini-burger-wrap {
   flex-shrink: 0;
+  align-self: stretch;   // 패널 행 높이 전체를 차지해 스케일 기준점으로 사용
+  display: flex;
+  align-items: flex-end; // 버거는 항상 바닥 정렬
+  overflow: hidden;
 
   @include m.mobile {
     width: m.vw(28);
@@ -1034,6 +1036,13 @@
   @include m.desktop {
     width: 32px;
   }
+}
+
+.mini-burger {
+  display: flex;
+  flex-direction: column-reverse; // 재료가 아래→위로 쌓임
+  align-items: center;
+  width: 100%;
 
   &__bun {
     width: 100%;
