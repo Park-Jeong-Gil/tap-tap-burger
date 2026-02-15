@@ -130,6 +130,16 @@ export async function getRoomInfo(roomId: string) {
   return data as { id: string; status: string } | null;
 }
 
+export async function getRoomHostNickname(roomId: string): Promise<string> {
+  const { data } = await supabase
+    .from('room_players')
+    .select('players(nickname)')
+    .eq('room_id', roomId)
+    .limit(1)
+    .single();
+  return (data?.players as unknown as { nickname: string } | null)?.nickname ?? '알 수 없음';
+}
+
 // 페이지 언로드 시에도 완료되는 keepalive PATCH (탭 닫기 대비)
 export function markRoomFinishedBeacon(roomId: string): void {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;

@@ -51,19 +51,19 @@ export const DIFFICULTY_TIERS: { minOrders: number; tier: DifficultyTier }[] = [
     tier: { minIngredients: 7, timerMultiplier: 1.4, hpDrainPerSec: 2.2 },
   }, // 압박
   {
-    minOrders: 30,
+    minOrders: 25,
     tier: { minIngredients: 8, timerMultiplier: 0.8, hpDrainPerSec: 3.2 },
   }, // 위기
   {
-    minOrders: 40,
+    minOrders: 30,
     tier: { minIngredients: 9, timerMultiplier: 0.6, hpDrainPerSec: 4.5 },
   }, // 극한
   {
-    minOrders: 50,
+    minOrders: 45,
     tier: { minIngredients: 11, timerMultiplier: 0.46, hpDrainPerSec: 6.0 },
   }, // 광기
   {
-    minOrders: 65,
+    minOrders: 50,
     tier: { minIngredients: 12, timerMultiplier: 0.38, hpDrainPerSec: 8.0 },
   }, // 지옥
 ];

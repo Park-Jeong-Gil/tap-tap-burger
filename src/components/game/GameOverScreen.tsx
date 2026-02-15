@@ -11,7 +11,11 @@ const fadeUp = {
   show:   { opacity: 1, y: 0 },
 };
 
-export default function GameOverScreen() {
+interface GameOverScreenProps {
+  versusResult?: 'win' | 'loss';
+}
+
+export default function GameOverScreen({ versusResult }: GameOverScreenProps) {
   const router = useRouter();
   const score = useGameStore((s) => s.score);
   const maxCombo = useGameStore((s) => s.maxCombo);
@@ -41,11 +45,12 @@ export default function GameOverScreen() {
       {/* 타이틀 */}
       <motion.h2
         className="gameover-title"
+        style={versusResult === 'win' ? { color: '#F5C842' } : undefined}
         initial={{ scale: 1.6, opacity: 0, y: -20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 420, damping: 22, delay: 0.05 }}
       >
-        GAME OVER
+        {versusResult === 'win' ? '승리!' : versusResult === 'loss' ? '패배...' : 'GAME OVER'}
       </motion.h2>
 
       {/* 스탯: stagger */}

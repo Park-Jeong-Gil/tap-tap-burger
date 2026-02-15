@@ -45,6 +45,7 @@ interface GameState {
   tick: (delta: number) => void; // delta: seconds
   saveScore: (playerId: string) => Promise<boolean>;
   addOrdersFromAttack: (count: number) => void; // versus: 상대 공격
+  forceGameOver: () => void;           // versus: 상대 먼저 게임오버 시 강제 종료
   clearFlash: () => void;
 }
 
@@ -283,6 +284,10 @@ export const useGameStore = create<GameState>((set, get) => ({
       attackReceivedFlashCount: get().attackReceivedFlashCount + 1,
       attackReceivedCount: count,
     });
+  },
+
+  forceGameOver: () => {
+    if (get().status === 'playing') set({ status: 'gameover' });
   },
 
   clearFlash: () => set({ submitFlash: null, lastSubmittedBurger: [], lastScoreGain: 0, lastComboOnSubmit: 0 }),

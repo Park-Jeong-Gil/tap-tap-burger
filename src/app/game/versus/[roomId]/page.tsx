@@ -67,6 +67,7 @@ export default function VersusGamePage() {
     orders,
     clearedCount,
     startGame: startLocalGame,
+    forceGameOver,
   } = useGameStore();
 
   const attackReceivedFlashCount = useGameStore(
@@ -85,6 +86,8 @@ export default function VersusGamePage() {
   const [joined, setJoined] = useState(false);
   const [expired, setExpired] = useState(false);
   const [countingDown, setCountingDown] = useState(false);
+  const [versusResult, setVersusResult] = useState<'win' | 'loss' | null>(null);
+  const versusResultRef = useRef<'win' | 'loss' | null>(null);
   const [nicknameInput, setNicknameInput] = useState("");
   const [attackSent, setAttackSent] = useState<{
     id: number;
@@ -283,6 +286,41 @@ export default function VersusGamePage() {
     }
   }, [roomStatus, gameStatus, countingDown]);
 
+  // ─── 대전 승패 판정 ─────────────────────────────
+  // 내 HP 소진 → 패배
+  useEffect(() => {
+    if (gameStatus === "gameover" && versusResultRef.current === null) {
+      versusResultRef.current = "loss";
+      setVersusResult("loss");
+    }
+  }, [gameStatus]);
+
+  // 상대방이 먼저 게임오버 → 승리
+  useEffect(() => {
+    if (
+      opponent.status === "gameover" &&
+      gameStatus === "playing" &&
+      versusResultRef.current === null
+    ) {
+      versusResultRef.current = "win";
+      setVersusResult("win");
+      forceGameOver();
+    }
+  }, [opponent.status, gameStatus, forceGameOver]);
+
+  // 상대방이 도중 퇴장 (방 상태가 finished로 변경) → 승리
+  useEffect(() => {
+    if (
+      roomStatus === "finished" &&
+      gameStatus === "playing" &&
+      versusResultRef.current === null
+    ) {
+      versusResultRef.current = "win";
+      setVersusResult("win");
+      forceGameOver();
+    }
+  }, [roomStatus, gameStatus, forceGameOver]);
+
   const handleReady = async () => {
     if (!playerId) return;
     const trimmed = nicknameInput.trim();
@@ -444,7 +482,7 @@ export default function VersusGamePage() {
         <ScoreBoard score={score} />
       </div>
       <InputPanel />
-      {gameStatus === "gameover" && <GameOverScreen />}
+      {gameStatus === "gameover" && <GameOverScreen versusResult={versusResult ?? undefined} />}
     </div>
   );
 }
