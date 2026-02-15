@@ -64,10 +64,12 @@ export default function OrderPreview({
     food.style.width = "100%";
     food.style.margin = "";
 
-    const column = container.closest('.ingame__order-col');
-    if (!column) return;
+    // ingame__play-area: flex:1 + min-height:0으로 definite height를 가짐
+    // ingame__order-col은 align-self:center(auto height)라 측정 기준으로 부적합
+    const playArea = container.closest('.ingame__play-area');
+    if (!playArea) return;
 
-    const columnBottom = column.getBoundingClientRect().bottom;
+    const columnBottom = playArea.getBoundingClientRect().bottom;
     const foodTop = food.getBoundingClientRect().top;
     const availableH = columnBottom - foodTop;
     const naturalH = food.scrollHeight;
