@@ -90,8 +90,11 @@ export default function CoopGamePage() {
           return;
         }
         await joinExisting(roomId, playerId, nickname);
+      } else if (room.status === "playing") {
+        // 기존 참여자가 게임 진행 중에 재접속 → 재연결 미지원, 만료 처리
+        setExpired(true);
+        return;
       }
-      // data가 있으면 (대기실 참여자) 게임 시작 후에도 그대로 입장
 
       // 키 배분: 방장이 전체 키를 배분하고 DB에 저장
       const { data: rp } = await supabase

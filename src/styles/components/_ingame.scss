@@ -88,6 +88,7 @@
   min-height: 0;
   max-width: 45%;
   max-height: 100%;
+  overflow: hidden;
   align-self: center;
   position: relative;
   isolation: isolate; // 내부 z-index 독립 스택 컨텍스트

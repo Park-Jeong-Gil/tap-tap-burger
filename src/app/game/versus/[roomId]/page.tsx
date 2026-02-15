@@ -134,7 +134,11 @@ export default function VersusGamePage() {
         .eq("player_id", playerId)
         .maybeSingle();
 
-      if (myRow) return; // 대기실 참여자 → 그대로 입장
+      if (myRow) {
+        // 기존 참여자가 게임 진행 중에 재접속 → 재연결 미지원, 만료 처리
+        if (room.status === "playing") setExpired(true);
+        return;
+      }
 
       // 새 플레이어: 방이 진행 중이거나 가득 찼으면 만료
       if (room.status === "playing") {

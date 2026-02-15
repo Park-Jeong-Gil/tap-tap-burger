@@ -49,12 +49,12 @@ export const useRoomStore = create<RoomState>((set) => ({
 
   joinExisting: async (roomId, playerId, nickname) => {
     await joinRoom(roomId, playerId);
-    set((state) => ({
+    set({
       roomId,
       isHost: false,
-      players: [...state.players, { playerId, nickname, ready: false }],
+      players: [{ playerId, nickname, ready: false }],
       roomStatus: 'waiting',
-    }));
+    });
   },
 
   setReady: async (roomId, playerId) => {

@@ -64,7 +64,7 @@ export default function OrderPreview({
     food.style.width = "100%";
     food.style.margin = "";
 
-    const column = container.parentElement;
+    const column = container.closest('.ingame__order-col');
     if (!column) return;
 
     const columnBottom = column.getBoundingClientRect().bottom;
