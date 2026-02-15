@@ -88,7 +88,7 @@ export default function GameOverScreen({ versusResult }: GameOverScreenProps) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.72, duration: 0.3, ease: 'easeOut' }}
       >
-        {mode !== 'versus' && (
+        {mode !== 'versus' && mode !== 'coop' && (
           <button className="btn btn--primary" onClick={handleRestart}>
             다시 시작
           </button>
