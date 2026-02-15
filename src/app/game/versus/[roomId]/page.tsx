@@ -27,7 +27,7 @@ interface OpponentState {
   score: number;
   combo: number;
   clearedCount: number;
-  currentBurger: Ingredient[];
+  targetIngredients: Ingredient[]; // 상대방이 현재 완성해야 할 주문서의 목표 재료
   status: "playing" | "gameover";
   nickname?: string;
 }
@@ -53,7 +53,6 @@ export default function VersusGamePage() {
     score,
     combo,
     orders,
-    currentBurger,
     clearedCount,
     startGame: startLocalGame,
   } = useGameStore();
@@ -66,7 +65,7 @@ export default function VersusGamePage() {
     score: 0,
     combo: 0,
     clearedCount: 0,
-    currentBurger: [],
+    targetIngredients: [],
     status: "playing",
   });
   const [joined, setJoined] = useState(false);
@@ -172,7 +171,7 @@ export default function VersusGamePage() {
       score,
       combo,
       clearedCount,
-      currentBurger,
+      targetIngredients: orders[0]?.ingredients ?? [],
       status: "playing",
     });
 
@@ -186,12 +185,12 @@ export default function VersusGamePage() {
       attackSentTimer.current = setTimeout(() => setAttackSent(null), 1300);
     }
     prevComboRef.current = combo;
-  }, [hp, orders.length, combo, currentBurger, gameStatus, sendStateUpdate, sendAttack]);
+  }, [hp, orders, combo, gameStatus, sendStateUpdate, sendAttack]);
 
   // 게임오버 시 상대방에게 알림 + 룸 만료 처리
   useEffect(() => {
     if (gameStatus === "gameover") {
-      sendStateUpdate({ hp: 0, queueCount: 0, score, combo, clearedCount, currentBurger: [], status: "gameover" });
+      sendStateUpdate({ hp: 0, queueCount: 0, score, combo, clearedCount, targetIngredients: [], status: "gameover" });
       if (!finishedRef.current) {
         finishedRef.current = true;
         updateRoomStatus(roomId, "finished").catch(() => {});
@@ -379,7 +378,7 @@ export default function VersusGamePage() {
             {opponent.combo}x COMBO
           </span>
         ) : null}
-        <MiniBurgerPreview ingredients={opponent.currentBurger} />
+        <MiniBurgerPreview ingredients={opponent.targetIngredients} />
       </div>
 
       {/* 내 게임 */}

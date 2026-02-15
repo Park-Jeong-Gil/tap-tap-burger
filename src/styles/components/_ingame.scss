@@ -1025,16 +1025,17 @@
 // 래퍼: versus-opponent 패널 높이를 기준으로 스케일 조정
 .mini-burger-wrap {
   flex-shrink: 0;
-  align-self: stretch;   // 패널 행 높이 전체를 차지해 스케일 기준점으로 사용
   display: flex;
   align-items: flex-end; // 버거는 항상 바닥 정렬
   overflow: hidden;
 
   @include m.mobile {
     width: m.vw(28);
+    height: m.vw(24); // font m.vw(12) + padding m.vw(6)*2 — 고정 높이로 스케일 기준점 확보
   }
   @include m.desktop {
     width: 32px;
+    height: 28px; // font 16px + padding 6px*2 — 고정 높이로 스케일 기준점 확보
   }
 }
 

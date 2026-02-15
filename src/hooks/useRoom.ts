@@ -73,7 +73,7 @@ interface OpponentState {
   score: number;
   combo: number;
   clearedCount: number;
-  currentBurger: Ingredient[];
+  targetIngredients: Ingredient[]; // 상대방이 현재 완성해야 할 주문서의 목표 재료
   status: 'playing' | 'gameover';
 }
 
@@ -103,7 +103,7 @@ export function useVersusRoom(
           score: p.score ?? 0,
           combo: p.combo ?? 0,
           clearedCount: p.clearedCount ?? 0,
-          currentBurger: p.currentBurger ?? [],
+          targetIngredients: p.targetIngredients ?? [],
           status: p.status,
         });
       }
