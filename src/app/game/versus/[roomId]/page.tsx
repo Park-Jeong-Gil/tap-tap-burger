@@ -8,7 +8,12 @@ import { useGameStore } from "@/stores/gameStore";
 import { useGameLoop } from "@/hooks/useGameLoop";
 import { useKeyboard } from "@/hooks/useKeyboard";
 import { useVersusRoom, useLobbyRoom } from "@/hooks/useRoom";
-import { supabase, getRoomInfo, updateRoomStatus, markRoomFinishedBeacon } from "@/lib/supabase";
+import {
+  supabase,
+  getRoomInfo,
+  updateRoomStatus,
+  markRoomFinishedBeacon,
+} from "@/lib/supabase";
 import { NICKNAME_STORAGE_KEY } from "@/lib/constants";
 import HpBar from "@/components/game/HpBar";
 import ScoreBoard from "@/components/game/ScoreBoard";
@@ -37,7 +42,14 @@ export default function VersusGamePage() {
   const roomId = params.roomId as string;
   const router = useRouter();
 
-  const { playerId, nickname, setNickname, saveNickname, initSession, isInitialized } = usePlayerStore();
+  const {
+    playerId,
+    nickname,
+    setNickname,
+    saveNickname,
+    initSession,
+    isInitialized,
+  } = usePlayerStore();
   const {
     isHost,
     players,
@@ -57,7 +69,9 @@ export default function VersusGamePage() {
     startGame: startLocalGame,
   } = useGameStore();
 
-  const attackReceivedFlashCount = useGameStore((s) => s.attackReceivedFlashCount);
+  const attackReceivedFlashCount = useGameStore(
+    (s) => s.attackReceivedFlashCount,
+  );
 
   const [opponent, setOpponent] = useState<OpponentState>({
     hp: 80,
@@ -72,7 +86,10 @@ export default function VersusGamePage() {
   const [expired, setExpired] = useState(false);
   const [countingDown, setCountingDown] = useState(false);
   const [nicknameInput, setNicknameInput] = useState("");
-  const [attackSent, setAttackSent] = useState<{ id: number; count: number } | null>(null);
+  const [attackSent, setAttackSent] = useState<{
+    id: number;
+    count: number;
+  } | null>(null);
   const [attackShaking, setAttackShaking] = useState(false);
   const attackSentIdRef = useRef(0);
   const attackSentTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -181,7 +198,10 @@ export default function VersusGamePage() {
       // 공격 발사 UI 피드백
       if (attackSentTimer.current) clearTimeout(attackSentTimer.current);
       attackSentIdRef.current++;
-      setAttackSent({ id: attackSentIdRef.current, count: prevComboRef.current });
+      setAttackSent({
+        id: attackSentIdRef.current,
+        count: prevComboRef.current,
+      });
       attackSentTimer.current = setTimeout(() => setAttackSent(null), 1300);
     }
     prevComboRef.current = combo;
@@ -190,7 +210,15 @@ export default function VersusGamePage() {
   // 게임오버 시 상대방에게 알림 + 룸 만료 처리
   useEffect(() => {
     if (gameStatus === "gameover") {
-      sendStateUpdate({ hp: 0, queueCount: 0, score, combo, clearedCount, targetIngredients: [], status: "gameover" });
+      sendStateUpdate({
+        hp: 0,
+        queueCount: 0,
+        score,
+        combo,
+        clearedCount,
+        targetIngredients: [],
+        status: "gameover",
+      });
       if (!finishedRef.current) {
         finishedRef.current = true;
         updateRoomStatus(roomId, "finished").catch(() => {});
@@ -224,10 +252,13 @@ export default function VersusGamePage() {
   // 대기실 10분 타임아웃 → 자동 만료
   useEffect(() => {
     if (roomStatus !== "waiting") return;
-    const timer = setTimeout(async () => {
-      await updateRoomStatus(roomId, "finished").catch(() => {});
-      setExpired(true);
-    }, 10 * 60 * 1000);
+    const timer = setTimeout(
+      async () => {
+        await updateRoomStatus(roomId, "finished").catch(() => {});
+        setExpired(true);
+      },
+      10 * 60 * 1000,
+    );
     return () => clearTimeout(timer);
   }, [roomId, roomStatus]);
 
@@ -264,7 +295,14 @@ export default function VersusGamePage() {
       <div className="multi-hub">
         <div className="room-lobby">
           <p className="room-lobby__title">링크 만료</p>
-          <p style={{ fontFamily: "Mulmaru", fontSize: "0.85em", color: "#9B7060", textAlign: "center" }}>
+          <p
+            style={{
+              fontFamily: "Mulmaru",
+              fontSize: "0.85em",
+              color: "#9B7060",
+              textAlign: "center",
+            }}
+          >
             이 게임 링크는 이미 사용되었거나 만료되었습니다.
           </p>
         </div>
@@ -308,13 +346,17 @@ export default function VersusGamePage() {
           {!isHost && !myReady && (
             <>
               <div className="main-nickname" style={{ width: "100%" }}>
-                <label className="main-nickname__label" htmlFor="vs-nickname">닉네임</label>
+                <label className="main-nickname__label" htmlFor="vs-nickname">
+                  닉네임
+                </label>
                 <input
                   id="vs-nickname"
                   className="input"
                   value={nicknameInput}
                   onChange={(e) => setNicknameInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && nicknameInput.trim() && handleReady()}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" && nicknameInput.trim() && handleReady()
+                  }
                   placeholder="닉네임 입력..."
                   maxLength={20}
                   autoFocus
@@ -364,9 +406,10 @@ export default function VersusGamePage() {
         <span className="versus-opponent__name">
           {opponentEntry?.nickname ?? "상대방"}
         </span>
-        <span className="versus-opponent__hp">HP {Math.ceil(opponent.hp)}</span>
+        <span className="versus-opponent__hp">HP {Math.ceil(opponent.hp)}</span>{" "}
+        /
         <span className="versus-opponent__cleared">
-          ✓ {opponent.clearedCount}
+          ✓ {opponent.clearedCount} clears
         </span>
         <span className="versus-opponent__score">
           {opponent.score.toLocaleString()}
