@@ -2,8 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 import { useGameStore } from '@/stores/gameStore';
 import { usePlayerStore } from '@/stores/playerStore';
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 18 },
+  show:   { opacity: 1, y: 0 },
+};
 
 export default function GameOverScreen() {
   const router = useRouter();
@@ -32,13 +38,47 @@ export default function GameOverScreen() {
 
   return (
     <div className="gameover-overlay">
-      <h2 className="gameover-title">GAME OVER</h2>
-      <div className="gameover-stats">
-        <p>SCORE <span>{score.toLocaleString()}</span></p>
-        <p>MAX COMBO <span>{maxCombo}x</span></p>
-        {isNewRecord === true && <p style={{ color: '#2E9E3E', fontSize: '0.8em' }}>🏆 신기록 달성!</p>}
-      </div>
-      <div className="gameover-actions">
+      {/* 타이틀 */}
+      <motion.h2
+        className="gameover-title"
+        initial={{ scale: 1.6, opacity: 0, y: -20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 420, damping: 22, delay: 0.05 }}
+      >
+        GAME OVER
+      </motion.h2>
+
+      {/* 스탯: stagger */}
+      <motion.div
+        className="gameover-stats"
+        initial="hidden"
+        animate="show"
+        transition={{ staggerChildren: 0.14, delayChildren: 0.32 }}
+      >
+        <motion.p variants={fadeUp} transition={{ type: 'spring', stiffness: 380, damping: 24 }}>
+          SCORE <span>{score.toLocaleString()}</span>
+        </motion.p>
+        <motion.p variants={fadeUp} transition={{ type: 'spring', stiffness: 380, damping: 24 }}>
+          MAX COMBO <span>{maxCombo}x</span>
+        </motion.p>
+        {isNewRecord === true && (
+          <motion.p
+            variants={fadeUp}
+            transition={{ type: 'spring', stiffness: 380, damping: 24 }}
+            style={{ color: '#2E9E3E', fontSize: '0.8em' }}
+          >
+            ★ 신기록 달성!
+          </motion.p>
+        )}
+      </motion.div>
+
+      {/* 버튼 */}
+      <motion.div
+        className="gameover-actions"
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.72, duration: 0.3, ease: 'easeOut' }}
+      >
         {mode !== 'versus' && (
           <button className="btn btn--primary" onClick={handleRestart}>
             다시 시작
@@ -47,7 +87,7 @@ export default function GameOverScreen() {
         <button className="btn btn--ghost" onClick={handleHome}>
           메인으로
         </button>
-      </div>
+      </motion.div>
     </div>
   );
 }

@@ -121,6 +121,12 @@
   }
 }
 
+// 카운트다운 중 주문서 숨김
+.ingame__order-col--hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
 // ─── 버거 표시 영역 (우측 절반) ──────────────────────
 .ingame__burger-area {
   flex: 1;
@@ -441,6 +447,19 @@
   span {
     color: v.$color-primary;
   }
+
+  // 점수 변경 시 팝 (key 교체로 재실행)
+  &__value {
+    display: inline-block;
+    color: v.$color-primary;
+    animation: score-value-pop 0.28s ease-out;
+  }
+}
+
+@keyframes score-value-pop {
+  0%   { transform: scale(1.35); color: #f0b429; }
+  60%  { transform: scale(0.96); }
+  100% { transform: scale(1);    color: v.$color-primary; }
 }
 
 .combo-display {

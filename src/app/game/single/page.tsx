@@ -15,7 +15,6 @@ export default function SingleGamePage() {
   const status = useGameStore((s) => s.status);
   const hp = useGameStore((s) => s.hp);
   const score = useGameStore((s) => s.score);
-  const combo = useGameStore((s) => s.combo);
   const startGame = useGameStore((s) => s.startGame);
   const wrongFlashCount = useGameStore((s) => s.wrongFlashCount);
   const timeoutFlashCount = useGameStore((s) => s.timeoutFlashCount);
@@ -59,7 +58,7 @@ export default function SingleGamePage() {
       <ComboPopup />
       <div className="top-display">
         <HpBar hp={hp} />
-        <ScoreBoard score={score} combo={combo} />
+        <ScoreBoard score={score} />
       </div>
       <InputPanel />
       {status === "gameover" && <GameOverScreen />}

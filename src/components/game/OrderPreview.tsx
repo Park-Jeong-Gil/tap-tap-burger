@@ -1,7 +1,9 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import type { Order, Ingredient } from "@/types";
+import { useGameStore } from "@/stores/gameStore";
 
 const INGREDIENT_IMAGES: Record<Ingredient, string> = {
   patty: "/ingredient/patty.png",
@@ -24,6 +26,31 @@ export default function OrderPreview({
   const containerRef = useRef<HTMLDivElement>(null);
   const foodRef = useRef<HTMLDivElement>(null);
 
+  const submitFlash = useGameStore((s) => s.submitFlash);
+  const lastComboOnSubmit = useGameStore((s) => s.lastComboOnSubmit);
+
+  const [showClear, setShowClear] = useState(false);
+  const [clearId, setClearId] = useState(0);
+  const [isComboFlash, setIsComboFlash] = useState(false);
+  const clearTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // 정답 제출 시 CLEAR! 플래시
+  useEffect(() => {
+    if (submitFlash === "correct") {
+      if (clearTimer.current) clearTimeout(clearTimer.current);
+      setClearId((n) => n + 1);
+      setIsComboFlash(lastComboOnSubmit >= 1);
+      setShowClear(true);
+      clearTimer.current = setTimeout(() => setShowClear(false), 520);
+    }
+  }, [submitFlash, lastComboOnSubmit]);
+
+  useEffect(() => {
+    return () => {
+      if (clearTimer.current) clearTimeout(clearTimer.current);
+    };
+  }, []);
+
   const remaining = Math.max(0, order.timeLimit - order.elapsed);
   const timePct = (remaining / order.timeLimit) * 100;
   const isUrgent = timePct < 30;
@@ -34,12 +61,9 @@ export default function OrderPreview({
     const food = foodRef.current;
     if (!container || !food) return;
 
-    // 자연 높이 측정을 위해 너비 초기화
     food.style.width = "100%";
     food.style.margin = "";
 
-    // getBoundingClientRect로 실제 레이아웃 크기 측정
-    // column(.ingame__order-col)의 max-height 경계 기준으로 사용 가능한 높이 계산
     const column = container.parentElement;
     if (!column) return;
 
@@ -56,7 +80,33 @@ export default function OrderPreview({
   }, [order.ingredients]);
 
   return (
-    <div className={`order-preview${isUrgent ? " order-preview--urgent" : ""}`} ref={containerRef}>
+    <div
+      className={`order-preview${isUrgent ? " order-preview--urgent" : ""}`}
+      ref={containerRef}
+    >
+      {/* 정답 제출 CLEAR! 플래시 오버레이 */}
+      <AnimatePresence>
+        {showClear && (
+          <motion.div
+            key={clearId}
+            className={`order-preview__clear${isComboFlash ? " order-preview__clear--combo" : ""}`}
+            initial={{ opacity: 0, scale: 0.85 }}
+            animate={{
+              opacity: 1,
+              scale: 1,
+              transition: { type: "spring", stiffness: 600, damping: 22 },
+            }}
+            exit={{
+              opacity: 0,
+              scale: 1.1,
+              transition: { duration: 0.2, ease: "easeIn" },
+            }}
+          >
+            CLEAR!
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* 헤더: 주문 번호 + 남은 시간 */}
       <div className="order-preview__header">
         <span className="order-preview__index">
@@ -77,9 +127,8 @@ export default function OrderPreview({
         />
       </div>
 
-      {/* 목표 버거 비주얼 (column-reverse: bun_bottom → ingredients → bun_top) */}
+      {/* 목표 버거 비주얼 */}
       <div className="order-preview__food" ref={foodRef}>
-        {/* 아래 번 (DOM 첫번째 → 시각적 최하단) */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/ingredient/bun_bottom.png"
@@ -87,7 +136,6 @@ export default function OrderPreview({
           className="order-preview__bun"
         />
 
-        {/* 재료 레이어 */}
         {order.ingredients.map((ing, i) => {
           const isDone = i < submittedCount;
           const isCurrent = i === submittedCount;
@@ -110,7 +158,6 @@ export default function OrderPreview({
           );
         })}
 
-        {/* 위 번 (DOM 마지막 → 시각적 최상단) */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/ingredient/bun_top.png"

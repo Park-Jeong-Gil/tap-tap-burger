@@ -201,7 +201,6 @@
 // ─── 주문서 미리보기 패널 ─────────────────────────────
 .order-preview {
   position: relative;
-  z-index: 3; // ingame__order-col 레이어(1,2) 위에 배치
   display: flex;
   flex-direction: column;
   background-color: v.$color-surface;
@@ -331,6 +330,7 @@
   }
   &--cheese {
     margin-bottom: -36%;
+    padding-top: 3%;
   }
   &--sauce {
     margin-bottom: -33%;
@@ -393,6 +393,38 @@
   }
   50% {
     filter: drop-shadow(0 0 2px v.$color-primary) brightness(1);
+  }
+}
+
+// ─── 주문서 완료 플래시 오버레이 ──────────────────────
+.order-preview__clear {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: v.$font-pixel;
+  font-weight: bold;
+  pointer-events: none;
+  border-radius: inherit;
+  background: rgba(46, 158, 62, 0.2);
+  color: v.$color-success;
+  text-shadow: 0 0 10px rgba(46, 158, 62, 0.7);
+  will-change: transform, opacity;
+
+  @include m.mobile {
+    font-size: m.vw(20);
+  }
+  @include m.desktop {
+    font-size: 24px;
+  }
+
+  // 콤보 클리어 시 금색으로
+  &--combo {
+    background: rgba(240, 180, 41, 0.22);
+    color: #f0b429;
+    text-shadow: 0 0 12px rgba(240, 180, 41, 0.8);
   }
 }
 

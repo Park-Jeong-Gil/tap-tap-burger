@@ -36,7 +36,6 @@ export default function CoopGamePage() {
     status: gameStatus,
     hp,
     score,
-    combo,
     startGame: startLocalGame,
     addIngredient,
     removeLastIngredient,
@@ -318,7 +317,7 @@ export default function CoopGamePage() {
       {countingDown && <CountdownScreen onComplete={handleCountdownComplete} />}
       <div className="top-display">
         <HpBar hp={hp} />
-        <ScoreBoard score={score} combo={combo} />
+        <ScoreBoard score={score} />
       </div>
       <InputPanel allowedActions={assignedKeys} />
       {gameStatus === "gameover" && <GameOverScreen />}

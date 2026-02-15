@@ -32,6 +32,7 @@ interface GameState {
   clearedCount: number;             // 정답 제출한 누적 주문서 수
   attackReceivedFlashCount: number; // 공격 받을 때 증가 → 피격 오버레이 트리거
   attackReceivedCount: number;      // 마지막 피격 주문서 수
+  inputLockedAt: number;            // 입력 잠금 타임스탬프 (0=해제, >0=잠금 중)
   mode: GameMode;
 
   // actions
@@ -74,6 +75,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   clearedCount: 0,
   attackReceivedFlashCount: 0,
   attackReceivedCount: 0,
+  inputLockedAt: 0,
   mode: 'single',
 
   startGame: (mode = 'single') => {
@@ -97,6 +99,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       clearedCount: 0,
       attackReceivedFlashCount: 0,
       attackReceivedCount: 0,
+      inputLockedAt: 0,
       mode,
     });
   },
@@ -120,12 +123,14 @@ export const useGameStore = create<GameState>((set, get) => ({
       clearedCount: 0,
       attackReceivedFlashCount: 0,
       attackReceivedCount: 0,
+      inputLockedAt: 0,
     });
   },
 
   addIngredient: (ingredient) => {
-    const { status, currentBurger } = get();
+    const { status, currentBurger, inputLockedAt } = get();
     if (status !== 'playing') return;
+    if (inputLockedAt > 0 && Date.now() - inputLockedAt < 200) return;
     set({ currentBurger: [...currentBurger, ingredient] });
   },
 
@@ -142,8 +147,9 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   submitBurger: () => {
-    const { status, orders, currentBurger, combo, maxCombo, score, hp } = get();
+    const { status, orders, currentBurger, combo, maxCombo, score, hp, inputLockedAt } = get();
     if (status !== 'playing' || orders.length === 0 || currentBurger.length === 0) return;
+    if (inputLockedAt > 0 && Date.now() - inputLockedAt < 200) return;
 
     const targetOrder = orders[0];
     const isValid = validateBurger(currentBurger, targetOrder.ingredients);
@@ -191,6 +197,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       submitFlash: 'correct',
       lastScoreGain: points,
       lastComboOnSubmit: wasCombo ? newCombo : 0,
+      inputLockedAt: Date.now(),
     });
   },
 
@@ -234,6 +241,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         combo: 0,
         currentBurger: [],
         timeoutFlashCount: timeoutFlashCount + 1,
+        inputLockedAt: Date.now(),
       } : {}),
     });
   },

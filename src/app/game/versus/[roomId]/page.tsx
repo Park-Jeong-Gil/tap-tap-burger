@@ -385,7 +385,7 @@ export default function VersusGamePage() {
       {/* 내 게임 */}
       <div className="top-display">
         <HpBar hp={hp} />
-        <ScoreBoard score={score} combo={combo} />
+        <ScoreBoard score={score} />
       </div>
       <InputPanel />
       {gameStatus === "gameover" && <GameOverScreen />}

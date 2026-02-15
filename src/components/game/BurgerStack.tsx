@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Ingredient } from '@/types';
 import { useGameStore } from '@/stores/gameStore';
-import { getComboMultiplier } from '@/lib/gameLogic';
 
 const INGREDIENT_IMAGES: Record<Ingredient, string> = {
   patty:  '/ingredient/patty.png',
@@ -23,8 +22,6 @@ export default function BurgerStack({ ingredients }: BurgerStackProps) {
   const clearFlash = useGameStore((s) => s.clearFlash);
   // 완성 플래시 동안 재료 스냅샷 유지 (currentBurger는 즉시 리셋되므로)
   const lastSubmittedBurger = useGameStore((s) => s.lastSubmittedBurger);
-  const lastScoreGain = useGameStore((s) => s.lastScoreGain);
-  const lastComboOnSubmit = useGameStore((s) => s.lastComboOnSubmit);
 
   const flashTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevFlash = useRef<'correct' | 'wrong' | null>(null);
@@ -110,17 +107,7 @@ export default function BurgerStack({ ingredients }: BurgerStackProps) {
         </div>
       </div>
 
-      {/* ── 플래시 오버레이 (카메라 바깥 → 항상 중앙 고정) ── */}
-      {isSubmitting && (
-        <div className={`burger-flash burger-flash--correct${lastComboOnSubmit > 0 ? ' burger-flash--combo' : ''}`}>
-          <span className="burger-flash__score">+{lastScoreGain}</span>
-          {lastComboOnSubmit > 0 && (
-            <span className="burger-flash__combo">
-              ×{getComboMultiplier(lastComboOnSubmit).toFixed(1)} COMBO!
-            </span>
-          )}
-        </div>
-      )}
+      {/* ── 오답 플래시 오버레이 ── */}
       {submitFlash === 'wrong' && (
         <div className="burger-flash burger-flash--wrong">MISS!</div>
       )}

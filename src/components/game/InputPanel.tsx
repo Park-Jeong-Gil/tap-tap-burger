@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { GrPowerCycle } from "@react-icons/all-files/gr/GrPowerCycle";
+import { AnimatePresence, motion } from "framer-motion";
 import type { Ingredient } from "@/types";
 import { useGameStore } from "@/stores/gameStore";
 import BurgerStack from "./BurgerStack";
@@ -78,8 +78,10 @@ export default function InputPanel({ allowedActions }: InputPanelProps) {
   const currentBurger = useGameStore((s) => s.currentBurger);
   const status = useGameStore((s) => s.status);
   const orders = useGameStore((s) => s.orders);
+  const inputLockedAt = useGameStore((s) => s.inputLockedAt);
 
   const firstOrder = orders[0] ?? null;
+  const isPlaying = status === "playing";
 
   const [isDesktop, setIsDesktop] = useState(false);
   useEffect(() => {
@@ -89,6 +91,14 @@ export default function InputPanel({ allowedActions }: InputPanelProps) {
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
   }, []);
+
+  const [inputBlocked, setInputBlocked] = useState(false);
+  useEffect(() => {
+    if (inputLockedAt === 0) return;
+    setInputBlocked(true);
+    const t = setTimeout(() => setInputBlocked(false), 200);
+    return () => clearTimeout(t);
+  }, [inputLockedAt]);
 
   const isAllowed = (action: string) =>
     !allowedActions || allowedActions.includes(action);
@@ -104,37 +114,45 @@ export default function InputPanel({ allowedActions }: InputPanelProps) {
     <div className="ingame__bottom">
       {/* 플레이 영역: 목표 주문서(좌) | 현재 버거 스택(우) */}
       <div className="ingame__play-area">
-        <div className="ingame__order-col">
-          {firstOrder && (
-            <OrderPreview
-              order={firstOrder}
-              submittedCount={currentBurger.length}
-            />
-          )}
+        <div
+          className={`ingame__order-col${!isPlaying ? " ingame__order-col--hidden" : ""}`}
+        >
+          <AnimatePresence mode="wait">
+            {isPlaying && firstOrder && (
+              <motion.div
+                key={firstOrder.orderIndex}
+                style={{ width: "100%", height: "100%", position: "relative", zIndex: 3 }}
+                initial={{ scale: 0.84, opacity: 0, y: 8 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                transition={{ type: "spring", stiffness: 360, damping: 28 }}
+                exit={{
+                  x: -80,
+                  scale: 0.88,
+                  opacity: 0,
+                  transition: { duration: 0.19, ease: "easeIn" },
+                }}
+              >
+                <OrderPreview
+                  order={firstOrder}
+                  submittedCount={currentBurger.length}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
         <div className="ingame__burger-area">
           <BurgerStack ingredients={currentBurger} />
         </div>
       </div>
 
-      {/* 컨트롤: [리셋] [재료 2×2] [완성] */}
+      {/* 컨트롤: [재료 2×3] [완성] */}
       <div className="ingame__controls">
-        {/* <InputBtn
-          action="cancel"
-          label="리셋"
-          className="input-btn--cancel"
-          disabled={!isAllowed("cancel")}
-          showKey={isDesktop}
-          icon={<GrPowerCycle />}
-          onClick={() => handleAction("cancel")}
-        /> */}
-
         <div className="ingame__grid">
           <InputBtn
             action="veggie"
             label="야채"
             className="input-btn--veggie"
-            disabled={!isAllowed("veggie")}
+            disabled={!isAllowed("veggie") || inputBlocked}
             showKey={isDesktop}
             onClick={() => handleAction("veggie")}
           />
@@ -142,7 +160,7 @@ export default function InputPanel({ allowedActions }: InputPanelProps) {
             action="sauce"
             label="소스"
             className="input-btn--sauce"
-            disabled={!isAllowed("sauce")}
+            disabled={!isAllowed("sauce") || inputBlocked}
             showKey={isDesktop}
             onClick={() => handleAction("sauce")}
           />
@@ -150,7 +168,7 @@ export default function InputPanel({ allowedActions }: InputPanelProps) {
             action="cheese"
             label="치즈"
             className="input-btn--cheese"
-            disabled={!isAllowed("cheese")}
+            disabled={!isAllowed("cheese") || inputBlocked}
             showKey={isDesktop}
             onClick={() => handleAction("cheese")}
           />
@@ -158,7 +176,7 @@ export default function InputPanel({ allowedActions }: InputPanelProps) {
             action="patty"
             label="패티"
             className="input-btn--patty"
-            disabled={!isAllowed("patty")}
+            disabled={!isAllowed("patty") || inputBlocked}
             showKey={isDesktop}
             onClick={() => handleAction("patty")}
           />
@@ -166,7 +184,7 @@ export default function InputPanel({ allowedActions }: InputPanelProps) {
             action="onion"
             label="양파"
             className="input-btn--onion"
-            disabled={!isAllowed("onion")}
+            disabled={!isAllowed("onion") || inputBlocked}
             showKey={isDesktop}
             onClick={() => handleAction("onion")}
           />
@@ -174,7 +192,7 @@ export default function InputPanel({ allowedActions }: InputPanelProps) {
             action="tomato"
             label="토마토"
             className="input-btn--tomato"
-            disabled={!isAllowed("tomato")}
+            disabled={!isAllowed("tomato") || inputBlocked}
             showKey={isDesktop}
             onClick={() => handleAction("tomato")}
           />
@@ -184,7 +202,7 @@ export default function InputPanel({ allowedActions }: InputPanelProps) {
           action="submit"
           label="완성"
           className="input-btn--submit"
-          disabled={!isAllowed("submit")}
+          disabled={!isAllowed("submit") || inputBlocked}
           showKey={isDesktop}
           onClick={() => handleAction("submit")}
         />
