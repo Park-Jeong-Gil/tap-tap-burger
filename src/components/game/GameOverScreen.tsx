@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useGameStore } from '@/stores/gameStore';
 import { usePlayerStore } from '@/stores/playerStore';
+import { useRoomStore } from '@/stores/roomStore';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 18 },
@@ -24,6 +25,7 @@ export default function GameOverScreen({ versusResult }: GameOverScreenProps) {
   const saveScore = useGameStore((s) => s.saveScore);
   const mode = useGameStore((s) => s.mode);
   const playerId = usePlayerStore((s) => s.playerId);
+  const resetRoom = useRoomStore((s) => s.reset);
   const [isNewRecord, setIsNewRecord] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -36,6 +38,8 @@ export default function GameOverScreen({ versusResult }: GameOverScreenProps) {
   };
 
   const handleHome = () => {
+    // 멀티 모드: roomStore 먼저 리셋 (roomStatus → 'waiting'으로 초기화해 만료 화면 flash 방지)
+    if (mode === 'versus' || mode === 'coop') resetRoom();
     resetGame();
     router.push('/');
   };
