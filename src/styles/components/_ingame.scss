@@ -543,7 +543,7 @@
 .gameover-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(26, 26, 46, 0.93);
+  background-color: #000000cc;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -818,7 +818,11 @@
     position: absolute;
     inset: -22%;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.46), rgba(255, 255, 255, 0));
+    background: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.46),
+      rgba(255, 255, 255, 0)
+    );
     animation: judge-ring-pulse 0.56s ease-out;
     z-index: -1;
   }
@@ -961,7 +965,11 @@
     position: absolute;
     inset: -20%;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(180, 255, 255, 0.4), rgba(180, 255, 255, 0));
+    background: radial-gradient(
+      circle,
+      rgba(180, 255, 255, 0.4),
+      rgba(180, 255, 255, 0)
+    );
     animation: combo-aurora 0.62s ease-out;
     z-index: -1;
   }
@@ -1463,7 +1471,9 @@
 
   @include m.mobile {
     width: m.vw(28);
-    height: m.vw(24); // font m.vw(12) + padding m.vw(6)*2 — 고정 높이로 스케일 기준점 확보
+    height: m.vw(
+      24
+    ); // font m.vw(12) + padding m.vw(6)*2 — 고정 높이로 스케일 기준점 확보
   }
   @include m.desktop {
     width: 32px;
@@ -1499,11 +1509,26 @@
       image-rendering: pixelated;
     }
     // OrderPreview와 동일한 퍼센트 마진 사용 (크기 변화에도 비율 유지)
-    &--veggie { margin-bottom: -32%; margin-top: -5%; }
-    &--cheese { margin-bottom: -36%; padding-top: 3%; }
-    &--sauce  { margin-bottom: -33%; padding-top: 5%; }
-    &--patty  { margin-bottom: -32%; }
-    &--onion  { margin-bottom: -32%; }
-    &--tomato { margin-bottom: -30%; }
+    &--veggie {
+      margin-bottom: -32%;
+      margin-top: -5%;
+    }
+    &--cheese {
+      margin-bottom: -36%;
+      padding-top: 3%;
+    }
+    &--sauce {
+      margin-bottom: -33%;
+      padding-top: 5%;
+    }
+    &--patty {
+      margin-bottom: -32%;
+    }
+    &--onion {
+      margin-bottom: -32%;
+    }
+    &--tomato {
+      margin-bottom: -30%;
+    }
   }
 }

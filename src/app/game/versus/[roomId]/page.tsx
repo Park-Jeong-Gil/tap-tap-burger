@@ -455,10 +455,11 @@ export default function VersusGamePage() {
 
   useEffect(() => {
     if (gameStatus === "gameover" && versusResultRef.current === null) {
-      versusResultRef.current = "loss";
-      setVersusResult("loss");
+      const result = score > opponent.score ? "win" : "loss";
+      versusResultRef.current = result;
+      setVersusResult(result);
     }
-  }, [gameStatus]);
+  }, [gameStatus, score, opponent.score]);
 
   useEffect(() => {
     if (
@@ -466,8 +467,6 @@ export default function VersusGamePage() {
       gameStatus === "playing" &&
       versusResultRef.current === null
     ) {
-      versusResultRef.current = "win";
-      setVersusResult("win");
       forceGameOver();
     }
   }, [opponent.status, gameStatus, forceGameOver]);
