@@ -17,6 +17,9 @@ interface BurgerStackProps {
   ingredients: Ingredient[];
 }
 
+const CAMERA_TOP_LOCK_RATIO = 0.42;
+const CAMERA_LOCK_RAMP_PX = 120;
+
 export default function BurgerStack({ ingredients }: BurgerStackProps) {
   const submitFlash = useGameStore((s) => s.submitFlash);
   const clearFlash = useGameStore((s) => s.clearFlash);
@@ -62,8 +65,22 @@ export default function BurgerStack({ ingredients }: BurgerStackProps) {
     const stack = stackRef.current;
     const food = foodRef.current;
     if (!stack || !food) return;
-    const overflow = Math.max(0, food.scrollHeight - stack.clientHeight);
-    setCameraY(overflow);
+    const stackHeight = stack.clientHeight;
+    const foodHeight = food.scrollHeight;
+    const overflow = Math.max(0, foodHeight - stackHeight);
+
+    if (overflow === 0) {
+      setCameraY(0);
+      return;
+    }
+
+    // overflow 초반에는 자연스럽게 따라가고, 일정 높이 이후엔 상단을 중앙 근처에 고정한다.
+    const centeredTop = overflow / 2;
+    const lockedTop = stackHeight * CAMERA_TOP_LOCK_RATIO;
+    const lockProgress = Math.min(1, overflow / CAMERA_LOCK_RAMP_PX);
+    const targetTop = centeredTop + (lockedTop - centeredTop) * lockProgress;
+    const nextCameraY = overflow / 2 + targetTop;
+    setCameraY(nextCameraY);
   }, [displayIngredients]);
 
   return (

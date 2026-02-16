@@ -21,7 +21,6 @@ export default function GameOverScreen({ versusResult }: GameOverScreenProps) {
   const score = useGameStore((s) => s.score);
   const maxCombo = useGameStore((s) => s.maxCombo);
   const resetGame = useGameStore((s) => s.resetGame);
-  const startGame = useGameStore((s) => s.startGame);
   const saveScore = useGameStore((s) => s.saveScore);
   const mode = useGameStore((s) => s.mode);
   const playerId = usePlayerStore((s) => s.playerId);
@@ -34,7 +33,8 @@ export default function GameOverScreen({ versusResult }: GameOverScreenProps) {
   }, [playerId, saveScore]);
 
   const handleRestart = () => {
-    startGame(mode);
+    // 싱글 재시작은 페이지의 카운트다운 흐름을 다시 타도록 idle로 되돌린다.
+    resetGame();
   };
 
   const handleHome = () => {

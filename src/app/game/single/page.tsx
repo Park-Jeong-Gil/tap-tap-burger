@@ -31,6 +31,13 @@ export default function SingleGamePage() {
     startGame("single");
   }, [startGame]);
 
+  // 게임오버 후 resetGame()으로 idle이 되면 카운트다운을 다시 노출한다.
+  useEffect(() => {
+    if (status === "idle" && !countingDown) {
+      setCountingDown(true);
+    }
+  }, [status, countingDown]);
+
   // 오답 → 화면 흔들림
   useEffect(() => {
     if (wrongFlashCount === 0) return;

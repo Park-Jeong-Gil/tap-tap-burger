@@ -1,8 +1,8 @@
 import type { Ingredient, DifficultyTier } from "@/types";
 
 // ─── HP ───────────────────────────────────────────────
-export const HP_MAX = 1000000;
-export const HP_INIT = 1000000;
+export const HP_MAX = 100;
+export const HP_INIT = 100;
 
 export const HP_DELTA = {
   correctSubmit: 15,
@@ -31,8 +31,8 @@ export const COMBO_MULTIPLIERS: {
 export const DIFFICULTY_TIERS: { minOrders: number; tier: DifficultyTier }[] = [
   {
     minOrders: 0,
-    tier: { minIngredients: 3, timerMultiplier: 2.2, hpDrainPerSec: 0.4 },
-    // tier: { minIngredients: 10, timerMultiplier: 20, hpDrainPerSec: 0.4 },
+    // tier: { minIngredients: 3, timerMultiplier: 2.2, hpDrainPerSec: 0.4 },
+    tier: { minIngredients: 10, timerMultiplier: 20, hpDrainPerSec: 0.4 },
   }, // 시작
   {
     minOrders: 6,
@@ -117,7 +117,7 @@ export const ALL_COOP_ACTIONS = [
 // ─── 타이머 ───────────────────────────────────────────
 export const BASE_SECONDS_PER_INGREDIENT = 1.0; // 재료 1개당 기본 초
 export const MULTI_MAX_INGREDIENTS = 6; // 멀티 모드 재료 최대 개수
-export const ORDER_REFRESH_DELAY_MS = 500;
+export const ORDER_REFRESH_DELAY_MS = 800;
 export const FEVER_SECONDS = 6;
 export const FEVER_INTERVAL_CLEARS = 5;
 export const FEVER_SCORE_PER_STACK = 50;
