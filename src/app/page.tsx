@@ -37,14 +37,14 @@ export default function MainPage() {
 
   return (
     <main className="main-page">
-      <div>
+      <header className="main-header">
         <h1 className="main-title">
           TAP TAP
           <br />
           BURGER
         </h1>
         <p className="main-subtitle">Perfect Order</p>
-      </div>
+      </header>
 
       <div className="main-nickname">
         <label className="main-nickname__label" htmlFor="nickname">
@@ -74,7 +74,10 @@ export default function MainPage() {
         >
           LEADERBOARD
         </button>
-        <button className="btn btn--ghost" onClick={() => setShowHtp(true)}>
+        <button
+          className="btn btn--flat btn--how"
+          onClick={() => setShowHtp(true)}
+        >
           HOW TO PLAY
         </button>
       </nav>

@@ -53,6 +53,10 @@
     cursor: not-allowed;
     pointer-events: none;
   }
+
+  &--how {
+    margin-top: 24px;
+  }
 }
 
 .btn--primary {
@@ -89,20 +93,20 @@
   @include pb.pixel-box(
     $corner-size: 2,
     $border-size: 4px,
-    $background-color: #847290,
+    $background-color: #ffdd00,
     $border-color: v.$color-border,
     $border-inset: true,
     $border-inset-sides: "all"
   );
-  // color: #333;
-  color: v.$color-bg;
+  color: #333;
+  // color: v.$color-bg;
 }
 
 .btn--flat {
   @include pb.pixel-box(
     $corner-size: 2,
     $border-size: 4px,
-    $background-color: #9c9c9c,
+    $background-color: #8d8691,
     $border-color: v.$color-border,
     $border-inset: true,
     $border-inset-sides: "all"
