@@ -22,6 +22,7 @@ import GameOverScreen from "@/components/game/GameOverScreen";
 import CountdownScreen from "@/components/game/CountdownScreen";
 import ComboPopup from "@/components/game/ComboPopup";
 import FeverResultPopup from "@/components/game/FeverResultPopup";
+import JudgementPopup from "@/components/game/JudgementPopup";
 import AttackSentBanner from "@/components/game/AttackSentBanner";
 import AttackReceivedOverlay from "@/components/game/AttackReceivedOverlay";
 import MiniBurgerPreview from "@/components/game/MiniBurgerPreview";
@@ -83,6 +84,7 @@ export default function VersusGamePage() {
     feverResultSeq,
     startGame: startLocalGame,
     forceGameOver,
+    wrongFlashCount,
   } = useGameStore();
 
   const attackReceivedFlashCount = useGameStore(
@@ -112,11 +114,13 @@ export default function VersusGamePage() {
     type: "combo" | "fever_delta";
   } | null>(null);
   const [attackShaking, setAttackShaking] = useState(false);
+  const [shaking, setShaking] = useState(false);
   const [opponentFeverResultTick, setOpponentFeverResultTick] = useState(0);
 
   const attackSentIdRef = useRef(0);
   const attackSentTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const attackShakeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const shakeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevComboRef = useRef(0);
   const lastSendRef = useRef(0);
   const finishedRef = useRef(false);
@@ -165,6 +169,7 @@ export default function VersusGamePage() {
     return () => {
       if (attackSentTimer.current) clearTimeout(attackSentTimer.current);
       if (attackShakeTimer.current) clearTimeout(attackShakeTimer.current);
+      if (shakeTimer.current) clearTimeout(shakeTimer.current);
     };
   }, []);
 
@@ -345,6 +350,13 @@ export default function VersusGamePage() {
     setAttackShaking(true);
     attackShakeTimer.current = setTimeout(() => setAttackShaking(false), 620);
   }, [attackReceivedFlashCount]);
+
+  useEffect(() => {
+    if (wrongFlashCount === 0) return;
+    if (shakeTimer.current) clearTimeout(shakeTimer.current);
+    setShaking(true);
+    shakeTimer.current = setTimeout(() => setShaking(false), 420);
+  }, [wrongFlashCount]);
 
   useEffect(() => {
     const markFinished = () => {
@@ -532,10 +544,11 @@ export default function VersusGamePage() {
 
   return (
     <div
-      className={`ingame${attackShaking ? " ingame--attack-shake" : ""}`}
+      className={`ingame${attackShaking ? " ingame--attack-shake" : ""}${shaking ? " ingame--shake" : ""}`}
       style={{ display: "flex", flexDirection: "column" }}
     >
       {countingDown && <CountdownScreen onComplete={handleCountdownComplete} />}
+      <JudgementPopup />
       <ComboPopup />
       <FeverResultPopup />
       <AttackSentBanner attackInfo={attackSent} />

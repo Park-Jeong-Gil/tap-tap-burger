@@ -11,6 +11,7 @@ import GameOverScreen from "@/components/game/GameOverScreen";
 import CountdownScreen from "@/components/game/CountdownScreen";
 import ComboPopup from "@/components/game/ComboPopup";
 import FeverResultPopup from "@/components/game/FeverResultPopup";
+import JudgementPopup from "@/components/game/JudgementPopup";
 
 export default function SingleGamePage() {
   const status = useGameStore((s) => s.status);
@@ -18,13 +19,10 @@ export default function SingleGamePage() {
   const score = useGameStore((s) => s.score);
   const startGame = useGameStore((s) => s.startGame);
   const wrongFlashCount = useGameStore((s) => s.wrongFlashCount);
-  const timeoutFlashCount = useGameStore((s) => s.timeoutFlashCount);
 
   const [countingDown, setCountingDown] = useState(true);
   const [shaking, setShaking] = useState(false);
-  const [timeoutFlashing, setTimeoutFlashing] = useState(false);
   const shakeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const timeoutTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleCountdownComplete = useCallback(() => {
     setCountingDown(false);
@@ -46,14 +44,6 @@ export default function SingleGamePage() {
     shakeTimer.current = setTimeout(() => setShaking(false), 400);
   }, [wrongFlashCount]);
 
-  // 타임아웃 → 붉은 비네트
-  useEffect(() => {
-    if (timeoutFlashCount === 0) return;
-    if (timeoutTimer.current) clearTimeout(timeoutTimer.current);
-    setTimeoutFlashing(true);
-    timeoutTimer.current = setTimeout(() => setTimeoutFlashing(false), 700);
-  }, [timeoutFlashCount]);
-
   useGameLoop();
   useKeyboard({ enabled: status === "playing" });
 
@@ -62,7 +52,7 @@ export default function SingleGamePage() {
       {countingDown && (
         <CountdownScreen onComplete={handleCountdownComplete} />
       )}
-      {!countingDown && timeoutFlashing && <div className="timeout-vignette" />}
+      <JudgementPopup />
       <ComboPopup />
       <FeverResultPopup />
       <div className="top-display">

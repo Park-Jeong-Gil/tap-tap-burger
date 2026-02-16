@@ -122,6 +122,17 @@ export function isCombo(elapsed: number, timeLimit: number): boolean {
   return elapsed < timeLimit * 0.65;
 }
 
+// ─── 클리어 판정 (남은 시간 비율 기반) ─────────────────
+export function getClearJudgement(
+  elapsed: number,
+  timeLimit: number,
+): 'perfect' | 'good' | 'clear' {
+  const progress = timeLimit > 0 ? elapsed / timeLimit : 1;
+  if (progress <= 0.45) return 'perfect';
+  if (progress <= 0.75) return 'good';
+  return 'clear';
+}
+
 // ─── 콤보 배율 ────────────────────────────────────
 export function getComboMultiplier(combo: number): number {
   if (combo === 0) return 1.0;

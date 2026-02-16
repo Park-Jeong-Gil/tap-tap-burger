@@ -19,6 +19,7 @@ import {
   generateFeverOrder,
   validateBurger,
   isCombo,
+  getClearJudgement,
   calcScore,
   getDifficulty,
 } from '@/lib/gameLogic';
@@ -39,6 +40,7 @@ interface GameState {
   submitFlash: 'correct' | 'wrong' | null;
   lastScoreGain: number;
   lastComboOnSubmit: number;
+  lastClearJudgement: 'perfect' | 'good' | 'clear' | null;
   wrongFlashCount: number;
   timeoutFlashCount: number;
   clearedCount: number;
@@ -142,6 +144,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   submitFlash: null,
   lastScoreGain: 0,
   lastComboOnSubmit: 0,
+  lastClearJudgement: null,
   wrongFlashCount: 0,
   timeoutFlashCount: 0,
   clearedCount: 0,
@@ -176,6 +179,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       submitFlash: null,
       lastScoreGain: 0,
       lastComboOnSubmit: 0,
+      lastClearJudgement: null,
       wrongFlashCount: 0,
       timeoutFlashCount: 0,
       clearedCount: 0,
@@ -210,6 +214,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       submitFlash: null,
       lastScoreGain: 0,
       lastComboOnSubmit: 0,
+      lastClearJudgement: null,
       wrongFlashCount: 0,
       timeoutFlashCount: 0,
       clearedCount: 0,
@@ -307,6 +312,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         submitFlash: 'correct',
         lastScoreGain: points,
         lastComboOnSubmit: 0,
+        lastClearJudgement: null,
         inputLockedAt: Date.now(),
         pendingFeverOrder: next.nextPendingFeverOrder,
         nextFeverClearTarget,
@@ -331,11 +337,13 @@ export const useGameStore = create<GameState>((set, get) => ({
         wrongFlashCount: get().wrongFlashCount + 1,
         lastScoreGain: 0,
         lastComboOnSubmit: 0,
+        lastClearJudgement: null,
       });
       return;
     }
 
     const wasCombo = isCombo(targetOrder.elapsed, targetOrder.timeLimit);
+    const clearJudgement = getClearJudgement(targetOrder.elapsed, targetOrder.timeLimit);
     const newCombo = wasCombo ? combo + 1 : 0;
     const points = calcScore(newCombo);
     const newScore = score + points;
@@ -375,6 +383,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       submitFlash: 'correct',
       lastScoreGain: points,
       lastComboOnSubmit: wasCombo ? newCombo : 0,
+      lastClearJudgement: clearJudgement,
       inputLockedAt: Date.now(),
       pendingFeverOrder: next.nextPendingFeverOrder,
       nextFeverClearTarget: nextFeverTarget,
@@ -464,6 +473,7 @@ export const useGameStore = create<GameState>((set, get) => ({
               currentBurger: [],
               timeoutFlashCount: timeoutFlashCount + 1,
               inputLockedAt: Date.now(),
+              lastClearJudgement: null,
             }
           : {
               currentBurger: [],
@@ -524,5 +534,11 @@ export const useGameStore = create<GameState>((set, get) => ({
     if (get().status === 'playing') set({ status: 'gameover' });
   },
 
-  clearFlash: () => set({ submitFlash: null, lastSubmittedBurger: [], lastScoreGain: 0, lastComboOnSubmit: 0 }),
+  clearFlash: () => set({
+    submitFlash: null,
+    lastSubmittedBurger: [],
+    lastScoreGain: 0,
+    lastComboOnSubmit: 0,
+    lastClearJudgement: null,
+  }),
 }));

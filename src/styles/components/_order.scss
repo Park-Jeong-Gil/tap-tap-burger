@@ -486,23 +486,39 @@
   font-weight: bold;
   pointer-events: none;
   border-radius: inherit;
-  background: rgba(46, 158, 62, 0.2);
-  color: v.$color-success;
-  text-shadow: 0 0 10px rgba(46, 158, 62, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  background:
+    radial-gradient(circle at center, rgba(183, 255, 206, 0.28), rgba(183, 255, 206, 0)),
+    rgba(46, 158, 62, 0.22);
+  color: #b8ffcf;
+  text-shadow:
+    -2px 0 #134824,
+    2px 0 #134824,
+    0 -2px #134824,
+    0 2px #134824,
+    0 0 14px rgba(122, 255, 180, 0.85);
   will-change: transform, opacity;
 
   @include m.mobile {
-    font-size: m.vw(20);
+    font-size: m.vw(24);
   }
   @include m.desktop {
-    font-size: 24px;
+    font-size: 30px;
   }
 
   // 콤보 클리어 시 금색으로
   &--combo {
-    background: rgba(240, 180, 41, 0.22);
-    color: #f0b429;
-    text-shadow: 0 0 12px rgba(240, 180, 41, 0.8);
+    background:
+      radial-gradient(circle at center, rgba(255, 235, 139, 0.36), rgba(255, 235, 139, 0)),
+      rgba(240, 180, 41, 0.24);
+    color: #ffe95f;
+    text-shadow:
+      -2px 0 #5f320f,
+      2px 0 #5f320f,
+      0 -2px #5f320f,
+      0 2px #5f320f,
+      0 0 16px rgba(255, 235, 139, 0.95);
   }
 }
 

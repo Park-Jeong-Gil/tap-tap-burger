@@ -15,7 +15,9 @@ import ScoreBoard from "@/components/game/ScoreBoard";
 import InputPanel from "@/components/game/InputPanel";
 import GameOverScreen from "@/components/game/GameOverScreen";
 import CountdownScreen from "@/components/game/CountdownScreen";
+import ComboPopup from "@/components/game/ComboPopup";
 import FeverResultPopup from "@/components/game/FeverResultPopup";
+import JudgementPopup from "@/components/game/JudgementPopup";
 import type { Ingredient } from "@/types";
 
 export default function CoopGamePage() {
@@ -44,18 +46,27 @@ export default function CoopGamePage() {
     removeLastIngredient,
     submitBurger,
     forceGameOver,
+    wrongFlashCount,
   } = useGameStore();
 
   const [assignedKeys, setAssignedKeys] = useState<string[]>([]);
   const [joined, setJoined] = useState(false);
   const [expired, setExpired] = useState(false);
   const [countingDown, setCountingDown] = useState(false);
+  const [shaking, setShaking] = useState(false);
   const [nicknameInput, setNicknameInput] = useState("");
   const finishedRef = useRef(false);
   const gameStatusRef = useRef(gameStatus);
+  const shakeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     gameStatusRef.current = gameStatus;
   }, [gameStatus]);
+
+  useEffect(() => {
+    return () => {
+      if (shakeTimer.current) clearTimeout(shakeTimer.current);
+    };
+  }, []);
 
   useEffect(() => {
     initSession();
@@ -195,6 +206,14 @@ export default function CoopGamePage() {
       forceGameOver();
     }
   }, [roomStatus, gameStatus, forceGameOver]);
+
+  // 오답 제출 시 화면 흔들림
+  useEffect(() => {
+    if (wrongFlashCount === 0) return;
+    if (shakeTimer.current) clearTimeout(shakeTimer.current);
+    setShaking(true);
+    shakeTimer.current = setTimeout(() => setShaking(false), 420);
+  }, [wrongFlashCount]);
 
   // 키보드 입력 → 코업 브로드캐스트
   useEffect(() => {
@@ -343,8 +362,10 @@ export default function CoopGamePage() {
   }
 
   return (
-    <div className="ingame">
+    <div className={`ingame${shaking ? " ingame--shake" : ""}`}>
       {countingDown && <CountdownScreen onComplete={handleCountdownComplete} />}
+      <JudgementPopup />
+      <ComboPopup />
       <FeverResultPopup />
       <div className="top-display">
         <HpBar hp={hp} />

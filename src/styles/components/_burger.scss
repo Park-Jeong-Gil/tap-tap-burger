@@ -9,7 +9,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  overflow: hidden;
+  // overflow: hidden;
   height: 100%;
 
   @include m.mobile {
@@ -113,18 +113,23 @@
   pointer-events: none;
 
   &--wrong {
-    background: rgba(217, 48, 37, 0.42);
-    color: v.$color-danger;
+    background: rgba(217, 48, 37, 0.5);
+    color: #ff8f86;
     font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
     text-shadow:
-      0 0 16px rgba(217, 48, 37, 0.9),
-      0 0 32px rgba(217, 48, 37, 0.4);
-    animation: flash-miss 0.52s ease-out forwards;
+      -2px 0 #4e1111,
+      2px 0 #4e1111,
+      0 -2px #4e1111,
+      0 2px #4e1111,
+      0 0 20px rgba(217, 48, 37, 0.95);
+    animation: flash-miss 0.56s ease-out forwards;
     @include m.mobile {
-      font-size: m.vw(36);
+      font-size: m.vw(44);
     }
     @include m.desktop {
-      font-size: 46px;
+      font-size: 56px;
     }
   }
 }
@@ -178,15 +183,15 @@
 // MISS! 크게 번쩍이다 사라지는 모션
 @keyframes flash-miss {
   0% {
-    transform: scale(1.5);
+    transform: scale(2) rotate(-5deg);
     opacity: 1;
   }
-  40% {
-    transform: scale(1);
+  35% {
+    transform: scale(0.92) rotate(2deg);
     opacity: 1;
   }
   100% {
-    transform: scale(0.9);
+    transform: scale(1.18) rotate(0);
     opacity: 0;
   }
 }

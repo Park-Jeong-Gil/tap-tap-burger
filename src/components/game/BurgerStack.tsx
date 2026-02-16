@@ -123,11 +123,6 @@ export default function BurgerStack({ ingredients }: BurgerStackProps) {
           )}
         </div>
       </div>
-
-      {/* ── 오답 플래시 오버레이 ── */}
-      {submitFlash === 'wrong' && (
-        <div className="burger-flash burger-flash--wrong">MISS!</div>
-      )}
     </div>
   );
 }

@@ -1,9 +1,7 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useRef, useEffect } from "react";
 import type { Order, Ingredient } from "@/types";
-import { useGameStore } from "@/stores/gameStore";
 import { FEVER_SCORE_PER_STACK } from "@/lib/constants";
 
 const INGREDIENT_IMAGES: Record<Ingredient, string> = {
@@ -26,31 +24,6 @@ export default function OrderPreview({
 }: OrderPreviewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const foodRef = useRef<HTMLDivElement>(null);
-
-  const submitFlash = useGameStore((s) => s.submitFlash);
-  const lastComboOnSubmit = useGameStore((s) => s.lastComboOnSubmit);
-
-  const [showClear, setShowClear] = useState(false);
-  const [clearId, setClearId] = useState(0);
-  const [isComboFlash, setIsComboFlash] = useState(false);
-  const clearTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // 정답 제출 시 CLEAR! 플래시
-  useEffect(() => {
-    if (submitFlash === "correct") {
-      if (clearTimer.current) clearTimeout(clearTimer.current);
-      setClearId((n) => n + 1);
-      setIsComboFlash(lastComboOnSubmit >= 1);
-      setShowClear(true);
-      clearTimer.current = setTimeout(() => setShowClear(false), 520);
-    }
-  }, [submitFlash, lastComboOnSubmit]);
-
-  useEffect(() => {
-    return () => {
-      if (clearTimer.current) clearTimeout(clearTimer.current);
-    };
-  }, []);
 
   const remaining = Math.max(0, order.timeLimit - order.elapsed);
   const timePct = (remaining / order.timeLimit) * 100;
@@ -99,29 +72,6 @@ export default function OrderPreview({
         .join(" ")}
       ref={containerRef}
     >
-      {/* 정답 제출 CLEAR! 플래시 오버레이 */}
-      <AnimatePresence>
-        {showClear && (
-          <motion.div
-            key={clearId}
-            className={`order-preview__clear${isComboFlash ? " order-preview__clear--combo" : ""}`}
-            initial={{ opacity: 0, scale: 0.85 }}
-            animate={{
-              opacity: 1,
-              scale: 1,
-              transition: { type: "spring", stiffness: 600, damping: 22 },
-            }}
-            exit={{
-              opacity: 0,
-              scale: 1.1,
-              transition: { duration: 0.2, ease: "easeIn" },
-            }}
-          >
-            CLEAR!
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* 헤더: 주문 번호 + 남은 시간 */}
       <div className="order-preview__header">
         <span className="order-preview__index">

@@ -15,21 +15,30 @@ function getComboLevel(combo: number): 1 | 2 | 3 | 4 {
 export default function ComboPopup() {
   const submitFlash = useGameStore((s) => s.submitFlash);
   const lastComboOnSubmit = useGameStore((s) => s.lastComboOnSubmit);
+  const lastClearJudgement = useGameStore((s) => s.lastClearJudgement);
 
   const [visible, setVisible] = useState(false);
   const [currentCombo, setCurrentCombo] = useState(0);
+  const [currentJudgeText, setCurrentJudgeText] = useState('COMBO!');
   const [uid, setUid] = useState(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (submitFlash === 'correct' && lastComboOnSubmit >= 1) {
       if (timerRef.current) clearTimeout(timerRef.current);
+      setCurrentJudgeText(
+        lastClearJudgement === 'perfect'
+          ? 'PERFECT!!'
+          : lastClearJudgement === 'good'
+            ? 'GOOD!'
+            : 'COMBO!',
+      );
       setCurrentCombo(lastComboOnSubmit);
       setUid((n) => n + 1);
       setVisible(true);
       timerRef.current = setTimeout(() => setVisible(false), 950);
     }
-  }, [submitFlash, lastComboOnSubmit]);
+  }, [submitFlash, lastComboOnSubmit, lastClearJudgement]);
 
   useEffect(() => {
     return () => {
@@ -47,23 +56,27 @@ export default function ComboPopup() {
           <motion.div
             key={uid}
             className={`combo-popup combo-popup--lv${level}`}
-            initial={{ scale: 2.4, opacity: 0, y: 8 }}
+            initial={{ scale: 2.2, opacity: 0, y: 24, rotate: -3 }}
             animate={{
-              scale: 1,
-              opacity: 1,
-              y: 0,
-              transition: { type: 'spring', stiffness: 550, damping: 20 },
+              scale: [2.2, 0.92, 1.08, 1],
+              opacity: [0, 1, 1, 1],
+              y: [24, -8, 0, 0],
+              rotate: [-3, 1, 0, 0],
+              transition: { duration: 0.55, times: [0, 0.45, 0.75, 1] },
             }}
             exit={{
-              scale: 0.65,
+              scale: 1.12,
               opacity: 0,
-              y: -20,
-              transition: { duration: 0.22, ease: 'easeIn' },
+              y: -38,
+              transition: { duration: 0.2, ease: 'easeIn' },
             }}
           >
-            <span className="combo-popup__number">{currentCombo}</span>
-            <span className="combo-popup__text">COMBO!</span>
-            <span className="combo-popup__mult">×{mult.toFixed(1)}</span>
+            <span className="combo-popup__judge">{currentJudgeText}</span>
+            <div className="combo-popup__main">
+              <span className="combo-popup__number">{currentCombo}</span>
+              <span className="combo-popup__text">combo</span>
+            </div>
+            <span className="combo-popup__mult">x{mult.toFixed(1)} SCORE</span>
           </motion.div>
         )}
       </AnimatePresence>
