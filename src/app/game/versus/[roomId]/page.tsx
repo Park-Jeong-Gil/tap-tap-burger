@@ -339,10 +339,23 @@ export default function VersusGamePage() {
     }
 
     const comboAttackBlocked = isFeverActive || opponent.isFeverActive;
-    if (!comboAttackBlocked && combo === 0 && prevComboRef.current > 0) {
-      sendAttack(prevComboRef.current, "combo");
-      showAttackBanner(prevComboRef.current, "combo");
-      emitProjectile("outgoing", "combo", prevComboRef.current);
+    if (!comboAttackBlocked) {
+      if (combo === 0 && prevComboRef.current > 0) {
+        const remaining = prevComboRef.current % 6;
+        if (remaining > 0) {
+          sendAttack(remaining, "combo");
+          showAttackBanner(remaining, "combo");
+          emitProjectile("outgoing", "combo", remaining);
+        }
+      } else if (combo > 0) {
+        const prevChunks = Math.floor(prevComboRef.current / 6);
+        const curChunks = Math.floor(combo / 6);
+        if (curChunks > prevChunks) {
+          sendAttack(6, "combo");
+          showAttackBanner(6, "combo");
+          emitProjectile("outgoing", "combo", 6);
+        }
+      }
     }
     prevComboRef.current = combo;
   }, [
