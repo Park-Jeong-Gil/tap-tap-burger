@@ -190,7 +190,7 @@ export default function MultiHubPage() {
           협력 모드
         </button>
         <button
-          className="btn btn--ghost"
+          className="btn btn--secondary"
           onClick={() => handleCreate('versus')}
           disabled={creating || !isInitialized}
         >

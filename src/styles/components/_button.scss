@@ -4,9 +4,14 @@
 
 // ─────────────────────────────────────────
 // .btn  — 기본 픽셀 버튼
-// .btn--primary   주황 강조
-// .btn--danger    붉은 위험
-// .btn--ghost     테두리만
+//
+// 중요도 계층 (1→4순위)
+// .btn--primary    주황 강조    [1순위] 주 액션
+// .btn--secondary  시에나 강조  [2순위] 부 액션
+// .btn--tertiary   아웃라인     [3순위] 탐색/보조
+// .btn--ghost      테두리만     [4순위] 취소/뒤로
+//
+// .btn--danger    붉은 위험 (비파괴 경고용, 계층 외)
 // ─────────────────────────────────────────
 
 .btn {
@@ -17,6 +22,7 @@
   font-family: v.$font-pixel;
   color: v.$color-text;
   text-align: center;
+  font-weight: bold;
   line-height: 1.4;
   border: none;
   outline: none;
@@ -54,10 +60,41 @@
     $corner-size: 2,
     $border-size: 4px,
     $background-color: v.$color-primary,
+    // $background-color: #f5cd70,
     $border-color: v.$color-border,
     $border-inset: true,
     $border-inset-sides: "all"
   );
+  color: v.$color-bg;
+}
+
+// 2순위: 따뜻한 시에나 — primary보다 차분하지만 여전히 강한 존재감
+.btn--secondary {
+  @include pb.pixel-box(
+    $corner-size: 2,
+    $border-size: 4px,
+    // $background-color: #cd7000,
+    $background-color: #44c16f,
+    $border-color: v.$color-border,
+    $border-inset: true,
+    $border-inset-sides: "all"
+  );
+  // color: #fde8c8; e78c6c 44c16f a07abb f5cd70 d37b15
+  // color: #333;
+  color: v.$color-bg;
+}
+
+// 3순위: 뮤트 웜브라운 — primary·secondary와 동일 스타일, 채도만 낮춤
+.btn--tertiary {
+  @include pb.pixel-box(
+    $corner-size: 2,
+    $border-size: 4px,
+    $background-color: #a07abb,
+    $border-color: v.$color-border,
+    $border-inset: true,
+    $border-inset-sides: "all"
+  );
+  // color: #333;
   color: v.$color-bg;
 }
 

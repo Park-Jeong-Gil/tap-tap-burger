@@ -1,15 +1,16 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { usePlayerStore } from '@/stores/playerStore';
-import HowToPlay from '@/components/ui/HowToPlay';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { usePlayerStore } from "@/stores/playerStore";
+import HowToPlay from "@/components/ui/HowToPlay";
 
 export default function MainPage() {
   const router = useRouter();
-  const { nickname, setNickname, initSession, saveNickname, isInitialized } = usePlayerStore();
+  const { nickname, setNickname, initSession, saveNickname, isInitialized } =
+    usePlayerStore();
   const [showHtp, setShowHtp] = useState(false);
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState("");
 
   useEffect(() => {
     initSession();
@@ -26,25 +27,29 @@ export default function MainPage() {
 
   const handleSingle = () => {
     setNickname(inputValue);
-    router.push('/game/single');
+    router.push("/game/single");
   };
 
   const handleMulti = () => {
     setNickname(inputValue);
-    router.push('/game/multi');
+    router.push("/game/multi");
   };
 
   return (
     <main className="main-page">
       <div>
         <h1 className="main-title">
-          TAP TAP<br />BURGER
+          TAP TAP
+          <br />
+          BURGER
         </h1>
         <p className="main-subtitle">Perfect Order</p>
       </div>
 
       <div className="main-nickname">
-        <label className="main-nickname__label" htmlFor="nickname">닉네임</label>
+        <label className="main-nickname__label" htmlFor="nickname">
+          닉네임
+        </label>
         <input
           id="nickname"
           className="input"
@@ -58,16 +63,19 @@ export default function MainPage() {
 
       <nav className="main-menu">
         <button className="btn btn--primary" onClick={handleSingle}>
-          싱글 게임
+          SINGLE GAME
         </button>
-        <button className="btn btn--ghost" onClick={handleMulti}>
-          멀티 게임
+        <button className="btn btn--secondary" onClick={handleMulti}>
+          MULTI GAME
         </button>
-        <button className="btn btn--ghost" onClick={() => router.push('/leaderboard')}>
-          리더보드
+        <button
+          className="btn btn--tertiary"
+          onClick={() => router.push("/leaderboard")}
+        >
+          LEADERBOARD
         </button>
         <button className="btn btn--ghost" onClick={() => setShowHtp(true)}>
-          하우 투 플레이
+          HOW TO PLAY
         </button>
       </nav>
 
