@@ -580,12 +580,14 @@
   font-family: v.$font-pixel;
   color: v.$color-danger;
   text-align: center;
+  filter: drop-shadow(0px 2px 0px #fff) drop-shadow(2px 0px 0px #fff)
+    drop-shadow(-2px 0px 0px #fff) drop-shadow(0px -2px 0px #fff);
 
   @include m.mobile {
-    font-size: m.vw(36);
+    font-size: m.vw(40);
   }
   @include m.desktop {
-    font-size: 40px;
+    font-size: 48px;
   }
 }
 
@@ -719,7 +721,7 @@
 .countdown-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(26, 26, 46, 0.9);
+  background-color: #000c;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -744,9 +746,11 @@
   &--go {
     color: v.$color-success;
     animation: countdown-go 0.65s ease-out forwards;
+    filter: drop-shadow(0 2px #fff) drop-shadow(2px 0 #fff)
+      drop-shadow(-2px 0 #fff) drop-shadow(0 -2px #fff);
 
     @include m.mobile {
-      font-size: m.vw(56);
+      font-size: m.vw(68);
     }
     @include m.desktop {
       font-size: 76px;
