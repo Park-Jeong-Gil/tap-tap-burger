@@ -43,6 +43,7 @@ export default function CoopGamePage() {
     addIngredient,
     removeLastIngredient,
     submitBurger,
+    forceGameOver,
   } = useGameStore();
 
   const [assignedKeys, setAssignedKeys] = useState<string[]>([]);
@@ -156,15 +157,20 @@ export default function CoopGamePage() {
     const markFinished = () => {
       if (gameStatusRef.current === "playing" && !finishedRef.current) {
         finishedRef.current = true;
+        // 뒤로가기 직후 대기실로 돌아가도 즉시 만료 상태를 보여주기 위해 로컬 상태를 먼저 갱신
+        setRoomStatus("finished");
+        updateRoomStatus(roomId, "finished").catch(() => {});
         markRoomFinishedBeacon(roomId);
       }
     };
     window.addEventListener("beforeunload", markFinished);
+    window.addEventListener("pagehide", markFinished);
     return () => {
       window.removeEventListener("beforeunload", markFinished);
+      window.removeEventListener("pagehide", markFinished);
       markFinished(); // 컴포넌트 언마운트 (SPA 이동) 시에도 실행
     };
-  }, [roomId]);
+  }, [roomId, setRoomStatus]);
 
   // 대기실 10분 타임아웃 → 자동 만료
   useEffect(() => {
@@ -182,6 +188,13 @@ export default function CoopGamePage() {
       setExpired(true);
     }
   }, [roomStatus, gameStatus, countingDown]);
+
+  // 게임 도중 상대가 나가서 룸이 만료되면 즉시 게임오버 처리
+  useEffect(() => {
+    if (roomStatus === "finished" && gameStatus === "playing") {
+      forceGameOver();
+    }
+  }, [roomStatus, gameStatus, forceGameOver]);
 
   // 키보드 입력 → 코업 브로드캐스트
   useEffect(() => {

@@ -31,28 +31,28 @@ export const COMBO_MULTIPLIERS: {
 export const DIFFICULTY_TIERS: { minOrders: number; tier: DifficultyTier }[] = [
   {
     minOrders: 0,
-    // tier: { minIngredients: 3, timerMultiplier: 2.2, hpDrainPerSec: 0.4 },
-    tier: { minIngredients: 10, timerMultiplier: 20, hpDrainPerSec: 0.4 },
+    tier: { minIngredients: 3, timerMultiplier: 2.2, hpDrainPerSec: 0.4 },
+    // tier: { minIngredients: 10, timerMultiplier: 20, hpDrainPerSec: 0.4 },
   }, // 시작
   {
     minOrders: 6,
-    // tier: { minIngredients: 4, timerMultiplier: 2, hpDrainPerSec: 0.8 },
-    tier: { minIngredients: 4, timerMultiplier: 10, hpDrainPerSec: 0.8 },
+    tier: { minIngredients: 4, timerMultiplier: 2, hpDrainPerSec: 0.8 },
+    // tier: { minIngredients: 4, timerMultiplier: 10, hpDrainPerSec: 0.8 },
   }, // 적응
   {
     minOrders: 10,
-    // tier: { minIngredients: 5, timerMultiplier: 1.8, hpDrainPerSec: 1.2 },
-    tier: { minIngredients: 5, timerMultiplier: 10, hpDrainPerSec: 1.2 },
+    tier: { minIngredients: 5, timerMultiplier: 1.8, hpDrainPerSec: 1.2 },
+    // tier: { minIngredients: 5, timerMultiplier: 10, hpDrainPerSec: 1.2 },
   }, // 적응
   {
     minOrders: 15,
-    // tier: { minIngredients: 6, timerMultiplier: 1.6, hpDrainPerSec: 1.6 },
-    tier: { minIngredients: 6, timerMultiplier: 10, hpDrainPerSec: 1.6 },
+    tier: { minIngredients: 6, timerMultiplier: 1.6, hpDrainPerSec: 1.6 },
+    // tier: { minIngredients: 6, timerMultiplier: 10, hpDrainPerSec: 1.6 },
   }, // 가속
   {
     minOrders: 20,
-    // tier: { minIngredients: 7, timerMultiplier: 1.4, hpDrainPerSec: 2.2 },
-    tier: { minIngredients: 7, timerMultiplier: 10, hpDrainPerSec: 2.2 },
+    tier: { minIngredients: 7, timerMultiplier: 1.4, hpDrainPerSec: 2.2 },
+    // tier: { minIngredients: 7, timerMultiplier: 10, hpDrainPerSec: 2.2 },
   }, // 압박
   {
     minOrders: 25,

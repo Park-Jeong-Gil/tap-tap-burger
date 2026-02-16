@@ -12,7 +12,19 @@ import type { GameMode } from '@/types';
 export default function MultiHubPage() {
   const router = useRouter();
   const { playerId, nickname, initSession, isInitialized } = usePlayerStore();
-  const { roomId, isHost, players, roomStatus, createAndJoin, setReady, startGame, reset, restoreHostRoom } = useRoomStore();
+  const {
+    roomId,
+    mode,
+    isHost,
+    players,
+    roomStatus,
+    createAndJoin,
+    setReady,
+    startGame,
+    setRoomStatus,
+    reset,
+    restoreHostRoom,
+  } = useRoomStore();
   const [creating, setCreating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [selectedMode, setSelectedMode] = useState<GameMode | null>(null);
@@ -48,6 +60,18 @@ export default function MultiHubPage() {
   // 대기실 실시간 동기화
   useLobbyRoom(roomId ?? '');
 
+  // 뒤로가기로 대기실 페이지에 복귀했을 때도 실제 룸 상태를 즉시 반영
+  useEffect(() => {
+    if (!roomId) return;
+    const syncRoomStatus = async () => {
+      const room = await getRoomInfo(roomId);
+      if (!room || room.status === 'finished') {
+        setRoomStatus('finished');
+      }
+    };
+    syncRoomStatus();
+  }, [roomId, setRoomStatus]);
+
   const handleCreate = async (mode: GameMode) => {
     if (!playerId || !isInitialized) return;
     setCreating(true);
@@ -80,13 +104,34 @@ export default function MultiHubPage() {
   // 참가자로 접속한 경우 (roomId가 URL에서 왔을 때)
   // → /game/coop/[roomId] or /game/versus/[roomId] 에서 직접 처리
 
-  if (roomId) {
+  if (roomId && roomStatus === 'finished') {
     return (
       <div className="multi-hub">
         <div className="room-lobby">
-          <p className="room-lobby__title">
-            {selectedMode === 'coop' ? '협력 모드' : '대전 모드'} 대기실
+          <p className="room-lobby__title">게임 만료</p>
+          <p style={{ fontFamily: 'Mulmaru', fontSize: '0.85em', color: '#9B7060', textAlign: 'center' }}>
+            이 게임은 종료되어 더 이상 참여할 수 없습니다.
           </p>
+        </div>
+        <button className="btn btn--ghost" onClick={() => { reset(); }}>
+          확인
+        </button>
+      </div>
+    );
+  }
+
+  if (roomId) {
+    const displayMode = selectedMode ?? mode;
+    const lobbyTitle =
+      displayMode === 'coop'
+        ? '협력 모드 대기실'
+        : displayMode === 'versus'
+          ? '대전 모드 대기실'
+          : '멀티 모드 대기실';
+    return (
+      <div className="multi-hub">
+        <div className="room-lobby">
+          <p className="room-lobby__title">{lobbyTitle}</p>
 
           <div className="room-lobby__link">
             <p style={{ fontFamily: 'Mulmaru', fontSize: '0.75em', color: '#7a7a9a', flex: 1, wordBreak: 'break-all' }}>
