@@ -129,9 +129,13 @@ export function useVersusRoom(
 
     // 공격 이벤트 (상대 콤보 → 내 큐에 주문서 추가)
     channel.on('broadcast', { event: 'attack' }, ({ payload }) => {
-      const { count, fromPlayerId } = payload as { count: number; fromPlayerId: string };
+      const { count, attackType, fromPlayerId } = payload as {
+        count: number;
+        attackType?: 'combo' | 'fever_delta';
+        fromPlayerId: string;
+      };
       if (fromPlayerId !== playerIdRef.current) {
-        addOrdersFromAttack(count);
+        addOrdersFromAttack(count, attackType ?? 'combo');
       }
     });
 

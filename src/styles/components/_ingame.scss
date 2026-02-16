@@ -1174,6 +1174,96 @@
   }
 }
 
+// ─── 공격 투사체 레이어 (대전: 송신/피격 공통) ────────
+.attack-projectile-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 66;
+  overflow: hidden;
+}
+
+.attack-shot {
+  position: fixed;
+  margin-left: -9px;
+  margin-top: -9px;
+  width: 18px;
+  height: 18px;
+  border-radius: 2px;
+  border: 2px solid rgba(26, 26, 46, 0.8);
+  image-rendering: pixelated;
+  will-change: transform, opacity;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 3px;
+    border-radius: 1px;
+    background: rgba(255, 255, 255, 0.25);
+  }
+
+  &__count {
+    position: absolute;
+    top: -16px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: v.$font-pixel;
+    font-weight: bold;
+    color: #fff7b0;
+    text-shadow:
+      -1px 0 #4f2808,
+      1px 0 #4f2808,
+      0 -1px #4f2808,
+      0 1px #4f2808;
+    white-space: nowrap;
+    @include m.mobile {
+      font-size: m.vw(10);
+    }
+    @include m.desktop {
+      font-size: 11px;
+    }
+  }
+
+  &--combo {
+    background: linear-gradient(135deg, #ffd44f 0%, #ff8b42 100%);
+    box-shadow:
+      0 0 0 2px rgba(255, 168, 66, 0.38),
+      0 0 14px rgba(255, 168, 66, 0.88);
+  }
+
+  &--fever_delta {
+    background: linear-gradient(135deg, #b1f4ff 0%, #5db8ff 100%);
+    box-shadow:
+      0 0 0 2px rgba(93, 184, 255, 0.35),
+      0 0 16px rgba(93, 184, 255, 0.9);
+  }
+}
+
+.attack-impact {
+  position: fixed;
+  margin-left: -18px;
+  margin-top: -18px;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 3px solid;
+  will-change: transform, opacity;
+
+  &--combo {
+    border-color: rgba(255, 184, 76, 0.95);
+    box-shadow:
+      0 0 0 2px rgba(255, 184, 76, 0.32),
+      0 0 20px rgba(255, 184, 76, 0.72);
+  }
+
+  &--fever_delta {
+    border-color: rgba(145, 227, 255, 0.95);
+    box-shadow:
+      0 0 0 2px rgba(145, 227, 255, 0.28),
+      0 0 20px rgba(145, 227, 255, 0.74);
+  }
+}
+
 // ─── 공격 발사 배너 (대전: 내가 콤보 공격 시) ─────────
 .attack-sent-wrap {
   position: fixed;

@@ -46,6 +46,7 @@ interface GameState {
   clearedCount: number;
   attackReceivedFlashCount: number;
   attackReceivedCount: number;
+  attackReceivedType: 'combo' | 'fever_delta';
   inputLockedAt: number;
   mode: GameMode;
 
@@ -70,7 +71,7 @@ interface GameState {
   submitBurger: () => void;
   tick: (delta: number) => void;
   saveScore: (playerId: string) => Promise<boolean>;
-  addOrdersFromAttack: (count: number) => void;
+  addOrdersFromAttack: (count: number, attackType?: 'combo' | 'fever_delta') => void;
   forceGameOver: () => void;
   clearFlash: () => void;
 }
@@ -150,6 +151,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   clearedCount: 0,
   attackReceivedFlashCount: 0,
   attackReceivedCount: 0,
+  attackReceivedType: 'combo',
   inputLockedAt: 0,
   mode: 'single',
   isFeverActive: false,
@@ -185,6 +187,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       clearedCount: 0,
       attackReceivedFlashCount: 0,
       attackReceivedCount: 0,
+      attackReceivedType: 'combo',
       inputLockedAt: 0,
       mode,
       isFeverActive: false,
@@ -220,6 +223,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       clearedCount: 0,
       attackReceivedFlashCount: 0,
       attackReceivedCount: 0,
+      attackReceivedType: 'combo',
       inputLockedAt: 0,
       isFeverActive: false,
       feverIngredient: null,
@@ -502,7 +506,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     }
   },
 
-  addOrdersFromAttack: (count: number) => {
+  addOrdersFromAttack: (count: number, attackType: 'combo' | 'fever_delta' = 'combo') => {
     const { orders, orderCounter } = get();
     if (orders.length === 0 || count <= 0) return;
 
@@ -527,6 +531,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       orders: newOrders,
       attackReceivedFlashCount: get().attackReceivedFlashCount + 1,
       attackReceivedCount: count,
+      attackReceivedType: attackType,
     });
   },
 

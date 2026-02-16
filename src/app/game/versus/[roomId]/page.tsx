@@ -25,6 +25,9 @@ import FeverResultPopup from "@/components/game/FeverResultPopup";
 import JudgementPopup from "@/components/game/JudgementPopup";
 import AttackSentBanner from "@/components/game/AttackSentBanner";
 import AttackReceivedOverlay from "@/components/game/AttackReceivedOverlay";
+import AttackProjectileLayer, {
+  type AttackProjectilePulse,
+} from "@/components/game/AttackProjectileLayer";
 import MiniBurgerPreview from "@/components/game/MiniBurgerPreview";
 import type { Ingredient } from "@/types";
 
@@ -90,6 +93,8 @@ export default function VersusGamePage() {
   const attackReceivedFlashCount = useGameStore(
     (s) => s.attackReceivedFlashCount,
   );
+  const attackReceivedCount = useGameStore((s) => s.attackReceivedCount);
+  const attackReceivedType = useGameStore((s) => s.attackReceivedType);
 
   const [opponent, setOpponent] = useState<OpponentState>({
     hp: 80,
@@ -116,11 +121,15 @@ export default function VersusGamePage() {
   const [attackShaking, setAttackShaking] = useState(false);
   const [shaking, setShaking] = useState(false);
   const [opponentFeverResultTick, setOpponentFeverResultTick] = useState(0);
+  const [projectiles, setProjectiles] = useState<AttackProjectilePulse[]>([]);
 
   const attackSentIdRef = useRef(0);
+  const projectileIdRef = useRef(0);
   const attackSentTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const attackShakeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const shakeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const opponentPanelRef = useRef<HTMLDivElement | null>(null);
+  const myHudRef = useRef<HTMLDivElement | null>(null);
   const prevComboRef = useRef(0);
   const lastSendRef = useRef(0);
   const finishedRef = useRef(false);
@@ -144,6 +153,51 @@ export default function VersusGamePage() {
     attackSentTimer.current = setTimeout(() => setAttackSent(null), 1300);
   }, []);
 
+  const emitProjectile = useCallback((
+    direction: "outgoing" | "incoming",
+    type: "combo" | "fever_delta",
+    count: number,
+  ) => {
+    if (count <= 0 || typeof window === "undefined") return;
+
+    const getCenter = (
+      el: HTMLElement | null,
+      fallback: { x: number; y: number },
+    ) => {
+      if (!el) return fallback;
+      const rect = el.getBoundingClientRect();
+      return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+    };
+
+    const viewportW = window.innerWidth;
+    const viewportH = window.innerHeight;
+    const myCenter = getCenter(myHudRef.current, {
+      x: viewportW * 0.5,
+      y: viewportH * 0.78,
+    });
+    const opponentCenter = getCenter(opponentPanelRef.current, {
+      x: viewportW * 0.5,
+      y: viewportH * 0.18,
+    });
+
+    projectileIdRef.current += 1;
+    setProjectiles((prev) => [
+      ...prev,
+      {
+        id: projectileIdRef.current,
+        count,
+        type,
+        direction,
+        from: direction === "outgoing" ? myCenter : opponentCenter,
+        to: direction === "outgoing" ? opponentCenter : myCenter,
+      },
+    ]);
+  }, []);
+
+  const handleProjectileDone = useCallback((id: number) => {
+    setProjectiles((prev) => prev.filter((p) => p.id !== id));
+  }, []);
+
   const tryResolveFeverDelta = useCallback((cycle: number, sendAttackFn: (count: number, type?: "combo" | "fever_delta") => void) => {
     if (resolvedFeverCycleRef.current.has(cycle)) return;
     const myCount = myFeverResultsRef.current[cycle];
@@ -163,7 +217,8 @@ export default function VersusGamePage() {
 
     sendAttackFn(attackCount, "fever_delta");
     showAttackBanner(attackCount, "fever_delta");
-  }, [showAttackBanner]);
+    emitProjectile("outgoing", "fever_delta", attackCount);
+  }, [showAttackBanner, emitProjectile]);
 
   useEffect(() => {
     return () => {
@@ -287,6 +342,7 @@ export default function VersusGamePage() {
     if (!comboAttackBlocked && combo === 0 && prevComboRef.current > 0) {
       sendAttack(prevComboRef.current, "combo");
       showAttackBanner(prevComboRef.current, "combo");
+      emitProjectile("outgoing", "combo", prevComboRef.current);
     }
     prevComboRef.current = combo;
   }, [
@@ -302,6 +358,7 @@ export default function VersusGamePage() {
     sendStateUpdate,
     sendAttack,
     showAttackBanner,
+    emitProjectile,
   ]);
 
   useEffect(() => {
@@ -349,7 +406,13 @@ export default function VersusGamePage() {
     if (attackShakeTimer.current) clearTimeout(attackShakeTimer.current);
     setAttackShaking(true);
     attackShakeTimer.current = setTimeout(() => setAttackShaking(false), 620);
-  }, [attackReceivedFlashCount]);
+    emitProjectile("incoming", attackReceivedType, attackReceivedCount);
+  }, [
+    attackReceivedFlashCount,
+    attackReceivedCount,
+    attackReceivedType,
+    emitProjectile,
+  ]);
 
   useEffect(() => {
     if (wrongFlashCount === 0) return;
@@ -553,8 +616,9 @@ export default function VersusGamePage() {
       <FeverResultPopup />
       <AttackSentBanner attackInfo={attackSent} />
       <AttackReceivedOverlay />
+      <AttackProjectileLayer pulses={projectiles} onDone={handleProjectileDone} />
 
-      <div className="versus-opponent">
+      <div className="versus-opponent" ref={opponentPanelRef}>
         <span className="versus-opponent__name">
           {opponentEntry?.nickname ?? "상대방"}
         </span>
@@ -580,7 +644,7 @@ export default function VersusGamePage() {
         <MiniBurgerPreview ingredients={opponent.targetIngredients} />
       </div>
 
-      <div className="top-display">
+      <div className="top-display" ref={myHudRef}>
         <HpBar hp={hp} />
         <ScoreBoard score={score} />
       </div>

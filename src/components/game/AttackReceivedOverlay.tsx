@@ -7,6 +7,7 @@ import { useGameStore } from '@/stores/gameStore';
 export default function AttackReceivedOverlay() {
   const attackReceivedFlashCount = useGameStore((s) => s.attackReceivedFlashCount);
   const attackReceivedCount = useGameStore((s) => s.attackReceivedCount);
+  const attackReceivedType = useGameStore((s) => s.attackReceivedType);
 
   const [visible, setVisible] = useState(false);
   const [count, setCount] = useState(0);
@@ -62,7 +63,9 @@ export default function AttackReceivedOverlay() {
           >
             <span className="attack-received-label__icon">⚠</span>
             <span className="attack-received-label__text">
-              +{count}개 주문 추가!
+              {attackReceivedType === 'fever_delta'
+                ? `피버 우위 공격 +${count}`
+                : `+${count}개 주문 추가!`}
             </span>
           </motion.div>
         </>
