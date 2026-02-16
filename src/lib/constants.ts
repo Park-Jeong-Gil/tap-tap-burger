@@ -1,8 +1,8 @@
 import type { Ingredient, DifficultyTier } from "@/types";
 
 // ─── HP ───────────────────────────────────────────────
-export const HP_MAX = 100;
-export const HP_INIT = 100;
+export const HP_MAX = 1000000;
+export const HP_INIT = 1000000;
 
 export const HP_DELTA = {
   correctSubmit: 15,
@@ -36,19 +36,23 @@ export const DIFFICULTY_TIERS: { minOrders: number; tier: DifficultyTier }[] = [
   }, // 시작
   {
     minOrders: 6,
-    tier: { minIngredients: 4, timerMultiplier: 2, hpDrainPerSec: 0.8 },
+    // tier: { minIngredients: 4, timerMultiplier: 2, hpDrainPerSec: 0.8 },
+    tier: { minIngredients: 4, timerMultiplier: 10, hpDrainPerSec: 0.8 },
   }, // 적응
   {
     minOrders: 10,
-    tier: { minIngredients: 5, timerMultiplier: 1.8, hpDrainPerSec: 1.2 },
+    // tier: { minIngredients: 5, timerMultiplier: 1.8, hpDrainPerSec: 1.2 },
+    tier: { minIngredients: 5, timerMultiplier: 10, hpDrainPerSec: 1.2 },
   }, // 적응
   {
     minOrders: 15,
-    tier: { minIngredients: 6, timerMultiplier: 1.6, hpDrainPerSec: 1.6 },
+    // tier: { minIngredients: 6, timerMultiplier: 1.6, hpDrainPerSec: 1.6 },
+    tier: { minIngredients: 6, timerMultiplier: 10, hpDrainPerSec: 1.6 },
   }, // 가속
   {
     minOrders: 20,
-    tier: { minIngredients: 7, timerMultiplier: 1.4, hpDrainPerSec: 2.2 },
+    // tier: { minIngredients: 7, timerMultiplier: 1.4, hpDrainPerSec: 2.2 },
+    tier: { minIngredients: 7, timerMultiplier: 10, hpDrainPerSec: 2.2 },
   }, // 압박
   {
     minOrders: 25,
@@ -113,9 +117,11 @@ export const ALL_COOP_ACTIONS = [
 // ─── 타이머 ───────────────────────────────────────────
 export const BASE_SECONDS_PER_INGREDIENT = 1.0; // 재료 1개당 기본 초
 export const MULTI_MAX_INGREDIENTS = 6; // 멀티 모드 재료 최대 개수
+export const ORDER_REFRESH_DELAY_MS = 500;
 export const FEVER_SECONDS = 6;
 export const FEVER_INTERVAL_CLEARS = 5;
 export const FEVER_SCORE_PER_STACK = 50;
+export const FEVER_TIMEOUT_GRACE_SECONDS = 0.3;
 
 // ─── localStorage 키 ──────────────────────────────────
 export const SESSION_STORAGE_KEY = "ttb_session_id";

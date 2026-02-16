@@ -15,6 +15,7 @@ import ScoreBoard from "@/components/game/ScoreBoard";
 import InputPanel from "@/components/game/InputPanel";
 import GameOverScreen from "@/components/game/GameOverScreen";
 import CountdownScreen from "@/components/game/CountdownScreen";
+import FeverResultPopup from "@/components/game/FeverResultPopup";
 import type { Ingredient } from "@/types";
 
 export default function CoopGamePage() {
@@ -331,6 +332,7 @@ export default function CoopGamePage() {
   return (
     <div className="ingame">
       {countingDown && <CountdownScreen onComplete={handleCountdownComplete} />}
+      <FeverResultPopup />
       <div className="top-display">
         <HpBar hp={hp} />
         <ScoreBoard score={score} />

@@ -843,6 +843,92 @@
   }
 }
 
+// ─── 피버 결과 팝업 (성공/실패) ───────────────────────
+.fever-result-wrap {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 64;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 24dvh;
+}
+
+.fever-result {
+  font-family: v.$font-pixel;
+  text-align: center;
+  background: rgba(26, 26, 46, 0.92);
+  border: 2px solid #ffd05a;
+  border-radius: 4px;
+  line-height: 1.15;
+
+  @include m.mobile {
+    padding: m.vw(10) m.vw(14);
+    min-width: m.vw(180);
+  }
+  @include m.desktop {
+    padding: 10px 14px;
+    min-width: 180px;
+  }
+
+  &__title {
+    font-weight: bold;
+    @include m.mobile {
+      font-size: m.vw(16);
+    }
+    @include m.desktop {
+      font-size: 18px;
+    }
+  }
+
+  &__stack,
+  &__score {
+    @include m.mobile {
+      font-size: m.vw(11);
+      margin-top: m.vw(4);
+    }
+    @include m.desktop {
+      font-size: 12px;
+      margin-top: 4px;
+    }
+  }
+
+  &--success {
+    border-color: #f0b429;
+    box-shadow:
+      0 0 0 2px rgba(240, 180, 41, 0.28),
+      0 0 22px rgba(240, 180, 41, 0.36);
+
+    .fever-result__title {
+      color: #f0b429;
+    }
+    .fever-result__stack {
+      color: #ffe5a0;
+    }
+    .fever-result__score {
+      color: v.$color-success;
+    }
+  }
+
+  &--fail {
+    border-color: v.$color-danger;
+    box-shadow:
+      0 0 0 2px rgba(217, 48, 37, 0.28),
+      0 0 18px rgba(217, 48, 37, 0.3);
+
+    .fever-result__title {
+      color: v.$color-danger;
+    }
+    .fever-result__stack {
+      color: #ffb3ac;
+    }
+    .fever-result__score {
+      color: #ffd6d1;
+    }
+  }
+}
+
 // ─── 공격 발사 배너 (대전: 내가 콤보 공격 시) ─────────
 .attack-sent-wrap {
   position: fixed;

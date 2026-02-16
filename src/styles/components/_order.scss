@@ -372,6 +372,17 @@
   }
 }
 
+.order-preview__fever-score {
+  font-family: v.$font-pixel;
+  color: v.$color-success;
+  @include m.mobile {
+    font-size: m.vw(10);
+  }
+  @include m.desktop {
+    font-size: 12px;
+  }
+}
+
 // 번 이미지
 .order-preview__bun {
   width: 100%;

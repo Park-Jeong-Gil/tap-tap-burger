@@ -9,8 +9,10 @@ import {
   BASE_SECONDS_PER_INGREDIENT,
   INGREDIENTS,
   MULTI_MAX_INGREDIENTS,
+  ORDER_REFRESH_DELAY_MS,
   FEVER_INTERVAL_CLEARS,
   FEVER_SCORE_PER_STACK,
+  FEVER_TIMEOUT_GRACE_SECONDS,
 } from '@/lib/constants';
 import {
   generateOrder,
@@ -230,7 +232,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   addIngredient: (ingredient) => {
     const { status, currentBurger, inputLockedAt, isFeverActive, feverIngredient } = get();
     if (status !== 'playing') return;
-    if (inputLockedAt > 0 && Date.now() - inputLockedAt < 200) return;
+    if (inputLockedAt > 0 && Date.now() - inputLockedAt < ORDER_REFRESH_DELAY_MS) return;
     if (isFeverActive && feverIngredient && ingredient !== feverIngredient) return;
 
     const nextBurger = [...currentBurger, ingredient];
@@ -274,7 +276,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     } = get();
 
     if (status !== 'playing' || orders.length === 0 || currentBurger.length === 0) return;
-    if (inputLockedAt > 0 && Date.now() - inputLockedAt < 200) return;
+    if (inputLockedAt > 0 && Date.now() - inputLockedAt < ORDER_REFRESH_DELAY_MS) return;
 
     const targetOrder = orders[0];
     const maxIng = mode !== 'single' ? MULTI_MAX_INGREDIENTS : undefined;
@@ -393,6 +395,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       feverCycleCounter: startFeverCycle,
       currentBurger,
       feverResultSeq,
+      inputLockedAt,
     } = get();
 
     if (status !== 'playing' || orders.length === 0) return;
@@ -405,8 +408,15 @@ export const useGameStore = create<GameState>((set, get) => ({
     let newHp = hp - diff.hpDrainPerSec * delta;
 
     const active = orders[0];
-    const newElapsed = active.elapsed + delta;
-    const timedOut = newElapsed >= active.timeLimit;
+    const isOrderRefreshDelay =
+      inputLockedAt > 0 && Date.now() - inputLockedAt < ORDER_REFRESH_DELAY_MS;
+    const elapsedDelta = isOrderRefreshDelay ? 0 : delta;
+    const newElapsed = active.elapsed + elapsedDelta;
+    const timeoutLimit =
+      active.type === 'fever'
+        ? active.timeLimit + FEVER_TIMEOUT_GRACE_SECONDS
+        : active.timeLimit;
+    const timedOut = newElapsed > timeoutLimit;
 
     let queueOrders: Order[];
     if (timedOut) {

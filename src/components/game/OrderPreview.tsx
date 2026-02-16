@@ -4,6 +4,7 @@ import { useRef, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Order, Ingredient } from "@/types";
 import { useGameStore } from "@/stores/gameStore";
+import { FEVER_SCORE_PER_STACK } from "@/lib/constants";
 
 const INGREDIENT_IMAGES: Record<Ingredient, string> = {
   patty: "/ingredient/patty.png",
@@ -56,6 +57,10 @@ export default function OrderPreview({
   const isUrgent = timePct < 30;
   const isFever = order.type === "fever";
   const feverIngredient = order.feverIngredient ?? order.ingredients[0];
+  const remainingText =
+    isFever && remaining < 1
+      ? `${remaining.toFixed(1)}s`
+      : `${Math.ceil(remaining)}s`;
 
   // 재료가 바뀔 때마다 food가 주문서 컬럼 영역을 넘으면 너비를 줄여서 축소
   useEffect(() => {
@@ -125,7 +130,7 @@ export default function OrderPreview({
         <span
           className={`order-preview__time${isUrgent ? " order-preview__time--urgent" : ""}`}
         >
-          {Math.ceil(remaining)}s
+          {remainingText}
         </span>
       </div>
 
@@ -150,6 +155,9 @@ export default function OrderPreview({
           )}
           <p className="order-preview__fever-count">
             현재 적재: {submittedCount}
+          </p>
+          <p className="order-preview__fever-score">
+            예상 점수: +{(submittedCount * FEVER_SCORE_PER_STACK).toLocaleString()}
           </p>
         </div>
       ) : (

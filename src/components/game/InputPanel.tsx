@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Ingredient } from "@/types";
 import { useGameStore } from "@/stores/gameStore";
+import { ORDER_REFRESH_DELAY_MS } from "@/lib/constants";
 import BurgerStack from "./BurgerStack";
 import OrderPreview from "./OrderPreview";
 
@@ -99,7 +100,7 @@ export default function InputPanel({ allowedActions, onAction }: InputPanelProps
   useEffect(() => {
     if (inputLockedAt === 0) return;
     setInputBlocked(true);
-    const t = setTimeout(() => setInputBlocked(false), 200);
+    const t = setTimeout(() => setInputBlocked(false), ORDER_REFRESH_DELAY_MS);
     return () => clearTimeout(t);
   }, [inputLockedAt]);
 

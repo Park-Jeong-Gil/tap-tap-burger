@@ -21,6 +21,7 @@ import InputPanel from "@/components/game/InputPanel";
 import GameOverScreen from "@/components/game/GameOverScreen";
 import CountdownScreen from "@/components/game/CountdownScreen";
 import ComboPopup from "@/components/game/ComboPopup";
+import FeverResultPopup from "@/components/game/FeverResultPopup";
 import AttackSentBanner from "@/components/game/AttackSentBanner";
 import AttackReceivedOverlay from "@/components/game/AttackReceivedOverlay";
 import MiniBurgerPreview from "@/components/game/MiniBurgerPreview";
@@ -536,6 +537,7 @@ export default function VersusGamePage() {
     >
       {countingDown && <CountdownScreen onComplete={handleCountdownComplete} />}
       <ComboPopup />
+      <FeverResultPopup />
       <AttackSentBanner attackInfo={attackSent} />
       <AttackReceivedOverlay />
 
