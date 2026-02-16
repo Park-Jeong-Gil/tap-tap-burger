@@ -316,7 +316,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         submitFlash: 'correct',
         lastScoreGain: points,
         lastComboOnSubmit: 0,
-        lastClearJudgement: null,
+        lastClearJudgement: 'perfect',
         inputLockedAt: Date.now(),
         pendingFeverOrder: next.nextPendingFeverOrder,
         nextFeverClearTarget,

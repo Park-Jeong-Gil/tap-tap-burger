@@ -48,12 +48,13 @@ export default function AttackReceivedOverlay() {
           <motion.div
             key={`label-${uid}`}
             className="attack-received-label"
-            initial={{ y: -30, opacity: 0, scale: 1.3 }}
+            initial={{ opacity: 0, scale: 1.8, y: 20, rotate: 2 }}
             animate={{
-              y: 0,
-              opacity: 1,
-              scale: 1,
-              transition: { type: 'spring', stiffness: 600, damping: 20 },
+              opacity: [0, 1, 1],
+              scale: [1.8, 0.92, 1],
+              y: [20, -4, 0],
+              rotate: [2, -0.5, 0],
+              transition: { duration: 0.4, times: [0, 0.48, 1] },
             }}
             exit={{
               y: -20,

@@ -57,7 +57,7 @@ export default function MainPage() {
           onChange={(e) => setInputValue(e.target.value)}
           onBlur={handleNicknameBlur}
           placeholder="닉네임 입력..."
-          maxLength={20}
+          maxLength={12}
         />
       </div>
 

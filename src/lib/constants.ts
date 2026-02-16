@@ -31,44 +31,44 @@ export const COMBO_MULTIPLIERS: {
 export const DIFFICULTY_TIERS: { minOrders: number; tier: DifficultyTier }[] = [
   {
     minOrders: 0,
-    tier: { minIngredients: 3, timerMultiplier: 2.2, hpDrainPerSec: 0.4 },
+    tier: { minIngredients: 3, timerMultiplier: 1.5, hpDrainPerSec: 0.3 },
     // tier: { minIngredients: 10, timerMultiplier: 20, hpDrainPerSec: 0.4 },
   }, // 시작
   {
-    minOrders: 6,
-    tier: { minIngredients: 4, timerMultiplier: 2, hpDrainPerSec: 0.8 },
+    minOrders: 5,
+    tier: { minIngredients: 4, timerMultiplier: 1.4, hpDrainPerSec: 0.8 },
     // tier: { minIngredients: 4, timerMultiplier: 10, hpDrainPerSec: 0.8 },
   }, // 적응
   {
     minOrders: 10,
-    tier: { minIngredients: 5, timerMultiplier: 1.8, hpDrainPerSec: 1.2 },
+    tier: { minIngredients: 5, timerMultiplier: 1.2, hpDrainPerSec: 2.0 },
     // tier: { minIngredients: 5, timerMultiplier: 10, hpDrainPerSec: 1.2 },
   }, // 적응
   {
     minOrders: 15,
-    tier: { minIngredients: 6, timerMultiplier: 1.6, hpDrainPerSec: 1.6 },
+    tier: { minIngredients: 6, timerMultiplier: 1, hpDrainPerSec: 3.2 },
     // tier: { minIngredients: 6, timerMultiplier: 10, hpDrainPerSec: 1.6 },
   }, // 가속
   {
     minOrders: 20,
-    tier: { minIngredients: 7, timerMultiplier: 1.4, hpDrainPerSec: 2.2 },
+    tier: { minIngredients: 7, timerMultiplier: 0.8, hpDrainPerSec: 4.5 },
     // tier: { minIngredients: 7, timerMultiplier: 10, hpDrainPerSec: 2.2 },
   }, // 압박
   {
     minOrders: 25,
-    tier: { minIngredients: 8, timerMultiplier: 0.8, hpDrainPerSec: 3.2 },
+    tier: { minIngredients: 8, timerMultiplier: 0.68, hpDrainPerSec: 6.0 },
   }, // 위기
   {
     minOrders: 30,
-    tier: { minIngredients: 9, timerMultiplier: 0.6, hpDrainPerSec: 4.5 },
+    tier: { minIngredients: 9, timerMultiplier: 0.4, hpDrainPerSec: 8.2 },
   }, // 극한
   {
-    minOrders: 45,
-    tier: { minIngredients: 11, timerMultiplier: 0.46, hpDrainPerSec: 6.0 },
+    minOrders: 35,
+    tier: { minIngredients: 11, timerMultiplier: 0.12, hpDrainPerSec: 10.0 },
   }, // 광기
   {
-    minOrders: 50,
-    tier: { minIngredients: 12, timerMultiplier: 0.38, hpDrainPerSec: 8.0 },
+    minOrders: 40,
+    tier: { minIngredients: 12, timerMultiplier: 0.08, hpDrainPerSec: 12.0 },
   }, // 지옥
 ];
 

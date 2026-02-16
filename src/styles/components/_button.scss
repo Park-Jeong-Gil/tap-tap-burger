@@ -59,8 +59,8 @@
   @include pb.pixel-box(
     $corner-size: 2,
     $border-size: 4px,
-    $background-color: v.$color-primary,
-    // $background-color: #f5cd70,
+    // $background-color: v.$color-primary,
+    $background-color: #e76434,
     $border-color: v.$color-border,
     $border-inset: true,
     $border-inset-sides: "all"
@@ -74,12 +74,12 @@
     $corner-size: 2,
     $border-size: 4px,
     // $background-color: #cd7000,
-    $background-color: #44c16f,
+    $background-color: #eb910a,
     $border-color: v.$color-border,
     $border-inset: true,
     $border-inset-sides: "all"
   );
-  // color: #fde8c8; e78c6c 44c16f a07abb f5cd70 d37b15
+  // color: #fde8c8; e78c6c 44c16f a07abb f5cd70 d37b15 e78c6c
   // color: #333;
   color: v.$color-bg;
 }
@@ -89,7 +89,20 @@
   @include pb.pixel-box(
     $corner-size: 2,
     $border-size: 4px,
-    $background-color: #a07abb,
+    $background-color: #847290,
+    $border-color: v.$color-border,
+    $border-inset: true,
+    $border-inset-sides: "all"
+  );
+  // color: #333;
+  color: v.$color-bg;
+}
+
+.btn--flat {
+  @include pb.pixel-box(
+    $corner-size: 2,
+    $border-size: 4px,
+    $background-color: #9c9c9c,
     $border-color: v.$color-border,
     $border-inset: true,
     $border-inset-sides: "all"

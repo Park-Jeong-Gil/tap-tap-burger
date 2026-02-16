@@ -213,11 +213,11 @@
 
   @include m.mobile {
     padding: m.vw(10) m.vw(12);
-    gap: m.vw(8);
+    gap: m.vw(12);
   }
   @include m.desktop {
     padding: 20px;
-    gap: 8px;
+    gap: 12px;
   }
 
   &--urgent {
@@ -227,7 +227,11 @@
   &--fever {
     border-color: #d93025;
     background:
-      linear-gradient(180deg, rgba(255, 214, 120, 0.18) 0%, rgba(255, 255, 255, 1) 45%),
+      linear-gradient(
+        180deg,
+        rgba(255, 214, 120, 0.18) 0%,
+        rgba(255, 255, 255, 1) 45%
+      ),
       v.$color-surface;
   }
 }
@@ -489,7 +493,11 @@
   text-transform: uppercase;
   letter-spacing: 0.03em;
   background:
-    radial-gradient(circle at center, rgba(183, 255, 206, 0.28), rgba(183, 255, 206, 0)),
+    radial-gradient(
+      circle at center,
+      rgba(183, 255, 206, 0.28),
+      rgba(183, 255, 206, 0)
+    ),
     rgba(46, 158, 62, 0.22);
   color: #b8ffcf;
   text-shadow:
@@ -510,7 +518,11 @@
   // 콤보 클리어 시 금색으로
   &--combo {
     background:
-      radial-gradient(circle at center, rgba(255, 235, 139, 0.36), rgba(255, 235, 139, 0)),
+      radial-gradient(
+        circle at center,
+        rgba(255, 235, 139, 0.36),
+        rgba(255, 235, 139, 0)
+      ),
       rgba(240, 180, 41, 0.24);
     color: #ffe95f;
     text-shadow:

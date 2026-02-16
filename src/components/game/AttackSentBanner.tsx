@@ -14,13 +14,14 @@ export default function AttackSentBanner({ attackInfo }: AttackSentBannerProps) 
           <motion.div
             key={attackInfo.id}
             className="attack-sent-banner"
-            initial={{ x: '-50%', y: 20, opacity: 0, scale: 0.7 }}
+            initial={{ x: '-50%', opacity: 0, scale: 1.8, y: 20, rotate: -2 }}
             animate={{
               x: '-50%',
-              y: 0,
-              opacity: 1,
-              scale: 1,
-              transition: { type: 'spring', stiffness: 700, damping: 22 },
+              opacity: [0, 1, 1],
+              scale: [1.8, 0.92, 1],
+              y: [20, -4, 0],
+              rotate: [-2, 0.5, 0],
+              transition: { duration: 0.45, times: [0, 0.48, 1] },
             }}
             exit={{
               x: '-50%',

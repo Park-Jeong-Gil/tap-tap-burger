@@ -19,14 +19,15 @@ export default function FeverResultPopup() {
         <motion.div
           key={feverResultSeq}
           className={`fever-result${success ? ' fever-result--success' : ' fever-result--fail'}`}
-          initial={{ opacity: 0, y: 18, scale: 0.8 }}
+          initial={{ opacity: 0, scale: 2.3, y: 34, rotate: -3 }}
           animate={{
             opacity: [0, 1, 1, 0],
-            y: [18, 0, 0, -16],
-            scale: [0.8, 1.05, 1, 0.96],
-            transition: { duration: 1.2, times: [0, 0.2, 0.7, 1] },
+            scale: [2.3, 0.9, 1.08, 0.96],
+            y: [34, -8, 0, -16],
+            rotate: [-3, 1, 0, 0],
+            transition: { duration: 1.3, times: [0, 0.3, 0.65, 1] },
           }}
-          exit={{ opacity: 0 }}
+          exit={{ opacity: 0, scale: 1.18, y: -40, transition: { duration: 0.18, ease: 'easeIn' } }}
         >
           <p className="fever-result__title">
             {success ? 'FEVER CLEAR!' : 'FEVER FAIL'}
