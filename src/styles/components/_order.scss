@@ -223,6 +223,13 @@
   &--urgent {
     animation: urgent-flash 0.4s ease-in-out infinite;
   }
+
+  &--fever {
+    border-color: #d93025;
+    background:
+      linear-gradient(180deg, rgba(255, 214, 120, 0.18) 0%, rgba(255, 255, 255, 1) 45%),
+      v.$color-surface;
+  }
 }
 
 .order-preview__header {
@@ -260,6 +267,10 @@
   }
 }
 
+.order-preview--fever .order-preview__index {
+  color: v.$color-danger;
+}
+
 // 타이머 진행 바
 .order-preview__timer-wrap {
   flex-shrink: 0;
@@ -286,6 +297,10 @@
   }
 }
 
+.order-preview--fever .order-preview__timer-bar {
+  background: linear-gradient(90deg, #ff7a24 0%, #d93025 100%);
+}
+
 // 버거 비주얼 (column-reverse로 쌓음)
 // width: min(100%, 35cqh) → 재료 수가 많아져도 .order-preview 높이(cqh) 기준으로
 // 버거 비주얼 영역 — 콘텐츠 자연 높이로 표시
@@ -302,6 +317,58 @@
   }
   @include m.desktop {
     margin-top: 12px;
+  }
+}
+
+.order-preview__fever {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  @include m.mobile {
+    gap: m.vw(10);
+    margin-top: m.vw(8);
+  }
+  @include m.desktop {
+    gap: 10px;
+    margin-top: 8px;
+  }
+}
+
+.order-preview__fever-text {
+  font-family: v.$font-pixel;
+  color: v.$color-text;
+  line-height: 1.35;
+  @include m.mobile {
+    font-size: m.vw(10);
+  }
+  @include m.desktop {
+    font-size: 12px;
+  }
+}
+
+.order-preview__fever-target {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 70%;
+    height: auto;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 0 6px rgba(217, 48, 37, 0.4));
+  }
+}
+
+.order-preview__fever-count {
+  font-family: v.$font-pixel;
+  color: v.$color-primary;
+  @include m.mobile {
+    font-size: m.vw(11);
+  }
+  @include m.desktop {
+    font-size: 13px;
   }
 }
 

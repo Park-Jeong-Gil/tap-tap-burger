@@ -29,6 +29,8 @@ export default function OrderCard({
   const remaining = Math.max(0, order.timeLimit - order.elapsed);
   const timePct = (remaining / order.timeLimit) * 100;
   const isUrgent = timePct < 30;
+  const isFever = order.type === "fever";
+  const feverIngredient = order.feverIngredient ?? order.ingredients[0];
 
   // 입력된 재료에 맞춰 자동 스크롤
   useEffect(() => {
@@ -61,7 +63,9 @@ export default function OrderCard({
       /> */}
 
       <div className="order-card__header">
-        <p className="order-card__index">#{order.orderIndex + 1}</p>
+        <p className="order-card__index">
+          {isFever ? "피버!" : `#${order.orderIndex + 1}`}
+        </p>
         <p
           className={`order-card__time${isUrgent ? " order-card__time--urgent" : ""}`}
         >
@@ -70,7 +74,11 @@ export default function OrderCard({
       </div>
 
       <div className="order-card__ingredients" ref={listRef}>
-        {order.ingredients.map((ing, i) => {
+        {isFever && feverIngredient ? (
+          <span className="order-card__ingredient">
+            🔥 {INGREDIENT_LABELS[feverIngredient]}
+          </span>
+        ) : order.ingredients.map((ing, i) => {
           const isDone = isFirst && i < submittedCount;
           const isCurrent = isFirst && i === submittedCount;
           return (

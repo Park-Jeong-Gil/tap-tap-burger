@@ -54,6 +54,8 @@ export default function OrderPreview({
   const remaining = Math.max(0, order.timeLimit - order.elapsed);
   const timePct = (remaining / order.timeLimit) * 100;
   const isUrgent = timePct < 30;
+  const isFever = order.type === "fever";
+  const feverIngredient = order.feverIngredient ?? order.ingredients[0];
 
   // 재료가 바뀔 때마다 food가 주문서 컬럼 영역을 넘으면 너비를 줄여서 축소
   useEffect(() => {
@@ -79,11 +81,17 @@ export default function OrderPreview({
       food.style.width = `${scale * 100}%`;
       food.style.margin = "0 auto";
     }
-  }, [order.ingredients]);
+  }, [order.ingredients, order.type]);
 
   return (
     <div
-      className={`order-preview${isUrgent ? " order-preview--urgent" : ""}`}
+      className={[
+        "order-preview",
+        isUrgent ? "order-preview--urgent" : "",
+        isFever ? "order-preview--fever" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
       ref={containerRef}
     >
       {/* 정답 제출 CLEAR! 플래시 오버레이 */}
@@ -112,7 +120,7 @@ export default function OrderPreview({
       {/* 헤더: 주문 번호 + 남은 시간 */}
       <div className="order-preview__header">
         <span className="order-preview__index">
-          주문서 #{order.orderIndex + 1}
+          {isFever ? "피버 타임!" : `주문서 #${order.orderIndex + 1}`}
         </span>
         <span
           className={`order-preview__time${isUrgent ? " order-preview__time--urgent" : ""}`}
@@ -129,44 +137,60 @@ export default function OrderPreview({
         />
       </div>
 
-      {/* 목표 버거 비주얼 */}
-      <div className="order-preview__food" ref={foodRef}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/ingredient/bun_bottom.png"
-          alt="bun-bottom"
-          className="order-preview__bun"
-        />
-
-        {order.ingredients.map((ing, i) => {
-          const isDone = i < submittedCount;
-          const isCurrent = i === submittedCount;
-          return (
-            <div
-              key={i}
-              className={[
-                "order-preview__layer",
-                `order-preview__layer--${ing}`,
-                isDone ? "order-preview__layer--done" : "",
-                isCurrent ? "order-preview__layer--current" : "",
-              ]
-                .filter(Boolean)
-                .join(" ")}
-            >
+      {isFever ? (
+        <div className="order-preview__fever">
+          <p className="order-preview__fever-text">
+            시간 내에 가장 많이 쌓아서 완성하세요!
+          </p>
+          {feverIngredient && (
+            <div className="order-preview__fever-target">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={INGREDIENT_IMAGES[ing]} alt={ing} />
-              {isDone && <span className="order-preview__check">✓</span>}
+              <img src={INGREDIENT_IMAGES[feverIngredient]} alt={feverIngredient} />
             </div>
-          );
-        })}
+          )}
+          <p className="order-preview__fever-count">
+            현재 적재: {submittedCount}
+          </p>
+        </div>
+      ) : (
+        <div className="order-preview__food" ref={foodRef}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/ingredient/bun_bottom.png"
+            alt="bun-bottom"
+            className="order-preview__bun"
+          />
 
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/ingredient/bun_top.png"
-          alt="bun-top"
-          className="order-preview__bun order-preview__bun--top"
-        />
-      </div>
+          {order.ingredients.map((ing, i) => {
+            const isDone = i < submittedCount;
+            const isCurrent = i === submittedCount;
+            return (
+              <div
+                key={i}
+                className={[
+                  "order-preview__layer",
+                  `order-preview__layer--${ing}`,
+                  isDone ? "order-preview__layer--done" : "",
+                  isCurrent ? "order-preview__layer--current" : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={INGREDIENT_IMAGES[ing]} alt={ing} />
+                {isDone && <span className="order-preview__check">✓</span>}
+              </div>
+            );
+          })}
+
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/ingredient/bun_top.png"
+            alt="bun-top"
+            className="order-preview__bun order-preview__bun--top"
+          />
+        </div>
+      )}
     </div>
   );
 }

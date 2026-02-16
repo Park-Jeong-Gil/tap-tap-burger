@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 
 interface AttackSentBannerProps {
-  attackInfo: { id: number; count: number } | null;
+  attackInfo: { id: number; count: number; type: "combo" | "fever_delta" } | null;
 }
 
 export default function AttackSentBanner({ attackInfo }: AttackSentBannerProps) {
@@ -32,7 +32,9 @@ export default function AttackSentBanner({ attackInfo }: AttackSentBannerProps) 
           >
             <span className="attack-sent-banner__bolt">⚡</span>
             <span className="attack-sent-banner__text">
-              {attackInfo.count} COMBO 공격!
+              {attackInfo.type === "fever_delta"
+                ? `피버 우위 공격 +${attackInfo.count}`
+                : `${attackInfo.count} COMBO 공격!`}
             </span>
           </motion.div>
         )}

@@ -6,6 +6,7 @@ import {
   COMBO_MULTIPLIERS,
   BASE_SCORE,
   BASE_SECONDS_PER_INGREDIENT,
+  FEVER_SECONDS,
 } from "./constants";
 
 // ─── 난이도 계산 (주문 순번 기반) ───────────────────
@@ -20,7 +21,7 @@ export function getDifficulty(orderCount: number): DifficultyTier {
 
 // ─── 순번 기반 재료 해금 ──────────────────────────
 // 초반: 패티·치즈만 → 야채 추가 → 소스 추가 (전체 해금)
-function getAvailableIngredients(_orderIndex: number): Ingredient[] {
+function getAvailableIngredients(): Ingredient[] {
   return INGREDIENTS; // 모든 재료 처음부터 해금
 }
 
@@ -36,6 +37,10 @@ function makeRng(seed?: number): () => number {
   };
 }
 
+function pickRandomIngredient(rng: () => number): Ingredient {
+  return INGREDIENTS[Math.floor(rng() * INGREDIENTS.length)];
+}
+
 // ─── 주문서 생성 ──────────────────────────────────
 // prevTime이 없으면 → 순번 기반 기본 시간
 // prevTime이 있으면 → prevTime + 재료수 × mult + 3초 여유
@@ -48,7 +53,7 @@ export function generateOrder(
 ): Order {
   const rng = makeRng(seed);
   const diff = getDifficulty(orderIndex);
-  const available = getAvailableIngredients(orderIndex);
+  const available = getAvailableIngredients();
   const count =
     maxIngredients !== undefined
       ? Math.min(diff.minIngredients, maxIngredients)
@@ -75,8 +80,28 @@ export function generateOrder(
 
   return {
     id: uuidv4(),
+    type: "normal",
     ingredients,
     timeLimit,
+    elapsed: 0,
+    orderIndex,
+  };
+}
+
+export function generateFeverOrder(
+  orderIndex: number,
+  feverCycle: number,
+  seed?: number,
+): Order {
+  const rng = makeRng(seed);
+  const feverIngredient = pickRandomIngredient(rng);
+  return {
+    id: uuidv4(),
+    type: "fever",
+    ingredients: [feverIngredient],
+    feverIngredient,
+    feverCycle,
+    timeLimit: FEVER_SECONDS,
     elapsed: 0,
     orderIndex,
   };

@@ -1,13 +1,17 @@
 export type Ingredient = 'patty' | 'cheese' | 'veggie' | 'sauce' | 'onion' | 'tomato';
 export type GameMode = 'single' | 'coop' | 'versus';
 export type GameStatus = 'idle' | 'playing' | 'gameover';
+export type OrderType = 'normal' | 'fever';
 
 export interface Order {
   id: string;
+  type: OrderType;
   ingredients: Ingredient[];
   timeLimit: number;   // seconds
   elapsed: number;     // seconds elapsed
   orderIndex: number;  // cumulative order count for timer formula
+  feverIngredient?: Ingredient;
+  feverCycle?: number;
 }
 
 export interface Player {

@@ -32,9 +32,18 @@ interface OpponentState {
   score: number;
   combo: number;
   clearedCount: number;
-  targetIngredients: Ingredient[]; // 상대방이 현재 완성해야 할 주문서의 목표 재료
+  targetIngredients: Ingredient[];
+  isFeverActive: boolean;
+  feverStackCount: number;
   status: "playing" | "gameover";
   nickname?: string;
+}
+
+function mapFeverDiffToAttack(diff: number): number {
+  if (diff >= 9) return 3;
+  if (diff >= 6) return 2;
+  if (diff >= 3) return 1;
+  return 0;
 }
 
 export default function VersusGamePage() {
@@ -66,6 +75,11 @@ export default function VersusGamePage() {
     combo,
     orders,
     clearedCount,
+    isFeverActive,
+    feverStackCount,
+    lastFeverResultCount,
+    lastFeverResultCycle,
+    feverResultSeq,
     startGame: startLocalGame,
     forceGameOver,
   } = useGameStore();
@@ -81,19 +95,24 @@ export default function VersusGamePage() {
     combo: 0,
     clearedCount: 0,
     targetIngredients: [],
+    isFeverActive: false,
+    feverStackCount: 0,
     status: "playing",
   });
   const [joined, setJoined] = useState(false);
   const [expired, setExpired] = useState(false);
   const [countingDown, setCountingDown] = useState(false);
-  const [versusResult, setVersusResult] = useState<'win' | 'loss' | null>(null);
-  const versusResultRef = useRef<'win' | 'loss' | null>(null);
+  const [versusResult, setVersusResult] = useState<"win" | "loss" | null>(null);
+  const versusResultRef = useRef<"win" | "loss" | null>(null);
   const [nicknameInput, setNicknameInput] = useState("");
   const [attackSent, setAttackSent] = useState<{
     id: number;
     count: number;
+    type: "combo" | "fever_delta";
   } | null>(null);
   const [attackShaking, setAttackShaking] = useState(false);
+  const [opponentFeverResultTick, setOpponentFeverResultTick] = useState(0);
+
   const attackSentIdRef = useRef(0);
   const attackSentTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const attackShakeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -101,32 +120,73 @@ export default function VersusGamePage() {
   const lastSendRef = useRef(0);
   const finishedRef = useRef(false);
   const gameStatusRef = useRef(gameStatus);
-  gameStatusRef.current = gameStatus;
+  const myFeverResultsRef = useRef<Record<number, number>>({});
+  const opponentFeverResultsRef = useRef<Record<number, number>>({});
+  const resolvedFeverCycleRef = useRef<Set<number>>(new Set());
+  const feverAttackCooldownUntilRef = useRef(0);
+  useEffect(() => {
+    gameStatusRef.current = gameStatus;
+  }, [gameStatus]);
+
+  const showAttackBanner = useCallback((count: number, type: "combo" | "fever_delta") => {
+    if (attackSentTimer.current) clearTimeout(attackSentTimer.current);
+    attackSentIdRef.current += 1;
+    setAttackSent({
+      id: attackSentIdRef.current,
+      count,
+      type,
+    });
+    attackSentTimer.current = setTimeout(() => setAttackSent(null), 1300);
+  }, []);
+
+  const tryResolveFeverDelta = useCallback((cycle: number, sendAttackFn: (count: number, type?: "combo" | "fever_delta") => void) => {
+    if (resolvedFeverCycleRef.current.has(cycle)) return;
+    const myCount = myFeverResultsRef.current[cycle];
+    const opponentCount = opponentFeverResultsRef.current[cycle];
+    if (myCount === undefined || opponentCount === undefined) return;
+
+    resolvedFeverCycleRef.current.add(cycle);
+    delete myFeverResultsRef.current[cycle];
+    delete opponentFeverResultsRef.current[cycle];
+
+    const attackCount = mapFeverDiffToAttack(myCount - opponentCount);
+    if (attackCount <= 0) return;
+
+    const now = Date.now();
+    if (now < feverAttackCooldownUntilRef.current) return;
+    feverAttackCooldownUntilRef.current = now + 2000;
+
+    sendAttackFn(attackCount, "fever_delta");
+    showAttackBanner(attackCount, "fever_delta");
+  }, [showAttackBanner]);
+
+  useEffect(() => {
+    return () => {
+      if (attackSentTimer.current) clearTimeout(attackSentTimer.current);
+      if (attackShakeTimer.current) clearTimeout(attackShakeTimer.current);
+    };
+  }, []);
 
   useEffect(() => {
     initSession();
   }, [initSession]);
 
-  // 닉네임 입력 초기화 (저장된 값 or 현재 닉네임)
   useEffect(() => {
     if (!isInitialized) return;
     const saved = localStorage.getItem(NICKNAME_STORAGE_KEY);
     setNicknameInput(saved ?? nickname);
   }, [isInitialized, nickname]);
 
-  // 룸 참가
   useEffect(() => {
     if (!isInitialized || !playerId || joined) return;
     setJoined(true);
     const join = async () => {
-      // 룸 상태 확인
       const room = await getRoomInfo(roomId);
       if (!room || room.status === "finished") {
         setExpired(true);
         return;
       }
 
-      // 이미 참여 중인지 확인 (대기실에 있던 플레이어는 게임 시작 후에도 입장 허용)
       const { data: myRow } = await supabase
         .from("room_players")
         .select("player_id")
@@ -135,19 +195,15 @@ export default function VersusGamePage() {
         .maybeSingle();
 
       if (myRow) {
-        // 기존 참여자가 게임 진행 중에 재접속(새로고침 등) → 만료 처리
-        // 단, roomStatus가 이미 'playing'이면 방장이 multi 페이지에서 게임 시작 후 정상 첫 진입한 것
         if (room.status === "playing" && roomStatus !== "playing") setExpired(true);
         return;
       }
 
-      // 새 플레이어: 방이 진행 중이거나 가득 찼으면 만료
       if (room.status === "playing") {
         setExpired(true);
         return;
       }
 
-      // 플레이어 수 확인 (최대 2명)
       const { count } = await supabase
         .from("room_players")
         .select("player_id", { count: "exact", head: true })
@@ -161,16 +217,25 @@ export default function VersusGamePage() {
       await joinExisting(roomId, playerId, nickname);
     };
     join();
-  }, [isInitialized, playerId, joined, roomId, nickname, joinExisting]);
+  }, [isInitialized, playerId, joined, roomId, nickname, joinExisting, roomStatus]);
 
   const handleOpponentUpdate = useCallback((state: OpponentState) => {
     setOpponent(state);
   }, []);
 
-  const { sendStateUpdate, sendAttack, isConnected } = useVersusRoom(
+  const handleOpponentFeverResult = useCallback(
+    (result: { cycle: number; count: number }) => {
+      opponentFeverResultsRef.current[result.cycle] = result.count;
+      setOpponentFeverResultTick((n) => n + 1);
+    },
+    [],
+  );
+
+  const { sendStateUpdate, sendAttack, sendFeverResult, isConnected } = useVersusRoom(
     roomId,
     playerId ?? "",
     handleOpponentUpdate,
+    handleOpponentFeverResult,
   );
   useLobbyRoom(roomId);
   useGameLoop();
@@ -181,25 +246,21 @@ export default function VersusGamePage() {
     startLocalGame("versus");
   }, [startLocalGame]);
 
-  // 게임 시작 시 카운트다운 → 로컬 게임 시작
   useEffect(() => {
     if (roomStatus === "playing" && gameStatus === "idle") {
       setCountingDown(true);
     }
   }, [roomStatus, gameStatus]);
 
-  // 채널 연결 완료 시 스로틀 초기화 → 즉시 상태 전송
   useEffect(() => {
     if (isConnected) {
       lastSendRef.current = 0;
     }
   }, [isConnected]);
 
-  // 내 상태 주기적으로 상대방에게 전송 (최대 10fps 스로틀) + 콤보 공격
   useEffect(() => {
     if (gameStatus !== "playing") return;
 
-    // 상태 전송: 100ms 간격으로 제한 (Supabase 브로드캐스트 과부하 방지)
     const now = Date.now();
     if (now - lastSendRef.current >= 100) {
       lastSendRef.current = now;
@@ -210,26 +271,53 @@ export default function VersusGamePage() {
         combo,
         clearedCount,
         targetIngredients: orders[0]?.ingredients ?? [],
+        isFeverActive,
+        feverStackCount,
         status: "playing",
       });
     }
 
-    // 콤보 종료 시 (0으로 리셋) 직전 콤보 수만큼 공격 (스로틀 없이 즉시 처리)
-    if (combo === 0 && prevComboRef.current > 0) {
-      sendAttack(prevComboRef.current);
-      // 공격 발사 UI 피드백
-      if (attackSentTimer.current) clearTimeout(attackSentTimer.current);
-      attackSentIdRef.current++;
-      setAttackSent({
-        id: attackSentIdRef.current,
-        count: prevComboRef.current,
-      });
-      attackSentTimer.current = setTimeout(() => setAttackSent(null), 1300);
+    const comboAttackBlocked = isFeverActive || opponent.isFeverActive;
+    if (!comboAttackBlocked && combo === 0 && prevComboRef.current > 0) {
+      sendAttack(prevComboRef.current, "combo");
+      showAttackBanner(prevComboRef.current, "combo");
     }
     prevComboRef.current = combo;
-  }, [hp, orders, combo, gameStatus]); // sendStateUpdate/sendAttack은 stable ref이므로 deps 불필요
+  }, [
+    hp,
+    orders,
+    combo,
+    clearedCount,
+    gameStatus,
+    score,
+    isFeverActive,
+    feverStackCount,
+    opponent.isFeverActive,
+    sendStateUpdate,
+    sendAttack,
+    showAttackBanner,
+  ]);
 
-  // 게임오버 시 상대방에게 알림 + 룸 만료 처리
+  useEffect(() => {
+    if (feverResultSeq === 0 || lastFeverResultCycle <= 0) return;
+    myFeverResultsRef.current[lastFeverResultCycle] = lastFeverResultCount;
+    sendFeverResult(lastFeverResultCycle, lastFeverResultCount);
+    tryResolveFeverDelta(lastFeverResultCycle, sendAttack);
+  }, [
+    feverResultSeq,
+    lastFeverResultCycle,
+    lastFeverResultCount,
+    sendFeverResult,
+    sendAttack,
+    tryResolveFeverDelta,
+  ]);
+
+  useEffect(() => {
+    for (const key of Object.keys(opponentFeverResultsRef.current)) {
+      tryResolveFeverDelta(Number(key), sendAttack);
+    }
+  }, [opponentFeverResultTick, sendAttack, tryResolveFeverDelta]);
+
   useEffect(() => {
     if (gameStatus === "gameover") {
       sendStateUpdate({
@@ -239,6 +327,8 @@ export default function VersusGamePage() {
         combo,
         clearedCount,
         targetIngredients: [],
+        isFeverActive: false,
+        feverStackCount: 0,
         status: "gameover",
       });
       if (!finishedRef.current) {
@@ -246,9 +336,8 @@ export default function VersusGamePage() {
         updateRoomStatus(roomId, "finished").catch(() => {});
       }
     }
-  }, [gameStatus, sendStateUpdate]);
+  }, [gameStatus, sendStateUpdate, score, combo, clearedCount, roomId]);
 
-  // 공격 받기 → 화면 강한 흔들림
   useEffect(() => {
     if (attackReceivedFlashCount === 0) return;
     if (attackShakeTimer.current) clearTimeout(attackShakeTimer.current);
@@ -256,7 +345,6 @@ export default function VersusGamePage() {
     attackShakeTimer.current = setTimeout(() => setAttackShaking(false), 620);
   }, [attackReceivedFlashCount]);
 
-  // 게임 중 나가기 (탭 닫기 / 언마운트) → 마지막 플레이어면 룸 만료
   useEffect(() => {
     const markFinished = () => {
       if (gameStatusRef.current === "playing" && !finishedRef.current) {
@@ -267,11 +355,10 @@ export default function VersusGamePage() {
     window.addEventListener("beforeunload", markFinished);
     return () => {
       window.removeEventListener("beforeunload", markFinished);
-      markFinished(); // 컴포넌트 언마운트 (SPA 이동) 시에도 실행
+      markFinished();
     };
   }, [roomId]);
 
-  // 대기실 10분 타임아웃 → 자동 만료
   useEffect(() => {
     if (roomStatus !== "waiting") return;
     const timer = setTimeout(
@@ -284,15 +371,12 @@ export default function VersusGamePage() {
     return () => clearTimeout(timer);
   }, [roomId, roomStatus]);
 
-  // 상대방이 만료 처리한 경우 (게임 미시작 상태) → 만료 화면
   useEffect(() => {
     if (roomStatus === "finished" && gameStatus === "idle" && !countingDown) {
       setExpired(true);
     }
   }, [roomStatus, gameStatus, countingDown]);
 
-  // ─── 대전 승패 판정 ─────────────────────────────
-  // 내 HP 소진 → 패배
   useEffect(() => {
     if (gameStatus === "gameover" && versusResultRef.current === null) {
       versusResultRef.current = "loss";
@@ -300,7 +384,6 @@ export default function VersusGamePage() {
     }
   }, [gameStatus]);
 
-  // 상대방이 먼저 게임오버 → 승리
   useEffect(() => {
     if (
       opponent.status === "gameover" &&
@@ -313,7 +396,6 @@ export default function VersusGamePage() {
     }
   }, [opponent.status, gameStatus, forceGameOver]);
 
-  // 상대방이 도중 퇴장 (방 상태가 finished로 변경) → 승리
   useEffect(() => {
     if (
       roomStatus === "finished" &&
@@ -346,7 +428,6 @@ export default function VersusGamePage() {
   const myReady = myEntry?.ready ?? false;
   const opponentEntry = players.find((p) => p.playerId !== playerId);
 
-  // 만료된 링크 화면
   if (expired) {
     return (
       <div className="multi-hub">
@@ -370,7 +451,6 @@ export default function VersusGamePage() {
     );
   }
 
-  // 대기실 화면
   if (roomStatus === "waiting") {
     return (
       <div className="multi-hub">
@@ -458,7 +538,7 @@ export default function VersusGamePage() {
       <ComboPopup />
       <AttackSentBanner attackInfo={attackSent} />
       <AttackReceivedOverlay />
-      {/* 상단: 상대방 미니 패널 */}
+
       <div className="versus-opponent">
         <span className="versus-opponent__name">
           {opponentEntry?.nickname ?? "상대방"}
@@ -473,6 +553,10 @@ export default function VersusGamePage() {
         </span>
         {opponent.status === "gameover" ? (
           <span className="versus-opponent__gameover">GAME OVER</span>
+        ) : opponent.isFeverActive ? (
+          <span className="versus-opponent__combo">
+            FEVER x{opponent.feverStackCount}
+          </span>
         ) : opponent.combo >= 2 ? (
           <span className="versus-opponent__combo">
             {opponent.combo}x COMBO
@@ -481,7 +565,6 @@ export default function VersusGamePage() {
         <MiniBurgerPreview ingredients={opponent.targetIngredients} />
       </div>
 
-      {/* 내 게임 */}
       <div className="top-display">
         <HpBar hp={hp} />
         <ScoreBoard score={score} />

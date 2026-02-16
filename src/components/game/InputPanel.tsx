@@ -80,6 +80,8 @@ export default function InputPanel({ allowedActions, onAction }: InputPanelProps
   const status = useGameStore((s) => s.status);
   const orders = useGameStore((s) => s.orders);
   const inputLockedAt = useGameStore((s) => s.inputLockedAt);
+  const isFeverActive = useGameStore((s) => s.isFeverActive);
+  const feverIngredient = useGameStore((s) => s.feverIngredient);
 
   const firstOrder = orders[0] ?? null;
   const isPlaying = status === "playing";
@@ -101,11 +103,16 @@ export default function InputPanel({ allowedActions, onAction }: InputPanelProps
     return () => clearTimeout(t);
   }, [inputLockedAt]);
 
-  const isAllowed = (action: string) =>
-    !allowedActions || allowedActions.includes(action);
+  const isAllowed = (action: string) => {
+    if (isFeverActive) {
+      if (action === "submit") return true;
+      return feverIngredient === action;
+    }
+    return !allowedActions || allowedActions.includes(action);
+  };
 
   const handleAction = (action: string | Ingredient) => {
-    if (status !== "playing") return;
+    if (status !== "playing" || !isAllowed(action as string)) return;
     if (action === "cancel") clearBurger();
     else if (action === "submit") submitBurger();
     else addIngredient(action as Ingredient);

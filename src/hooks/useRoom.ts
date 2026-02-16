@@ -74,13 +74,21 @@ interface OpponentState {
   combo: number;
   clearedCount: number;
   targetIngredients: Ingredient[]; // 상대방이 현재 완성해야 할 주문서의 목표 재료
+  isFeverActive: boolean;
+  feverStackCount: number;
   status: 'playing' | 'gameover';
+}
+
+interface OpponentFeverResult {
+  cycle: number;
+  count: number;
 }
 
 export function useVersusRoom(
   roomId: string,
   playerId: string,
   onOpponentUpdate: (state: OpponentState) => void,
+  onOpponentFeverResult?: (result: OpponentFeverResult) => void,
 ) {
   const channelRef = useRef<RealtimeChannel | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -112,6 +120,8 @@ export function useVersusRoom(
           combo: p.combo ?? 0,
           clearedCount: p.clearedCount ?? 0,
           targetIngredients: p.targetIngredients ?? [],
+          isFeverActive: p.isFeverActive ?? false,
+          feverStackCount: p.feverStackCount ?? 0,
           status: p.status,
         });
       }
@@ -122,6 +132,17 @@ export function useVersusRoom(
       const { count, fromPlayerId } = payload as { count: number; fromPlayerId: string };
       if (fromPlayerId !== playerIdRef.current) {
         addOrdersFromAttack(count);
+      }
+    });
+
+    channel.on('broadcast', { event: 'fever_result' }, ({ payload }) => {
+      const { playerId: fromPlayerId, cycle, count } = payload as {
+        playerId: string;
+        cycle: number;
+        count: number;
+      };
+      if (fromPlayerId !== playerIdRef.current) {
+        onOpponentFeverResult?.({ cycle, count });
       }
     });
 
@@ -149,24 +170,31 @@ export function useVersusRoom(
       setIsConnected(false);
       supabase.removeChannel(channel);
     };
-  }, [roomId, onOpponentUpdate, addOrdersFromAttack, setRoomStatus]); // playerId 제거 — ref로 관리
+  }, [roomId, onOpponentUpdate, onOpponentFeverResult, addOrdersFromAttack, setRoomStatus]); // playerId 제거 — ref로 관리
 
   // sendStateUpdate/sendAttack도 ref 사용 → 안정적인 함수 참조 유지
-  const sendStateUpdate = useCallback((state: Omit<OpponentState, 'nickname'>) => {
+  const sendStateUpdate = useCallback((state: OpponentState) => {
     channelRef.current?.send({
       type: 'broadcast', event: 'state_update',
       payload: { ...state, playerId: playerIdRef.current },
     });
   }, []);
 
-  const sendAttack = useCallback((count: number) => {
+  const sendAttack = useCallback((count: number, attackType: 'combo' | 'fever_delta' = 'combo') => {
     channelRef.current?.send({
       type: 'broadcast', event: 'attack',
-      payload: { count, fromPlayerId: playerIdRef.current },
+      payload: { count, attackType, fromPlayerId: playerIdRef.current },
     });
   }, []);
 
-  return { sendStateUpdate, sendAttack, isConnected };
+  const sendFeverResult = useCallback((cycle: number, count: number) => {
+    channelRef.current?.send({
+      type: 'broadcast', event: 'fever_result',
+      payload: { cycle, count, playerId: playerIdRef.current },
+    });
+  }, []);
+
+  return { sendStateUpdate, sendAttack, sendFeverResult, isConnected };
 }
 
 // ─── 대기실 실시간 동기화 ──────────────────────────

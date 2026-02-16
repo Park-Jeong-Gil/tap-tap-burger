@@ -36,6 +36,8 @@ export default function CoopGamePage() {
     status: gameStatus,
     hp,
     score,
+    isFeverActive,
+    feverIngredient,
     startGame: startLocalGame,
     addIngredient,
     removeLastIngredient,
@@ -49,7 +51,9 @@ export default function CoopGamePage() {
   const [nicknameInput, setNicknameInput] = useState("");
   const finishedRef = useRef(false);
   const gameStatusRef = useRef(gameStatus);
-  gameStatusRef.current = gameStatus;
+  useEffect(() => {
+    gameStatusRef.current = gameStatus;
+  }, [gameStatus]);
 
   useEffect(() => {
     initSession();
@@ -120,7 +124,7 @@ export default function CoopGamePage() {
       }
     };
     join();
-  }, [isInitialized, playerId, joined, roomId, nickname, isHost, joinExisting]);
+  }, [isInitialized, playerId, joined, roomId, nickname, isHost, joinExisting, roomStatus]);
 
   const { sendInput } = useCoopRoom(roomId, playerId ?? "");
   useLobbyRoom(roomId);
@@ -183,11 +187,17 @@ export default function CoopGamePage() {
     if (gameStatus !== "playing" || assignedKeys.length === 0) return;
 
     const handleKey = (e: KeyboardEvent) => {
+      if (e.repeat) return;
+
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA") return;
 
       const action = KEY_MAP[e.key];
-      if (!action || !assignedKeys.includes(action)) return;
+      if (!action) return;
+
+      const allowedDuringFever =
+        isFeverActive && (action === "submit" || action === feverIngredient);
+      if (!allowedDuringFever && !assignedKeys.includes(action)) return;
 
       e.preventDefault();
       if (action === "cancel") removeLastIngredient();
@@ -203,6 +213,8 @@ export default function CoopGamePage() {
   }, [
     gameStatus,
     assignedKeys,
+    isFeverActive,
+    feverIngredient,
     addIngredient,
     removeLastIngredient,
     submitBurger,

@@ -20,6 +20,8 @@ export function useKeyboard({ allowedActions, enabled = true }: UseKeyboardOptio
     if (!enabled || status !== 'playing') return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.repeat) return;
+
       // 인풋 포커스 중에는 무시
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA') return;

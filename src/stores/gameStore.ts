@@ -2,9 +2,19 @@
 
 import { create } from 'zustand';
 import type { Ingredient, Order, GameStatus, GameMode } from '@/types';
-import { HP_MAX, HP_INIT, HP_DELTA, BASE_SECONDS_PER_INGREDIENT, INGREDIENTS, MULTI_MAX_INGREDIENTS } from '@/lib/constants';
+import {
+  HP_MAX,
+  HP_INIT,
+  HP_DELTA,
+  BASE_SECONDS_PER_INGREDIENT,
+  INGREDIENTS,
+  MULTI_MAX_INGREDIENTS,
+  FEVER_INTERVAL_CLEARS,
+  FEVER_SCORE_PER_STACK,
+} from '@/lib/constants';
 import {
   generateOrder,
+  generateFeverOrder,
   validateBurger,
   isCombo,
   calcScore,
@@ -22,18 +32,30 @@ interface GameState {
   maxCombo: number;
   orders: Order[];
   currentBurger: Ingredient[];
-  lastSubmittedBurger: Ingredient[]; // 완성 플래시 중 표시용 스냅샷
-  orderCounter: number; // 총 생성된 주문서 수 (순번 기반 난이도 계산용)
+  lastSubmittedBurger: Ingredient[];
+  orderCounter: number;
   submitFlash: 'correct' | 'wrong' | null;
-  lastScoreGain: number;     // 마지막 정답 제출로 얻은 점수
-  lastComboOnSubmit: number; // 제출 시점의 콤보 수 (0 = 콤보 없음)
-  wrongFlashCount: number;          // 오답 시 증가 → 화면 흔들림 트리거
-  timeoutFlashCount: number;        // 타임아웃 시 증가 → 경고 비네트 트리거
-  clearedCount: number;             // 정답 제출한 누적 주문서 수
-  attackReceivedFlashCount: number; // 공격 받을 때 증가 → 피격 오버레이 트리거
-  attackReceivedCount: number;      // 마지막 피격 주문서 수
-  inputLockedAt: number;            // 입력 잠금 타임스탬프 (0=해제, >0=잠금 중)
+  lastScoreGain: number;
+  lastComboOnSubmit: number;
+  wrongFlashCount: number;
+  timeoutFlashCount: number;
+  clearedCount: number;
+  attackReceivedFlashCount: number;
+  attackReceivedCount: number;
+  inputLockedAt: number;
   mode: GameMode;
+
+  // fever state
+  isFeverActive: boolean;
+  feverIngredient: Ingredient | null;
+  feverEndAt: number;
+  feverStackCount: number;
+  pendingFeverOrder: boolean;
+  nextFeverClearTarget: number;
+  feverCycleCounter: number;
+  lastFeverResultCount: number;
+  lastFeverResultCycle: number;
+  feverResultSeq: number;
 
   // actions
   startGame: (mode?: GameMode) => void;
@@ -42,21 +64,67 @@ interface GameState {
   removeLastIngredient: () => void;
   clearBurger: () => void;
   submitBurger: () => void;
-  tick: (delta: number) => void; // delta: seconds
+  tick: (delta: number) => void;
   saveScore: (playerId: string) => Promise<boolean>;
-  addOrdersFromAttack: (count: number) => void; // versus: 상대 공격
-  forceGameOver: () => void;           // versus: 상대 먼저 게임오버 시 강제 종료
+  addOrdersFromAttack: (count: number) => void;
+  forceGameOver: () => void;
   clearFlash: () => void;
 }
 
-// FIFO 시스템: 각 주문은 활성화될 때 fresh 타이머로 독립 생성
-// coop 모드에서는 seed를 사용해 두 클라이언트가 동일한 주문서를 생성
-function createInitialOrders(count: number, maxIngredients?: number, useSeed = false): { orders: Order[]; counter: number } {
+function createInitialOrders(
+  count: number,
+  maxIngredients?: number,
+  useSeed = false,
+): { orders: Order[]; counter: number } {
   const orders: Order[] = [];
   for (let i = 0; i < count; i++) {
     orders.push(generateOrder(i, undefined, maxIngredients, useSeed ? i : undefined));
   }
   return { orders, counter: count };
+}
+
+function getActiveFeverState(orders: Order[], currentBurger: Ingredient[]) {
+  const active = orders[0];
+  if (!active || active.type !== 'fever') {
+    return {
+      isFeverActive: false,
+      feverIngredient: null,
+      feverEndAt: 0,
+      feverStackCount: 0,
+    };
+  }
+  return {
+    isFeverActive: true,
+    feverIngredient: active.feverIngredient ?? active.ingredients[0] ?? null,
+    feverEndAt: Date.now() + Math.max(0, active.timeLimit - active.elapsed) * 1000,
+    feverStackCount: currentBurger.length,
+  };
+}
+
+function makeNextOrder(params: {
+  orderCounter: number;
+  pendingFeverOrder: boolean;
+  feverCycleCounter: number;
+  maxIngredients?: number;
+  useSeed?: boolean;
+}) {
+  const { orderCounter, pendingFeverOrder, feverCycleCounter, maxIngredients, useSeed = false } = params;
+  const seed = useSeed ? orderCounter : undefined;
+  if (pendingFeverOrder) {
+    return {
+      order: generateFeverOrder(orderCounter, feverCycleCounter + 1, seed),
+      nextOrderCounter: orderCounter + 1,
+      nextPendingFeverOrder: false,
+      nextFeverCycleCounter: feverCycleCounter + 1,
+    };
+  }
+
+  return {
+    order: generateOrder(orderCounter, undefined, maxIngredients, seed),
+    nextOrderCounter: orderCounter + 1,
+    nextPendingFeverOrder: false,
+    nextFeverCycleCounter: feverCycleCounter,
+  };
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -79,6 +147,16 @@ export const useGameStore = create<GameState>((set, get) => ({
   attackReceivedCount: 0,
   inputLockedAt: 0,
   mode: 'single',
+  isFeverActive: false,
+  feverIngredient: null,
+  feverEndAt: 0,
+  feverStackCount: 0,
+  pendingFeverOrder: false,
+  nextFeverClearTarget: FEVER_INTERVAL_CLEARS,
+  feverCycleCounter: 0,
+  lastFeverResultCount: 0,
+  lastFeverResultCycle: 0,
+  feverResultSeq: 0,
 
   startGame: (mode = 'single') => {
     const maxIng = mode !== 'single' ? MULTI_MAX_INGREDIENTS : undefined;
@@ -103,6 +181,16 @@ export const useGameStore = create<GameState>((set, get) => ({
       attackReceivedCount: 0,
       inputLockedAt: 0,
       mode,
+      isFeverActive: false,
+      feverIngredient: null,
+      feverEndAt: 0,
+      feverStackCount: 0,
+      pendingFeverOrder: false,
+      nextFeverClearTarget: FEVER_INTERVAL_CLEARS,
+      feverCycleCounter: 0,
+      lastFeverResultCount: 0,
+      lastFeverResultCycle: 0,
+      feverResultSeq: 0,
     });
   },
 
@@ -126,36 +214,110 @@ export const useGameStore = create<GameState>((set, get) => ({
       attackReceivedFlashCount: 0,
       attackReceivedCount: 0,
       inputLockedAt: 0,
+      isFeverActive: false,
+      feverIngredient: null,
+      feverEndAt: 0,
+      feverStackCount: 0,
+      pendingFeverOrder: false,
+      nextFeverClearTarget: FEVER_INTERVAL_CLEARS,
+      feverCycleCounter: 0,
+      lastFeverResultCount: 0,
+      lastFeverResultCycle: 0,
+      feverResultSeq: 0,
     });
   },
 
   addIngredient: (ingredient) => {
-    const { status, currentBurger, inputLockedAt } = get();
+    const { status, currentBurger, inputLockedAt, isFeverActive, feverIngredient } = get();
     if (status !== 'playing') return;
     if (inputLockedAt > 0 && Date.now() - inputLockedAt < 200) return;
-    set({ currentBurger: [...currentBurger, ingredient] });
+    if (isFeverActive && feverIngredient && ingredient !== feverIngredient) return;
+
+    const nextBurger = [...currentBurger, ingredient];
+    set({
+      currentBurger: nextBurger,
+      ...(isFeverActive ? { feverStackCount: nextBurger.length } : {}),
+    });
   },
 
   removeLastIngredient: () => {
-    const { status, currentBurger } = get();
+    const { status, currentBurger, isFeverActive } = get();
     if (status !== 'playing' || currentBurger.length === 0) return;
+    if (isFeverActive) return;
     set({ currentBurger: currentBurger.slice(0, -1) });
   },
 
   clearBurger: () => {
-    const { status, currentBurger } = get();
+    const { status, currentBurger, isFeverActive } = get();
     if (status !== 'playing' || currentBurger.length === 0) return;
+    if (isFeverActive) return;
     set({ currentBurger: [] });
   },
 
   submitBurger: () => {
-    const { status, orders, currentBurger, combo, maxCombo, score, hp, inputLockedAt } = get();
+    const {
+      status,
+      orders,
+      currentBurger,
+      combo,
+      maxCombo,
+      score,
+      hp,
+      inputLockedAt,
+      orderCounter,
+      mode,
+      clearedCount,
+      pendingFeverOrder,
+      nextFeverClearTarget,
+      feverCycleCounter,
+      feverResultSeq,
+    } = get();
+
     if (status !== 'playing' || orders.length === 0 || currentBurger.length === 0) return;
     if (inputLockedAt > 0 && Date.now() - inputLockedAt < 200) return;
 
     const targetOrder = orders[0];
-    const isValid = validateBurger(currentBurger, targetOrder.ingredients);
+    const maxIng = mode !== 'single' ? MULTI_MAX_INGREDIENTS : undefined;
+    const useSeed = mode === 'coop';
 
+    if (targetOrder.type === 'fever') {
+      const feverStack = currentBurger.length;
+      const points = feverStack * FEVER_SCORE_PER_STACK;
+      const remaining = orders.slice(1);
+      const next = makeNextOrder({
+        orderCounter,
+        pendingFeverOrder,
+        feverCycleCounter,
+        maxIngredients: maxIng,
+        useSeed,
+      });
+      const newOrders = [...remaining, next.order];
+      const feverState = getActiveFeverState(newOrders, []);
+      const feverCycle = targetOrder.feverCycle ?? feverCycleCounter;
+
+      set({
+        score: score + points,
+        orders: newOrders,
+        currentBurger: [],
+        lastSubmittedBurger: [...currentBurger],
+        orderCounter: next.nextOrderCounter,
+        clearedCount: clearedCount + 1,
+        submitFlash: 'correct',
+        lastScoreGain: points,
+        lastComboOnSubmit: 0,
+        inputLockedAt: Date.now(),
+        pendingFeverOrder: next.nextPendingFeverOrder,
+        nextFeverClearTarget,
+        feverCycleCounter: next.nextFeverCycleCounter,
+        lastFeverResultCount: feverStack,
+        lastFeverResultCycle: feverCycle,
+        feverResultSeq: feverResultSeq + 1,
+        ...feverState,
+      });
+      return;
+    }
+
+    const isValid = validateBurger(currentBurger, targetOrder.ingredients);
     if (!isValid) {
       const newHp = Math.max(0, hp + HP_DELTA.wrongSubmit);
       set({
@@ -178,13 +340,25 @@ export const useGameStore = create<GameState>((set, get) => ({
     const newMaxCombo = Math.max(maxCombo, newCombo);
     const hpDelta = wasCombo ? HP_DELTA.comboSubmit : HP_DELTA.correctSubmit;
     const newHp = Math.min(HP_MAX, hp + hpDelta);
+    const newClearedCount = clearedCount + 1;
 
-    // 소비된 주문서 제거 후 새 주문서 추가 (순번 기반)
-    const { orderCounter, mode } = get();
-    const maxIng = mode !== 'single' ? MULTI_MAX_INGREDIENTS : undefined;
+    let nextPendingFeverOrder = pendingFeverOrder;
+    let nextFeverTarget = nextFeverClearTarget;
+    if (newClearedCount >= nextFeverTarget) {
+      nextPendingFeverOrder = true;
+      nextFeverTarget += FEVER_INTERVAL_CLEARS;
+    }
+
     const remaining = orders.slice(1);
-    const newOrder = generateOrder(orderCounter, undefined, maxIng, mode === 'coop' ? orderCounter : undefined);
-    const newOrders = [...remaining, newOrder];
+    const next = makeNextOrder({
+      orderCounter,
+      pendingFeverOrder: nextPendingFeverOrder,
+      feverCycleCounter,
+      maxIngredients: maxIng,
+      useSeed,
+    });
+    const newOrders = [...remaining, next.order];
+    const feverState = getActiveFeverState(newOrders, []);
 
     set({
       hp: newHp,
@@ -193,25 +367,43 @@ export const useGameStore = create<GameState>((set, get) => ({
       maxCombo: newMaxCombo,
       orders: newOrders,
       currentBurger: [],
-      lastSubmittedBurger: [...currentBurger], // 플래시 동안 재료 스냅샷 유지
-      orderCounter: orderCounter + 1,
-      clearedCount: get().clearedCount + 1,
+      lastSubmittedBurger: [...currentBurger],
+      orderCounter: next.nextOrderCounter,
+      clearedCount: newClearedCount,
       submitFlash: 'correct',
       lastScoreGain: points,
       lastComboOnSubmit: wasCombo ? newCombo : 0,
       inputLockedAt: Date.now(),
+      pendingFeverOrder: next.nextPendingFeverOrder,
+      nextFeverClearTarget: nextFeverTarget,
+      feverCycleCounter: next.nextFeverCycleCounter,
+      ...feverState,
     });
   },
 
   tick: (delta: number) => {
-    const { status, orders, hp, timeoutFlashCount } = get();
+    const {
+      status,
+      orders,
+      hp,
+      timeoutFlashCount,
+      mode,
+      orderCounter: startCounter,
+      pendingFeverOrder: startPendingFever,
+      feverCycleCounter: startFeverCycle,
+      currentBurger,
+      feverResultSeq,
+    } = get();
+
     if (status !== 'playing' || orders.length === 0) return;
 
-    let { orderCounter } = get();
+    let orderCounter = startCounter;
+    let pendingFeverOrder = startPendingFever;
+    let feverCycleCounter = startFeverCycle;
+
     const diff = getDifficulty(orderCounter);
     let newHp = hp - diff.hpDrainPerSec * delta;
 
-    // 첫 번째 주문서만 타이머 진행 (나머지는 FIFO 대기, 타이머 정지)
     const active = orders[0];
     const newElapsed = active.elapsed + delta;
     const timedOut = newElapsed >= active.timeLimit;
@@ -219,32 +411,63 @@ export const useGameStore = create<GameState>((set, get) => ({
     let queueOrders: Order[];
     if (timedOut) {
       queueOrders = orders.slice(1);
-      newHp += HP_DELTA.orderTimeout;
+      if (active.type === 'normal') {
+        newHp += HP_DELTA.orderTimeout;
+      }
     } else {
       queueOrders = [{ ...active, elapsed: newElapsed }, ...orders.slice(1)];
     }
 
     newHp = Math.max(0, newHp);
 
-    // 타임아웃 시 새 주문서 보충
-    const { mode } = get();
     const maxIng = mode !== 'single' ? MULTI_MAX_INGREDIENTS : undefined;
+    const useSeed = mode === 'coop';
     if (timedOut) {
-      queueOrders.push(generateOrder(orderCounter, undefined, maxIng, mode === 'coop' ? orderCounter : undefined));
-      orderCounter++;
+      const next = makeNextOrder({
+        orderCounter,
+        pendingFeverOrder,
+        feverCycleCounter,
+        maxIngredients: maxIng,
+        useSeed,
+      });
+      queueOrders.push(next.order);
+      orderCounter = next.nextOrderCounter;
+      pendingFeverOrder = next.nextPendingFeverOrder;
+      feverCycleCounter = next.nextFeverCycleCounter;
     }
+
+    const isFeverTimeout = timedOut && active.type === 'fever';
+    const nextBurger = timedOut ? [] : currentBurger;
+    const feverState = getActiveFeverState(queueOrders, nextBurger);
 
     set({
       hp: newHp,
-      orders: queueOrders, // FIFO 순서 유지, 정렬 없음
+      orders: queueOrders,
       orderCounter,
+      pendingFeverOrder,
+      feverCycleCounter,
       status: newHp <= 0 ? 'gameover' : 'playing',
-      ...(timedOut ? {
-        combo: 0,
-        currentBurger: [],
-        timeoutFlashCount: timeoutFlashCount + 1,
-        inputLockedAt: Date.now(),
-      } : {}),
+      ...(timedOut
+        ? active.type === 'normal'
+          ? {
+              combo: 0,
+              currentBurger: [],
+              timeoutFlashCount: timeoutFlashCount + 1,
+              inputLockedAt: Date.now(),
+            }
+          : {
+              currentBurger: [],
+              inputLockedAt: Date.now(),
+            }
+        : {}),
+      ...(isFeverTimeout
+        ? {
+            lastFeverResultCount: 0,
+            lastFeverResultCycle: active.feverCycle ?? feverCycleCounter,
+            feverResultSeq: feverResultSeq + 1,
+          }
+        : {}),
+      ...feverState,
     });
   },
 
@@ -261,19 +484,20 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   addOrdersFromAttack: (count: number) => {
     const { orders, orderCounter } = get();
-    if (orders.length === 0) return;
+    if (orders.length === 0 || count <= 0) return;
 
-    // 남은 시간이 가장 많은 마지막 주문서에 재료 추가 (최대 MULTI_MAX_INGREDIENTS까지)
-    const lastIdx = orders.length - 1;
-    const target = orders[lastIdx];
+    const lastNormalIdx = [...orders].reverse().findIndex((o) => o.type === 'normal');
+    if (lastNormalIdx < 0) return;
+    const idx = orders.length - 1 - lastNormalIdx;
+    const target = orders[idx];
 
     const extra: Ingredient[] = Array.from({ length: count }, () =>
-      INGREDIENTS[Math.floor(Math.random() * INGREDIENTS.length)]
+      INGREDIENTS[Math.floor(Math.random() * INGREDIENTS.length)],
     );
     const extraTime = count * BASE_SECONDS_PER_INGREDIENT * getDifficulty(orderCounter).timerMultiplier;
 
     const newOrders = [...orders];
-    newOrders[lastIdx] = {
+    newOrders[idx] = {
       ...target,
       ingredients: [...target.ingredients, ...extra],
       timeLimit: target.timeLimit + extraTime,
