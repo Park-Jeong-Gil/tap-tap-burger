@@ -17,6 +17,7 @@
   }
   @include m.desktop {
     padding: 32px 24px;
+    max-width: 500px;
     // gap: 28px;
   }
 }
