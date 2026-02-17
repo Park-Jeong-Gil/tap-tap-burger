@@ -243,11 +243,12 @@
   h1 {
     font-family: v.$font-pixel;
     color: v.$color-primary;
+    margin-right: auto;
     @include m.mobile {
-      font-size: m.vw(14);
+      font-size: m.vw(32);
     }
     @include m.desktop {
-      font-size: 14px;
+      font-size: 32px;
     }
   }
 }
@@ -276,11 +277,11 @@
     $border-color: v.$color-muted
   );
   @include m.mobile {
-    font-size: m.vw(9);
+    font-size: m.vw(16);
     padding: m.vw(6) m.vw(10);
   }
   @include m.desktop {
-    font-size: 14px;
+    font-size: 16px;
     padding: 6px 10px;
   }
 
@@ -322,12 +323,12 @@
   @include m.mobile {
     gap: m.vw(10);
     padding: m.vw(8) m.vw(10);
-    font-size: m.vw(9);
+    font-size: m.vw(12);
   }
   @include m.desktop {
     gap: 10px;
     padding: 8px 10px;
-    font-size: 14px;
+    font-size: 16px;
   }
 
   &--mine {
@@ -381,10 +382,10 @@
   font-family: v.$font-pixel;
   color: v.$color-primary;
   @include m.mobile {
-    font-size: m.vw(14);
+    font-size: m.vw(32);
   }
   @include m.desktop {
-    font-size: 14px;
+    font-size: 32px;
   }
 }
 
@@ -426,10 +427,10 @@
   font-family: v.$font-pixel;
   color: v.$color-primary;
   @include m.mobile {
-    font-size: m.vw(12);
+    font-size: m.vw(28);
   }
   @include m.desktop {
-    font-size: 12px;
+    font-size: 28px;
   }
 }
 
@@ -437,15 +438,29 @@
   display: flex;
   @include m.mobile {
     gap: m.vw(8);
+    font-size: m.vw(20);
   }
   @include m.desktop {
     gap: 8px;
+    font-size: 20px;
   }
 }
 
 .room-lobby__players {
   display: flex;
   flex-direction: column;
+
+  .room-lobby__players-title {
+    color: v.$color-primary;
+
+    @include m.mobile {
+      font-size: m.vw(20);
+    }
+    @include m.desktop {
+      font-size: 20px;
+    }
+  }
+
   @include m.mobile {
     gap: m.vw(8);
   }
@@ -460,11 +475,12 @@
   justify-content: space-between;
   font-family: v.$font-pixel;
   color: v.$color-text;
+
   @include m.mobile {
-    font-size: m.vw(9);
+    font-size: m.vw(14);
   }
   @include m.desktop {
-    font-size: 14px;
+    font-size: 16px;
   }
 
   &--ready {

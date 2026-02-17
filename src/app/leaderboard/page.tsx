@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { getLeaderboard } from '@/lib/supabase';
-import { usePlayerStore } from '@/stores/playerStore';
-import type { GameMode } from '@/types';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { getLeaderboard } from "@/lib/supabase";
+import { usePlayerStore } from "@/stores/playerStore";
+import type { GameMode } from "@/types";
 
 type TabMode = GameMode;
 
@@ -18,7 +18,7 @@ interface LeaderEntry {
 export default function LeaderboardPage() {
   const router = useRouter();
   const playerId = usePlayerStore((s) => s.playerId);
-  const [tab, setTab] = useState<TabMode>('single');
+  const [tab, setTab] = useState<TabMode>("single");
   const [rows, setRows] = useState<LeaderEntry[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -31,30 +31,38 @@ export default function LeaderboardPage() {
   }, [tab]);
 
   const tabLabel: Record<TabMode, string> = {
-    single: 'Single',
-    coop: 'Co-op',
-    versus: 'Versus',
+    single: "Single",
+    coop: "Co-op",
+    versus: "Versus",
   };
 
   const rankClass = (i: number) =>
-    i === 0 ? 'leaderboard-row--top1' :
-    i === 1 ? 'leaderboard-row--top2' :
-    i === 2 ? 'leaderboard-row--top3' : '';
+    i === 0
+      ? "leaderboard-row--top1"
+      : i === 1
+        ? "leaderboard-row--top2"
+        : i === 2
+          ? "leaderboard-row--top3"
+          : "";
 
   return (
     <div className="leaderboard-page">
       <div className="leaderboard-header">
-        <button className="btn btn--ghost" onClick={() => router.push('/')} style={{ fontSize: 'inherit' }}>
+        <h1>LEADERBOARD</h1>
+        <button
+          className="btn btn--ghost"
+          onClick={() => router.push("/")}
+          style={{ fontSize: "inherit" }}
+        >
           ← Back
         </button>
-        <h1>LEADERBOARD</h1>
       </div>
 
       <div className="leaderboard-tabs">
-        {(['single', 'coop', 'versus'] as TabMode[]).map((t) => (
+        {(["single", "coop", "versus"] as TabMode[]).map((t) => (
           <button
             key={t}
-            className={`leaderboard-tab${tab === t ? ' leaderboard-tab--active' : ''}`}
+            className={`leaderboard-tab${tab === t ? " leaderboard-tab--active" : ""}`}
             onClick={() => setTab(t)}
           >
             {tabLabel[t]}
@@ -63,7 +71,14 @@ export default function LeaderboardPage() {
       </div>
 
       {loading && (
-        <p style={{ fontFamily: 'Mulmaru', color: '#7a7a9a', textAlign: 'center', marginTop: '32px' }}>
+        <p
+          style={{
+            fontFamily: "Mulmaru",
+            color: "#7a7a9a",
+            textAlign: "center",
+            marginTop: "32px",
+          }}
+        >
           Loading...
         </p>
       )}
@@ -71,7 +86,14 @@ export default function LeaderboardPage() {
       {!loading && (
         <div className="leaderboard-table">
           {rows.length === 0 && (
-            <p style={{ fontFamily: 'Mulmaru', color: '#7a7a9a', textAlign: 'center', marginTop: '32px' }}>
+            <p
+              style={{
+                fontFamily: "Mulmaru",
+                color: "#7a7a9a",
+                textAlign: "center",
+                marginTop: "32px",
+              }}
+            >
               No records found
             </p>
           )}
@@ -81,15 +103,23 @@ export default function LeaderboardPage() {
               <div
                 key={row.id}
                 className={[
-                  'leaderboard-row',
+                  "leaderboard-row",
                   rankClass(i),
-                  isMine ? 'leaderboard-row--mine' : '',
-                ].filter(Boolean).join(' ')}
+                  isMine ? "leaderboard-row--mine" : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
               >
                 <span className="leaderboard-rank">
-                  {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}
+                  {i === 0
+                    ? "🥇"
+                    : i === 1
+                      ? "🥈"
+                      : i === 2
+                        ? "🥉"
+                        : `#${i + 1}`}
                 </span>
-                <span>{row.players?.nickname ?? 'Unknown'}</span>
+                <span>{row.players?.nickname ?? "Unknown"}</span>
                 <span>{row.score.toLocaleString()} pts</span>
                 <span>{row.max_combo}x</span>
               </div>

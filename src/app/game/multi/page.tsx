@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { usePlayerStore } from '@/stores/playerStore';
-import { useRoomStore } from '@/stores/roomStore';
-import { useLobbyRoom } from '@/hooks/useRoom';
-import { getRoomInfo, getRoomPlayers } from '@/lib/supabase';
-import { ACTIVE_ROOM_STORAGE_KEY } from '@/lib/constants';
-import type { GameMode } from '@/types';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { usePlayerStore } from "@/stores/playerStore";
+import { useRoomStore } from "@/stores/roomStore";
+import { useLobbyRoom } from "@/hooks/useRoom";
+import { getRoomInfo, getRoomPlayers } from "@/lib/supabase";
+import { ACTIVE_ROOM_STORAGE_KEY } from "@/lib/constants";
+import type { GameMode } from "@/types";
 
 export default function MultiHubPage() {
   const router = useRouter();
@@ -29,17 +29,22 @@ export default function MultiHubPage() {
   const [copied, setCopied] = useState(false);
   const [selectedMode, setSelectedMode] = useState<GameMode | null>(null);
 
-  useEffect(() => { initSession(); }, [initSession]);
+  useEffect(() => {
+    initSession();
+  }, [initSession]);
 
   // Restore on refresh: if there's an active room in localStorage, restore state from DB
   useEffect(() => {
     if (!isInitialized || roomId) return;
     const saved = localStorage.getItem(ACTIVE_ROOM_STORAGE_KEY);
     if (!saved) return;
-    const { roomId: savedRoomId, mode } = JSON.parse(saved) as { roomId: string; mode: GameMode };
+    const { roomId: savedRoomId, mode } = JSON.parse(saved) as {
+      roomId: string;
+      mode: GameMode;
+    };
     const restore = async () => {
       const room = await getRoomInfo(savedRoomId);
-      if (!room || room.status !== 'waiting') {
+      if (!room || room.status !== "waiting") {
         localStorage.removeItem(ACTIVE_ROOM_STORAGE_KEY);
         return;
       }
@@ -52,21 +57,21 @@ export default function MultiHubPage() {
 
   // Host starts game → navigate to game page
   useEffect(() => {
-    if (roomStatus === 'playing' && roomId && selectedMode) {
+    if (roomStatus === "playing" && roomId && selectedMode) {
       router.push(`/game/${selectedMode}/${roomId}`);
     }
   }, [roomStatus, roomId, selectedMode, router]);
 
   // Realtime lobby sync
-  useLobbyRoom(roomId ?? '');
+  useLobbyRoom(roomId ?? "");
 
   // Also sync room status immediately when navigating back to lobby
   useEffect(() => {
     if (!roomId) return;
     const syncRoomStatus = async () => {
       const room = await getRoomInfo(roomId);
-      if (!room || room.status === 'finished') {
-        setRoomStatus('finished');
+      if (!room || room.status === "finished") {
+        setRoomStatus("finished");
       }
     };
     syncRoomStatus();
@@ -104,16 +109,28 @@ export default function MultiHubPage() {
   // When joining as a participant (roomId comes from URL)
   // → handled directly in /game/coop/[roomId] or /game/versus/[roomId]
 
-  if (roomId && roomStatus === 'finished') {
+  if (roomId && roomStatus === "finished") {
     return (
       <div className="multi-hub">
         <div className="room-lobby">
           <p className="room-lobby__title">Game Expired</p>
-          <p style={{ fontFamily: 'Mulmaru', fontSize: '0.85em', color: '#9B7060', textAlign: 'center' }}>
+          <p
+            style={{
+              fontFamily: "Mulmaru",
+              fontSize: "0.85em",
+              color: "#9B7060",
+              textAlign: "center",
+            }}
+          >
             This game has ended and is no longer available.
           </p>
         </div>
-        <button className="btn btn--ghost" onClick={() => { reset(); }}>
+        <button
+          className="btn btn--ghost"
+          onClick={() => {
+            reset();
+          }}
+        >
           OK
         </button>
       </div>
@@ -123,40 +140,80 @@ export default function MultiHubPage() {
   if (roomId) {
     const displayMode = selectedMode ?? mode;
     const lobbyTitle =
-      displayMode === 'coop'
-        ? 'Co-op Lobby'
-        : displayMode === 'versus'
-          ? 'Versus Lobby'
-          : 'Multi Lobby';
+      displayMode === "coop"
+        ? "Co-op Lobby"
+        : displayMode === "versus"
+          ? "Versus Lobby"
+          : "Multi Lobby";
     return (
       <div className="multi-hub">
         <div className="room-lobby">
           <p className="room-lobby__title">{lobbyTitle}</p>
 
           <div className="room-lobby__link">
-            <p style={{ fontFamily: 'Mulmaru', fontSize: '0.75em', color: '#7a7a9a', flex: 1, wordBreak: 'break-all' }}>
+            <p
+              style={{
+                fontFamily: "Mulmaru",
+                fontSize: "0.75em",
+                color: "#7a7a9a",
+                flex: 1,
+                wordBreak: "break-all",
+              }}
+            >
               Link copied to clipboard. Share with a friend!
             </p>
-            {copied && <span style={{ color: '#4caf50', fontFamily: 'Mulmaru', fontSize: '0.8em' }}>✓ Copied</span>}
+            {copied && (
+              <span
+                style={{
+                  color: "#4caf50",
+                  fontFamily: "Mulmaru",
+                  fontSize: "0.8em",
+                }}
+              >
+                ✓ Copied
+              </span>
+            )}
           </div>
 
           <div className="room-lobby__players">
-            <p style={{ fontFamily: 'Mulmaru', fontSize: '0.8em', color: '#7a7a9a' }}>Players</p>
+            <p
+              className="room-lobby__players-title"
+              // style={{
+              //   fontFamily: "Mulmaru",
+              //   fontSize: "0.8em",
+              //   color: "#7a7a9a",
+              // }}
+            >
+              Players
+            </p>
             {players.map((p) => (
-              <div key={p.playerId} className={`room-lobby__player${p.ready ? ' room-lobby__player--ready' : ''}`}>
-                <span>{p.nickname} {p.playerId === playerId ? '(me)' : ''}</span>
-                <span>{p.ready ? 'Ready ✓' : 'Waiting...'}</span>
+              <div
+                key={p.playerId}
+                className={`room-lobby__player${p.ready ? " room-lobby__player--ready" : ""}`}
+              >
+                <span>
+                  {p.nickname} {p.playerId === playerId ? "(me)" : ""}
+                </span>
+                <span>{p.ready ? "Ready ✓" : "Waiting..."}</span>
               </div>
             ))}
             {players.length < 2 && (
-              <p style={{ fontFamily: 'Mulmaru', fontSize: '0.75em', color: '#7a7a9a' }}>
+              <p
+                style={{
+                  fontFamily: "Mulmaru",
+                  fontSize: "0.75em",
+                  color: "#7a7a9a",
+                }}
+              >
                 Waiting for opponent...
               </p>
             )}
           </div>
 
           {!isHost && !myReady && (
-            <button className="btn btn--primary" onClick={handleReady}>Ready</button>
+            <button className="btn btn--primary" onClick={handleReady}>
+              Ready
+            </button>
           )}
 
           {isHost && (
@@ -165,12 +222,18 @@ export default function MultiHubPage() {
               onClick={handleStart}
               disabled={!allReady}
             >
-              {allReady ? 'Start Game' : 'Waiting for all players...'}
+              {allReady ? "Start Game" : "Waiting for all players..."}
             </button>
           )}
         </div>
 
-        <button className="btn btn--ghost" onClick={() => { reset(); router.push('/'); }}>
+        <button
+          className="btn btn--ghost"
+          onClick={() => {
+            reset();
+            router.push("/");
+          }}
+        >
           Cancel
         </button>
       </div>
@@ -184,21 +247,21 @@ export default function MultiHubPage() {
       <div className="multi-hub__modes">
         <button
           className="btn btn--primary"
-          onClick={() => handleCreate('coop')}
+          onClick={() => handleCreate("coop")}
           disabled={creating || !isInitialized}
         >
-          Co-op
+          Co-op MODE
         </button>
         <button
           className="btn btn--secondary"
-          onClick={() => handleCreate('versus')}
+          onClick={() => handleCreate("versus")}
           disabled={creating || !isInitialized}
         >
-          Versus
+          VS MODE
         </button>
       </div>
 
-      <button className="btn btn--ghost" onClick={() => router.push('/')}>
+      <button className="btn btn--ghost" onClick={() => router.push("/")}>
         ← Back
       </button>
     </div>
