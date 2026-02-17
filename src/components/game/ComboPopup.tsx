@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { AnimatePresence, motion } from 'framer-motion';
-import { useEffect, useRef, useState } from 'react';
-import { useGameStore } from '@/stores/gameStore';
-import { getComboMultiplier } from '@/lib/gameLogic';
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { useGameStore } from "@/stores/gameStore";
+import { getComboMultiplier } from "@/lib/gameLogic";
 
 function getComboLevel(combo: number): 1 | 2 | 3 | 4 {
   if (combo >= 10) return 4;
@@ -19,19 +19,19 @@ export default function ComboPopup() {
 
   const [visible, setVisible] = useState(false);
   const [currentCombo, setCurrentCombo] = useState(0);
-  const [currentJudgeText, setCurrentJudgeText] = useState('COMBO!');
+  const [currentJudgeText, setCurrentJudgeText] = useState("COMBO!");
   const [uid, setUid] = useState(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (submitFlash === 'correct' && lastComboOnSubmit >= 1) {
+    if (submitFlash === "correct" && lastComboOnSubmit >= 1) {
       if (timerRef.current) clearTimeout(timerRef.current);
       setCurrentJudgeText(
-        lastClearJudgement === 'perfect'
-          ? 'PERFECT!!'
-          : lastClearJudgement === 'good'
-            ? 'GOOD!'
-            : 'COMBO!',
+        lastClearJudgement === "perfect"
+          ? "PERFECT!!"
+          : lastClearJudgement === "good"
+            ? "GOOD!"
+            : "COMBO!",
       );
       setCurrentCombo(lastComboOnSubmit);
       setUid((n) => n + 1);
@@ -56,7 +56,7 @@ export default function ComboPopup() {
           <motion.div
             key={uid}
             className={`combo-popup combo-popup--lv${level}`}
-            initial={{ scale: 2.2, opacity: 0, y: 24, rotate: -3 }}
+            initial={{ scale: 2.2, opacity: 0, y: 20, rotate: -3 }}
             animate={{
               scale: [2.2, 0.92, 1.08, 1],
               opacity: [0, 1, 1, 1],
@@ -68,7 +68,7 @@ export default function ComboPopup() {
               scale: 1.12,
               opacity: 0,
               y: -38,
-              transition: { duration: 0.2, ease: 'easeIn' },
+              transition: { duration: 0.2, ease: "easeIn" },
             }}
           >
             <span className="combo-popup__judge">{currentJudgeText}</span>

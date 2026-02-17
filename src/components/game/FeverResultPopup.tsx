@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { AnimatePresence, motion } from 'framer-motion';
-import { useGameStore } from '@/stores/gameStore';
-import { FEVER_SCORE_PER_STACK } from '@/lib/constants';
+import { AnimatePresence, motion } from "framer-motion";
+import { useGameStore } from "@/stores/gameStore";
+import { FEVER_SCORE_PER_STACK } from "@/lib/constants";
 
 export default function FeverResultPopup() {
   const feverResultSeq = useGameStore((s) => s.feverResultSeq);
@@ -18,7 +18,7 @@ export default function FeverResultPopup() {
       <AnimatePresence>
         <motion.div
           key={feverResultSeq}
-          className={`fever-result${success ? ' fever-result--success' : ' fever-result--fail'}`}
+          className={`fever-result${success ? " fever-result--success" : " fever-result--fail"}`}
           initial={{ opacity: 0, scale: 2.3, y: 34, rotate: -3 }}
           animate={{
             opacity: [0, 1, 1, 0],
@@ -27,16 +27,21 @@ export default function FeverResultPopup() {
             rotate: [-3, 1, 0, 0],
             transition: { duration: 1.3, times: [0, 0.3, 0.65, 1] },
           }}
-          exit={{ opacity: 0, scale: 1.18, y: -40, transition: { duration: 0.18, ease: 'easeIn' } }}
+          exit={{
+            opacity: 0,
+            scale: 1.18,
+            y: -20,
+            transition: { duration: 0.18, ease: "easeIn" },
+          }}
         >
           <p className="fever-result__title">
-            {success ? 'FEVER CLEAR!' : 'FEVER FAIL'}
+            {success ? "FEVER CLEAR!" : "FEVER FAIL"}
           </p>
           <p className="fever-result__stack">
-            {success ? `STACK x${lastFeverResultCount}` : '시간 초과'}
+            {success ? `STACK x${lastFeverResultCount}` : "시간 초과"}
           </p>
           <p className="fever-result__score">
-            {success ? `+${gained.toLocaleString()} SCORE` : '+0 SCORE'}
+            {success ? `+${gained.toLocaleString()} SCORE` : "+0 SCORE"}
           </p>
         </motion.div>
       </AnimatePresence>

@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { AnimatePresence, motion } from 'framer-motion';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { useGameStore } from '@/stores/gameStore';
+import { AnimatePresence, motion } from "framer-motion";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useGameStore } from "@/stores/gameStore";
 
-type JudgeTone = 'perfect' | 'good' | 'clear' | 'miss' | 'timeout';
+type JudgeTone = "perfect" | "good" | "clear" | "miss" | "timeout";
 
 const JUDGE_COPY: Record<JudgeTone, { title: string; sub: string }> = {
-  perfect: { title: 'PERFECT!!', sub: 'SUPER FAST SERVE' },
-  good: { title: 'GOOD!', sub: 'NICE SPEED' },
-  clear: { title: 'CLEAR!', sub: 'NICE SERVE' },
-  miss: { title: 'MISS!', sub: 'WRONG ORDER' },
-  timeout: { title: 'TIME OVER', sub: 'ORDER FAILED' },
+  perfect: { title: "PERFECT!!", sub: "SUPER FAST SERVE" },
+  good: { title: "GOOD!", sub: "NICE SPEED" },
+  clear: { title: "CLEAR!", sub: "NICE SERVE" },
+  miss: { title: "MISS!", sub: "WRONG ORDER" },
+  timeout: { title: "TIME OVER", sub: "ORDER FAILED" },
 };
 
 export default function JudgementPopup() {
@@ -22,7 +22,7 @@ export default function JudgementPopup() {
 
   const [visible, setVisible] = useState(false);
   const [uid, setUid] = useState(0);
-  const [tone, setTone] = useState<JudgeTone>('clear');
+  const [tone, setTone] = useState<JudgeTone>("clear");
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const trigger = useCallback((nextTone: JudgeTone) => {
@@ -34,19 +34,19 @@ export default function JudgementPopup() {
   }, []);
 
   useEffect(() => {
-    if (submitFlash === 'correct') {
+    if (submitFlash === "correct") {
       if (lastComboOnSubmit >= 1) return;
-      trigger(lastClearJudgement ?? 'clear');
+      trigger(lastClearJudgement ?? "clear");
       return;
     }
-    if (submitFlash === 'wrong') {
-      trigger('miss');
+    if (submitFlash === "wrong") {
+      trigger("miss");
     }
   }, [submitFlash, lastComboOnSubmit, lastClearJudgement, trigger]);
 
   useEffect(() => {
     if (timeoutFlashCount === 0) return;
-    trigger('timeout');
+    trigger("timeout");
   }, [timeoutFlashCount, trigger]);
 
   useEffect(() => {
@@ -62,12 +62,16 @@ export default function JudgementPopup() {
       <AnimatePresence>
         {visible && (
           <>
-            {tone === 'timeout' && (
+            {tone === "timeout" && (
               <motion.div
                 key={`judge-vignette-${uid}`}
                 className="timeout-vignette timeout-vignette--judge"
                 initial={{ opacity: 0 }}
-                animate={{ opacity: [0, 1, 0], transition: { duration: 0.72, times: [0, 0.3, 1] } }}
+                animate={{
+                  opacity: [0, 1, 0],
+                  transition: { duration: 0.72, times: [0, 0.3, 1] },
+                  // transition: { duration: 20, times: [0, 0.3, 1] },
+                }}
                 exit={{ opacity: 0 }}
               />
             )}
@@ -81,16 +85,18 @@ export default function JudgementPopup() {
                 y: [34, -8, 0, 0],
                 rotate: [-3, 1, 0, 0],
                 transition: { duration: 0.58, times: [0, 0.44, 0.72, 1] },
+                // transition: { duration: 20, times: [0, 0.44, 0.72, 1] },
               }}
               exit={{
                 opacity: 0,
                 scale: 1.18,
                 y: -40,
-                transition: { duration: 0.18, ease: 'easeIn' },
+                transition: { duration: 0.18, ease: "easeIn" },
+                // transition: { duration: 20, ease: "easeIn" },
               }}
             >
               <span className="judge-popup__title">{copy.title}</span>
-              <span className="judge-popup__sub">{copy.sub}</span>
+              {/* <span className="judge-popup__sub">{copy.sub}</span> */}
             </motion.div>
           </>
         )}

@@ -991,6 +991,7 @@
 
   &__judge {
     letter-spacing: 0.04em;
+
     color: #ffd54f;
     text-shadow:
       -2px 0 #5f320f,
@@ -1000,11 +1001,11 @@
       0 0 16px rgba(255, 208, 92, 0.9);
     @include m.mobile {
       font-size: m.vw(20);
-      margin-bottom: m.vw(2);
+      margin-bottom: m.vw(8);
     }
     @include m.desktop {
       font-size: 26px;
-      margin-bottom: 2px;
+      margin-bottom: 8px;
     }
   }
 
