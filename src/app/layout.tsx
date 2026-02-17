@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: "Tap Tap Burger",
     description: t.metaDesc,
     icons: {
-      icon: [{ url: "/favicon.ico" }, { url: "/favicon.png", type: "image/png" }],
+      icon: "/favicon.ico",
     },
     openGraph: {
       title: "Tap Tap Burger",

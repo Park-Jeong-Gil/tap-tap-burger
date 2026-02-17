@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getLeaderboard } from "@/lib/supabase";
 import { usePlayerStore } from "@/stores/playerStore";
@@ -16,6 +16,8 @@ interface LeaderEntry {
   players: { id: string; nickname: string } | null;
 }
 
+const PAGE_SIZE = 10;
+
 export default function LeaderboardPage() {
   const router = useRouter();
   const playerId = usePlayerStore((s) => s.playerId);
@@ -23,14 +25,82 @@ export default function LeaderboardPage() {
   const [tab, setTab] = useState<TabMode>("single");
   const [rows, setRows] = useState<LeaderEntry[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
+  // refs to avoid stale closures in IntersectionObserver callback
+  const loadingRef = useRef(true);
+  const loadingMoreRef = useRef(false);
+  const hasMoreRef = useRef(true);
+  const tabRef = useRef<TabMode>(tab);
+  const rowCountRef = useRef(0);
+
+  tabRef.current = tab;
+
+  // Tab change: reset and load first page
   useEffect(() => {
+    setRows([]);
+    rowCountRef.current = 0;
+    hasMoreRef.current = true;
+    setHasMore(true);
     setLoading(true);
-    getLeaderboard(tab)
-      .then((data) => setRows((data as unknown as LeaderEntry[]) ?? []))
+    loadingRef.current = true;
+
+    getLeaderboard(tab, 0, PAGE_SIZE - 1)
+      .then((data) => {
+        const entries = (data as unknown as LeaderEntry[]) ?? [];
+        setRows(entries);
+        rowCountRef.current = entries.length;
+        const more = entries.length === PAGE_SIZE;
+        setHasMore(more);
+        hasMoreRef.current = more;
+      })
       .catch(() => setRows([]))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+        loadingRef.current = false;
+      });
   }, [tab]);
+
+  // IntersectionObserver — set up once, reads mutable state via refs
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries[0].isIntersecting) return;
+        if (loadingRef.current || loadingMoreRef.current || !hasMoreRef.current) return;
+
+        const offset = rowCountRef.current;
+        loadingMoreRef.current = true;
+        setLoadingMore(true);
+
+        getLeaderboard(tabRef.current, offset, offset + PAGE_SIZE - 1)
+          .then((data) => {
+            const newEntries = (data as unknown as LeaderEntry[]) ?? [];
+            setRows((prev) => {
+              const updated = [...prev, ...newEntries];
+              rowCountRef.current = updated.length;
+              return updated;
+            });
+            const more = newEntries.length === PAGE_SIZE;
+            setHasMore(more);
+            hasMoreRef.current = more;
+          })
+          .catch(() => {})
+          .finally(() => {
+            loadingMoreRef.current = false;
+            setLoadingMore(false);
+          });
+      },
+      { threshold: 0.5 }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, []);
 
   const tabLabel: Record<TabMode, string> = {
     single: t.tabSingle,
@@ -128,6 +198,38 @@ export default function LeaderboardPage() {
             );
           })}
         </div>
+      )}
+
+      {/* Sentinel always in DOM so IntersectionObserver survives tab switches */}
+      <div ref={sentinelRef} style={{ height: "1px" }} />
+
+      {loadingMore && (
+        <p
+          style={{
+            fontFamily: "Mulmaru",
+            color: "#7a7a9a",
+            textAlign: "center",
+            marginTop: "8px",
+            paddingBottom: "16px",
+          }}
+        >
+          {t.loading}
+        </p>
+      )}
+
+      {!hasMore && rows.length > 0 && !loadingMore && !loading && (
+        <p
+          style={{
+            fontFamily: "Mulmaru",
+            color: "#7a7a9a",
+            textAlign: "center",
+            marginTop: "8px",
+            paddingBottom: "16px",
+            fontSize: "12px",
+          }}
+        >
+          —
+        </p>
       )}
     </div>
   );

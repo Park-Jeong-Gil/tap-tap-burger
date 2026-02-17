@@ -48,13 +48,13 @@ export async function getBestScore(playerId: string, mode: string): Promise<numb
 }
 
 // ─── Leaderboard ──────────────────────────────────────
-export async function getLeaderboard(mode: string) {
+export async function getLeaderboard(mode: string, from = 0, to = 9) {
   const { data, error } = await supabase
     .from('scores')
     .select('id, score, max_combo, created_at, players(id, nickname)')
     .eq('mode', mode)
     .order('score', { ascending: false })
-    .limit(100);
+    .range(from, to);
 
   if (error) throw error;
   return data;

@@ -17,6 +17,22 @@ export default function MainPage() {
 
   useEffect(() => {
     initSession();
+    console.log(
+      `
+%c _____         _         _____                 _
+%c|     | ___  _| | ___   |   __| ___  ___  ___ | |_  ___  ___
+%c|   --|| . || . || -_|  |  |  ||  _|| .'|| . ||   || -_||  _|
+%c|_____||___||___||___|  |_____||_|  |__,||  _||_|_||___||_|
+%c                                         |_|
+📞 010-4468-7412
+📧 wjdrlf5986@naver.com
+`,
+      "color:#22577A",
+      "color:#38A3A5",
+      "color:#57CC99",
+      "color:#80ED99",
+      "color:#99FFED",
+    );
   }, [initSession]);
 
   useEffect(() => {
