@@ -36,6 +36,77 @@
   - 한국어/영어 지원
   - 최초 접속 시 국가 코드(KR) 기반 locale 쿠키 설정
 
+## 게임 기획 설계
+
+### 핵심 플레이 루프
+
+1. 주문 확인: 현재 주문(타깃 재료 순서)을 읽는다.
+2. 입력/조합: 재료를 순서대로 쌓아 버거를 만든다.
+3. 제출/판정: 정답/오답/시간초과를 판정한다.
+4. 보상/리스크: 점수/콤보/HP를 갱신한다.
+5. 난이도 전이: 주문 수 기반 난이도와 압박이 상승한다.
+
+### 재미 설계 포인트
+
+- **정확도 vs 속도의 동시 요구**
+  - 정답만으로는 고점이 어렵고, 빠른 제출(콤보 조건)까지 맞춰야 한다.
+- **단기 집중 세션**
+  - HP 지속 감소 + 오답/타임아웃 패널티로 템포를 유지한다.
+- **모드별 감정선 분리**
+  - Single: 개인 기록 갱신
+  - Co-op: 역할 분담과 커뮤니케이션
+  - Versus: 상대 상태 관찰 + 공격/대응
+- **피버 이벤트로 페이싱 조절**
+  - 일정 클리어 주기마다 규칙을 전환해 단조로움을 줄인다.
+
+## 프론트엔드 아키텍처
+
+### 레이어 구조
+
+- `src/app/*`: 라우팅 및 페이지 엔트리(App Router)
+- `src/components/*`: UI/게임 프레젠테이션 컴포넌트
+- `src/stores/*`: 전역 상태(Zustand, 게임/플레이어/룸)
+- `src/hooks/*`: 입력/게임루프/리얼타임 구독 로직
+- `src/lib/*`: 게임 규칙/상수/외부 I/O(Supabase) 유틸
+- `src/styles/*`: SCSS 토큰/믹스인/컴포넌트 스타일
+
+### 상태 관리 분리 전략
+
+- `playerStore`: 세션 식별, 닉네임, 초기화
+- `roomStore`: 멀티 로비/방 상태/준비 상태
+- `gameStore`: 인게임 단일 소스 오브 트루스
+  - 주문 큐, HP/점수/콤보, 피버 상태, 공격 수신 상태
+
+### 렌더링/입력 처리 흐름
+
+- 페이지 진입 후 카운트다운 → `startGame()`으로 게임 상태 시작
+- `useGameLoop`가 주기적으로 `tick(delta)`를 호출해 시간 기반 상태 갱신
+- `useKeyboard`/터치 입력이 `addIngredient`, `submitBurger` 등 액션을 호출
+- 컴포넌트는 store 상태를 구독해 UI만 반영 (규칙 로직은 store/lib에 집중)
+
+## 시스템 설계
+
+### 데이터/식별 설계
+
+- `localStorage`의 `ttb_session_id(UUID)`로 익명 사용자 식별
+- `players.session_id` UNIQUE로 플레이어 중복 방지
+- `scores(player_id, mode)` UNIQUE + RPC 업서트로 모드별 최고 기록 유지
+
+### 실시간 멀티플레이 설계
+
+- 대기실: `postgres_changes`로 `room_players`, `rooms.status` 동기화
+- 게임 중(Co-op/Versus): Realtime `broadcast` 이벤트 중심 동기화
+  - Co-op: 입력 액션 전파
+  - Versus: 상태 업데이트, 공격, 피버 결과 전파
+- 링크 기반 룸 참여: `waiting -> playing -> finished` 상태 전이
+
+### 장애/엣지 케이스 대응
+
+- Supabase 실패 시 플레이어 초기화는 로컬 세션으로 폴백
+- 탭 종료/이탈 시 `keepalive` 요청으로 룸 `finished` 처리 시도
+- 만료/종료 룸 진입 차단 및 만료 화면 분기
+- 대기실에서 실시간 누락 대비 상태 폴링 보조
+
 ## 현재 구현 스펙 (Code Truth 기준)
 
 PRD(`TapTapBurger_PRD.md`)는 기획과 코드 스펙을 함께 관리하며, 수치/룰 충돌 시 Current Spec을 우선합니다.
@@ -153,4 +224,3 @@ npm run dev
 - PRD: `TapTapBurger_PRD.md`
   - 기획 의도 + 현재 코드 스펙 + Fever 스펙(v1) 포함
 - DB 마이그레이션: `supabase/migrations/001_init.sql`
-
