@@ -187,6 +187,48 @@ PRD(`TapTapBurger_PRD.md`)는 기획과 코드 스펙을 함께 관리하며, �
 - `/game/versus/[roomId]` 대전 모드
 - `/leaderboard` 모드별 순위표
 
+## 화면 캡처 (자동화)
+
+아래 이미지는 자동 캡처 스크립트(`scripts/capture-screenshots.sh`)로 생성했습니다.
+
+### 메인 화면
+
+![Main Desktop](docs/screenshots/main-desktop.png)
+
+- 게임 진입의 허브 화면
+- 닉네임 입력, 싱글/멀티/리더보드/게임 방법 CTA 제공
+- 프로젝트의 픽셀 UI 톤과 브랜딩을 가장 먼저 전달
+
+### 멀티 허브 화면
+
+![Multi Desktop](docs/screenshots/multi-desktop.png)
+
+- 협력/대전 모드 선택 시작점
+- 방 생성 후 링크 공유, 준비 상태 동기화 플로우의 시작 단계
+
+### 싱글 인게임 화면
+
+![Single Desktop](docs/screenshots/single-desktop.png)
+
+- 상단 HUD(HP, 점수) + 중앙 버거 스택 + 하단 입력 패널 구조
+- 실시간 판정/콤보/피버 피드백이 겹쳐 보이는 핵심 플레이 UI
+- 게임 기획의 코어 루프(입력-판정-보상)를 시각적으로 확인 가능
+
+### 리더보드 화면
+
+![Leaderboard Desktop](docs/screenshots/leaderboard-desktop.png)
+
+- 모드 탭(싱글/협력/대전) 기반 기록 탐색
+- 점수 경쟁과 재방문 동기를 담당하는 메타 시스템 UI
+
+### 모바일 대응 화면
+
+![Main Mobile](docs/screenshots/main-mobile.png)
+![Single Mobile](docs/screenshots/single-mobile.png)
+
+- 모바일 우선 레이아웃으로 핵심 인터랙션을 유지
+- 터치 입력 중심 UX에서도 데스크톱과 동일한 게임 루프 제공
+
 ## 실행 방법
 
 ### 1) 의존성 설치
@@ -218,6 +260,7 @@ npm run dev
 - `npm run build`: 프로덕션 빌드
 - `npm run start`: 프로덕션 실행
 - `npm run lint`: ESLint 검사
+- `npm run capture:screens`: 주요 페이지 자동 캡처 (`docs/screenshots/*`)
 
 ## 문서
 

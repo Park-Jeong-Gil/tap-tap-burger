@@ -101,6 +101,14 @@ export default function MainPage() {
         </button>
       </nav>
 
+      {/* 푸터 */}
+      <p className="main-footer">
+        © 2026 by{" "}
+        <a href="https://girgir.dev" target="_blank" rel="noopener noreferrer">
+          girgir
+        </a>
+        . All rights reserved.
+      </p>
       {showHtp && <HowToPlay onClose={() => setShowHtp(false)} />}
     </main>
   );

@@ -114,6 +114,30 @@
   }
 }
 
+.main-footer {
+  font-family: v.$font-pixel;
+  color: v.$color-muted;
+  text-align: center;
+  margin-top: auto;
+
+  @include m.mobile {
+    font-size: m.vw(14);
+    margin-top: m.vw(24);
+  }
+  @include m.desktop {
+    font-size: 16px;
+    margin-top: 24px;
+  }
+
+  a {
+    color: v.$color-primary;
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
 // ─── 하우 투 플레이 모달 ──────────────────────────────
 .htp-modal {
   position: fixed;
