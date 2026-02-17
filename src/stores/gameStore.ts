@@ -61,6 +61,7 @@ interface GameState {
   lastFeverResultCount: number;
   lastFeverResultCycle: number;
   feverResultSeq: number;
+  lastWasFeverClear: boolean;
 
   // actions
   startGame: (mode?: GameMode) => void;
@@ -164,6 +165,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   lastFeverResultCount: 0,
   lastFeverResultCycle: 0,
   feverResultSeq: 0,
+  lastWasFeverClear: false,
 
   startGame: (mode = 'single') => {
     const maxIng = mode !== 'single' ? MULTI_MAX_INGREDIENTS : undefined;
@@ -200,6 +202,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       lastFeverResultCount: 0,
       lastFeverResultCycle: 0,
       feverResultSeq: 0,
+      lastWasFeverClear: false,
     });
   },
 
@@ -235,6 +238,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       lastFeverResultCount: 0,
       lastFeverResultCycle: 0,
       feverResultSeq: 0,
+      lastWasFeverClear: false,
     });
   },
 
@@ -294,6 +298,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     if (targetOrder.type === 'fever') {
       const feverStack = currentBurger.length;
       const points = feverStack * FEVER_SCORE_PER_STACK;
+      const newHp = Math.min(HP_MAX, hp + feverStack);
       const remaining = orders.slice(1);
       const next = makeNextOrder({
         orderCounter,
@@ -307,6 +312,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       const feverCycle = targetOrder.feverCycle ?? feverCycleCounter;
 
       set({
+        hp: newHp,
         score: score + points,
         orders: newOrders,
         currentBurger: [],
@@ -317,6 +323,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         lastScoreGain: points,
         lastComboOnSubmit: 0,
         lastClearJudgement: 'perfect',
+        lastWasFeverClear: true,
         inputLockedAt: Date.now(),
         pendingFeverOrder: next.nextPendingFeverOrder,
         nextFeverClearTarget,
@@ -388,6 +395,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       lastScoreGain: points,
       lastComboOnSubmit: wasCombo ? newCombo : 0,
       lastClearJudgement: clearJudgement,
+      lastWasFeverClear: false,
       inputLockedAt: Date.now(),
       pendingFeverOrder: next.nextPendingFeverOrder,
       nextFeverClearTarget: nextFeverTarget,
@@ -545,5 +553,6 @@ export const useGameStore = create<GameState>((set, get) => ({
     lastScoreGain: 0,
     lastComboOnSubmit: 0,
     lastClearJudgement: null,
+    lastWasFeverClear: false,
   }),
 }));

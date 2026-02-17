@@ -18,11 +18,17 @@ export default function SingleGamePage() {
   const hp = useGameStore((s) => s.hp);
   const score = useGameStore((s) => s.score);
   const startGame = useGameStore((s) => s.startGame);
+  const resetGame = useGameStore((s) => s.resetGame);
   const wrongFlashCount = useGameStore((s) => s.wrongFlashCount);
 
   const [countingDown, setCountingDown] = useState(true);
   const [shaking, setShaking] = useState(false);
   const shakeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // 페이지 진입 시 이전 게임 상태 초기화 (뒤로가기 후 재시작 대응)
+  useEffect(() => {
+    resetGame();
+  }, [resetGame]);
 
   const handleCountdownComplete = useCallback(() => {
     setCountingDown(false);
