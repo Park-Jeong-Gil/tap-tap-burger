@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { usePlayerStore } from "@/stores/playerStore";
 import { useLocale } from "@/providers/LocaleProvider";
+import { generateDefaultNickname } from "@/lib/gameLogic";
 import HowToPlay from "@/components/ui/HowToPlay";
 
 export default function MainPage() {
@@ -28,12 +29,12 @@ export default function MainPage() {
   };
 
   const handleSingle = () => {
-    setNickname(inputValue);
+    setNickname(inputValue.trim() || generateDefaultNickname());
     router.push("/game/single");
   };
 
   const handleMulti = () => {
-    setNickname(inputValue);
+    setNickname(inputValue.trim() || generateDefaultNickname());
     router.push("/game/multi");
   };
 

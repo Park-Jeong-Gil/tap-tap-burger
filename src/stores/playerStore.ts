@@ -4,7 +4,6 @@ import { create } from 'zustand';
 import { v4 as uuidv4 } from 'uuid';
 import { upsertPlayer } from '@/lib/supabase';
 import { SESSION_STORAGE_KEY, NICKNAME_STORAGE_KEY } from '@/lib/constants';
-import { generateDefaultNickname } from '@/lib/gameLogic';
 
 interface PlayerState {
   sessionId: string | null;
@@ -32,8 +31,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       localStorage.setItem(SESSION_STORAGE_KEY, sessionId);
     }
 
-    const savedNickname =
-      localStorage.getItem(NICKNAME_STORAGE_KEY) || generateDefaultNickname();
+    const savedNickname = localStorage.getItem(NICKNAME_STORAGE_KEY) ?? '';
 
     set({ sessionId, nickname: savedNickname });
 
@@ -47,7 +45,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   },
 
   setNickname: (name: string) => {
-    const trimmed = name.trim() || generateDefaultNickname();
+    const trimmed = name.trim();
     set({ nickname: trimmed });
     if (typeof window !== 'undefined') {
       localStorage.setItem(NICKNAME_STORAGE_KEY, trimmed);
