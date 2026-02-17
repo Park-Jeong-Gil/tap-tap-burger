@@ -1,5 +1,8 @@
 import type { Metadata } from 'next';
+import { cookies } from 'next/headers';
 import { getRoomHostNickname } from '@/lib/supabase';
+import { translations } from '@/lib/translations';
+import type { Locale } from '@/lib/translations';
 
 export async function generateMetadata({
   params,
@@ -8,9 +11,17 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { roomId } = await params;
   const hostNickname = await getRoomHostNickname(roomId);
-  const description = `${hostNickname} has challenged you to a match!`;
+  const cookieStore = await cookies();
+  const locale = (cookieStore.get('locale')?.value ?? 'en') as Locale;
+  const t = translations[locale];
+
+  const description =
+    locale === 'ko'
+      ? `${hostNickname}님이 당신에게 승부를 걸어왔습니다.`
+      : `${hostNickname} has challenged you to a match!`;
+
   return {
-    title: 'Tap Tap Burger: Versus',
+    title: t.versusLayoutTitle,
     description,
     openGraph: { description },
   };

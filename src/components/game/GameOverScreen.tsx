@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { useGameStore } from '@/stores/gameStore';
 import { usePlayerStore } from '@/stores/playerStore';
 import { useRoomStore } from '@/stores/roomStore';
+import { useLocale } from '@/providers/LocaleProvider';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 18 },
@@ -17,6 +18,7 @@ interface GameOverScreenProps {
 }
 
 export default function GameOverScreen({ versusResult }: GameOverScreenProps) {
+  const { t } = useLocale();
   const router = useRouter();
   const score = useGameStore((s) => s.score);
   const maxCombo = useGameStore((s) => s.maxCombo);
@@ -54,7 +56,7 @@ export default function GameOverScreen({ versusResult }: GameOverScreenProps) {
         animate={{ scale: 1, opacity: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 420, damping: 22, delay: 0.05 }}
       >
-        {versusResult === 'win' ? 'VICTORY!' : versusResult === 'loss' ? 'DEFEAT...' : 'GAME OVER'}
+        {versusResult === 'win' ? t.victory : versusResult === 'loss' ? t.defeat : 'GAME OVER'}
       </motion.h2>
 
       {/* Stats: stagger */}
@@ -76,7 +78,7 @@ export default function GameOverScreen({ versusResult }: GameOverScreenProps) {
             transition={{ type: 'spring', stiffness: 380, damping: 24 }}
             style={{ color: '#2E9E3E', fontSize: '0.8em' }}
           >
-            ★ New Record!
+            {t.newRecord}
           </motion.p>
         )}
       </motion.div>
@@ -90,11 +92,11 @@ export default function GameOverScreen({ versusResult }: GameOverScreenProps) {
       >
         {mode !== 'versus' && mode !== 'coop' && (
           <button className="btn btn--primary" onClick={handleRestart}>
-            RETRY
+            {t.retry}
           </button>
         )}
         <button className="btn btn--ghost" onClick={handleHome}>
-          MAIN MENU
+          {t.mainMenu}
         </button>
       </motion.div>
     </div>

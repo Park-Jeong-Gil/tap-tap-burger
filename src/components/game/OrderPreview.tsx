@@ -3,6 +3,7 @@
 import { useRef, useEffect } from "react";
 import type { Order, Ingredient } from "@/types";
 import { FEVER_SCORE_PER_STACK } from "@/lib/constants";
+import { useLocale } from "@/providers/LocaleProvider";
 
 const INGREDIENT_IMAGES: Record<Ingredient, string> = {
   patty: "/ingredient/patty.png",
@@ -22,6 +23,7 @@ export default function OrderPreview({
   order,
   submittedCount,
 }: OrderPreviewProps) {
+  const { t } = useLocale();
   const containerRef = useRef<HTMLDivElement>(null);
   const foodRef = useRef<HTMLDivElement>(null);
 
@@ -75,7 +77,7 @@ export default function OrderPreview({
       {/* Header: order number + remaining time */}
       <div className="order-preview__header">
         <span className="order-preview__index">
-          {isFever ? "FEVER TIME!" : `ORDER #${order.orderIndex + 1}`}
+          {isFever ? t.feverTime : `${t.orderPrefix} #${order.orderIndex + 1}`}
         </span>
         <span
           className={`order-preview__time${isUrgent ? " order-preview__time--urgent" : ""}`}
@@ -95,7 +97,7 @@ export default function OrderPreview({
       {isFever ? (
         <div className="order-preview__fever">
           <p className="order-preview__fever-text">
-            Stack as many as you can before time runs out!
+            {t.feverInstructions}
           </p>
           {feverIngredient && (
             <div className="order-preview__fever-target">
@@ -104,10 +106,10 @@ export default function OrderPreview({
             </div>
           )}
           <p className="order-preview__fever-count">
-            Stacked: {submittedCount}
+            {t.stacked}: {submittedCount}
           </p>
           <p className="order-preview__fever-score">
-            Expected: +{(submittedCount * FEVER_SCORE_PER_STACK).toLocaleString()}
+            {t.expected}: +{(submittedCount * FEVER_SCORE_PER_STACK).toLocaleString()}
           </p>
         </div>
       ) : (

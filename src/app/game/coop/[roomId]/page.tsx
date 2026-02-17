@@ -19,6 +19,7 @@ import ComboPopup from "@/components/game/ComboPopup";
 import FeverResultPopup from "@/components/game/FeverResultPopup";
 import JudgementPopup from "@/components/game/JudgementPopup";
 import type { Ingredient } from "@/types";
+import { useLocale } from "@/providers/LocaleProvider";
 
 export default function CoopGamePage() {
   const params = useParams();
@@ -49,6 +50,7 @@ export default function CoopGamePage() {
     wrongFlashCount,
   } = useGameStore();
 
+  const { t } = useLocale();
   const [assignedKeys, setAssignedKeys] = useState<string[]>([]);
   const [joined, setJoined] = useState(false);
   const [expired, setExpired] = useState(false);
@@ -278,13 +280,13 @@ export default function CoopGamePage() {
     return (
       <div className="multi-hub">
         <div className="room-lobby">
-          <p className="room-lobby__title">Link Expired</p>
+          <p className="room-lobby__title">{t.linkExpired}</p>
           <p style={{ fontFamily: "Mulmaru", fontSize: "0.85em", color: "#9B7060", textAlign: "center" }}>
-            This link has already been used or has expired.
+            {t.linkExpiredDesc}
           </p>
         </div>
         <button className="btn btn--ghost" onClick={() => router.push("/")}>
-          Back to Main
+          {t.backToMain}
         </button>
       </div>
     );
@@ -295,7 +297,7 @@ export default function CoopGamePage() {
     return (
       <div className="multi-hub">
         <div className="room-lobby">
-          <p className="room-lobby__title">Co-op Lobby</p>
+          <p className="room-lobby__title">{t.coopLobby}</p>
           <div className="room-lobby__players">
             {players.map((p) => (
               <div
@@ -303,9 +305,9 @@ export default function CoopGamePage() {
                 className={`room-lobby__player${p.ready ? " room-lobby__player--ready" : ""}`}
               >
                 <span>
-                  {p.nickname} {p.playerId === playerId ? "(me)" : ""}
+                  {p.nickname} {p.playerId === playerId ? t.me : ""}
                 </span>
-                <span>{p.ready ? "Ready ✓" : "Waiting..."}</span>
+                <span>{p.ready ? t.readyMark : t.waiting}</span>
               </div>
             ))}
             {players.length < 2 && (
@@ -316,21 +318,21 @@ export default function CoopGamePage() {
                   color: "#7a7a9a",
                 }}
               >
-                Waiting for opponent...
+                {t.waitingForOpponent}
               </p>
             )}
           </div>
           {!isHost && !myReady && (
             <>
               <div className="main-nickname" style={{ width: "100%" }}>
-                <label className="main-nickname__label" htmlFor="coop-nickname">Nickname</label>
+                <label className="main-nickname__label" htmlFor="coop-nickname">{t.nickname}</label>
                 <input
                   id="coop-nickname"
                   className="input"
                   value={nicknameInput}
                   onChange={(e) => setNicknameInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && nicknameInput.trim() && handleReady()}
-                  placeholder="Enter nickname..."
+                  placeholder={t.nicknamePlaceholder}
                   maxLength={20}
                   autoFocus
                 />
@@ -340,7 +342,7 @@ export default function CoopGamePage() {
                 onClick={handleReady}
                 disabled={!nicknameInput.trim()}
               >
-                Ready
+                {t.ready}
               </button>
             </>
           )}
@@ -350,12 +352,12 @@ export default function CoopGamePage() {
               onClick={handleStart}
               disabled={!allReady}
             >
-              {allReady ? "Start Game" : "Waiting..."}
+              {allReady ? t.startGame : t.waiting}
             </button>
           )}
         </div>
         <button className="btn btn--ghost" onClick={() => router.push("/")}>
-          Cancel
+          {t.cancel}
         </button>
       </div>
     );

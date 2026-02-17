@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getLeaderboard } from "@/lib/supabase";
 import { usePlayerStore } from "@/stores/playerStore";
+import { useLocale } from "@/providers/LocaleProvider";
 import type { GameMode } from "@/types";
 
 type TabMode = GameMode;
@@ -18,6 +19,7 @@ interface LeaderEntry {
 export default function LeaderboardPage() {
   const router = useRouter();
   const playerId = usePlayerStore((s) => s.playerId);
+  const { t, locale } = useLocale();
   const [tab, setTab] = useState<TabMode>("single");
   const [rows, setRows] = useState<LeaderEntry[]>([]);
   const [loading, setLoading] = useState(false);
@@ -31,9 +33,9 @@ export default function LeaderboardPage() {
   }, [tab]);
 
   const tabLabel: Record<TabMode, string> = {
-    single: "Single",
-    coop: "Co-op",
-    versus: "Versus",
+    single: t.tabSingle,
+    coop: t.tabCoop,
+    versus: t.tabVersus,
   };
 
   const rankClass = (i: number) =>
@@ -54,18 +56,18 @@ export default function LeaderboardPage() {
           onClick={() => router.push("/")}
           style={{ fontSize: "inherit" }}
         >
-          ← Back
+          {t.back}
         </button>
       </div>
 
       <div className="leaderboard-tabs">
-        {(["single", "coop", "versus"] as TabMode[]).map((t) => (
+        {(["single", "coop", "versus"] as TabMode[]).map((mode) => (
           <button
-            key={t}
-            className={`leaderboard-tab${tab === t ? " leaderboard-tab--active" : ""}`}
-            onClick={() => setTab(t)}
+            key={mode}
+            className={`leaderboard-tab${tab === mode ? " leaderboard-tab--active" : ""}`}
+            onClick={() => setTab(mode)}
           >
-            {tabLabel[t]}
+            {tabLabel[mode]}
           </button>
         ))}
       </div>
@@ -79,7 +81,7 @@ export default function LeaderboardPage() {
             marginTop: "32px",
           }}
         >
-          Loading...
+          {t.loading}
         </p>
       )}
 
@@ -94,7 +96,7 @@ export default function LeaderboardPage() {
                 marginTop: "32px",
               }}
             >
-              No records found
+              {t.noRecords}
             </p>
           )}
           {rows.map((row, i) => {
@@ -119,8 +121,8 @@ export default function LeaderboardPage() {
                         ? "🥉"
                         : `#${i + 1}`}
                 </span>
-                <span>{row.players?.nickname ?? "Unknown"}</span>
-                <span>{row.score.toLocaleString()} pts</span>
+                <span>{row.players?.nickname ?? t.unknown}</span>
+                <span>{locale === "ko" ? `${row.score.toLocaleString()}${t.scoreUnit}` : `${row.score.toLocaleString()} ${t.scoreUnit}`}</span>
                 <span>{row.max_combo}x</span>
               </div>
             );

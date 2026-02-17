@@ -7,6 +7,7 @@ import { useGameStore } from "@/stores/gameStore";
 import { ORDER_REFRESH_DELAY_MS } from "@/lib/constants";
 import BurgerStack from "./BurgerStack";
 import OrderPreview from "./OrderPreview";
+import { useLocale } from "@/providers/LocaleProvider";
 
 interface InputPanelProps {
   allowedActions?: string[];
@@ -74,6 +75,7 @@ function InputBtn({
 }
 
 export default function InputPanel({ allowedActions, onAction }: InputPanelProps) {
+  const { t } = useLocale();
   const addIngredient = useGameStore((s) => s.addIngredient);
   const clearBurger = useGameStore((s) => s.clearBurger);
   const submitBurger = useGameStore((s) => s.submitBurger);
@@ -160,7 +162,7 @@ export default function InputPanel({ allowedActions, onAction }: InputPanelProps
         <div className="ingame__grid">
           <InputBtn
             action="veggie"
-            label="VEGGIE"
+            label={t.veggieBtn}
             className="input-btn--veggie"
             disabled={!isAllowed("veggie") || inputBlocked}
             showKey={isDesktop}
@@ -168,7 +170,7 @@ export default function InputPanel({ allowedActions, onAction }: InputPanelProps
           />
           <InputBtn
             action="sauce"
-            label="SAUCE"
+            label={t.sauceBtn}
             className="input-btn--sauce"
             disabled={!isAllowed("sauce") || inputBlocked}
             showKey={isDesktop}
@@ -176,7 +178,7 @@ export default function InputPanel({ allowedActions, onAction }: InputPanelProps
           />
           <InputBtn
             action="cheese"
-            label="CHEESE"
+            label={t.cheeseBtn}
             className="input-btn--cheese"
             disabled={!isAllowed("cheese") || inputBlocked}
             showKey={isDesktop}
@@ -184,7 +186,7 @@ export default function InputPanel({ allowedActions, onAction }: InputPanelProps
           />
           <InputBtn
             action="patty"
-            label="PATTY"
+            label={t.pattyBtn}
             className="input-btn--patty"
             disabled={!isAllowed("patty") || inputBlocked}
             showKey={isDesktop}
@@ -192,7 +194,7 @@ export default function InputPanel({ allowedActions, onAction }: InputPanelProps
           />
           <InputBtn
             action="onion"
-            label="ONION"
+            label={t.onionBtn}
             className="input-btn--onion"
             disabled={!isAllowed("onion") || inputBlocked}
             showKey={isDesktop}
@@ -200,7 +202,7 @@ export default function InputPanel({ allowedActions, onAction }: InputPanelProps
           />
           <InputBtn
             action="tomato"
-            label="TOMATO"
+            label={t.tomatoBtn}
             className="input-btn--tomato"
             disabled={!isAllowed("tomato") || inputBlocked}
             showKey={isDesktop}
@@ -210,7 +212,7 @@ export default function InputPanel({ allowedActions, onAction }: InputPanelProps
 
         <InputBtn
           action="submit"
-          label="SERVE"
+          label={t.serveBtn}
           className="input-btn--submit"
           disabled={!isAllowed("submit") || inputBlocked}
           showKey={isDesktop}

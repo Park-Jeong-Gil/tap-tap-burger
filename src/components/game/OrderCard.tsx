@@ -2,15 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import type { Order, Ingredient } from "@/types";
-
-const INGREDIENT_LABELS: Record<Ingredient, string> = {
-  patty: "🟫 Patty",
-  cheese: "🟨 Cheese",
-  veggie: "🟩 Veggie",
-  sauce: "🟥 Sauce",
-  onion: "🟣 Onion",
-  tomato: "🍅 Tomato",
-};
+import { useLocale } from "@/providers/LocaleProvider";
 
 interface OrderCardProps {
   order: Order;
@@ -25,12 +17,22 @@ export default function OrderCard({
   isFirst,
   isNew,
 }: OrderCardProps) {
+  const { t } = useLocale();
   const listRef = useRef<HTMLDivElement>(null);
   const remaining = Math.max(0, order.timeLimit - order.elapsed);
   const timePct = (remaining / order.timeLimit) * 100;
   const isUrgent = timePct < 30;
   const isFever = order.type === "fever";
   const feverIngredient = order.feverIngredient ?? order.ingredients[0];
+
+  const INGREDIENT_LABELS: Record<Ingredient, string> = {
+    patty: t.pattyLabel,
+    cheese: t.cheeseLabel,
+    veggie: t.veggieLabel,
+    sauce: t.sauceLabel,
+    onion: t.onionLabel,
+    tomato: t.tomatoLabel,
+  };
 
   // Auto-scroll to match submitted ingredient
   useEffect(() => {
@@ -64,7 +66,7 @@ export default function OrderCard({
 
       <div className="order-card__header">
         <p className="order-card__index">
-          {isFever ? "FEVER!" : `#${order.orderIndex + 1}`}
+          {isFever ? t.feverBadge : `#${order.orderIndex + 1}`}
         </p>
         <p
           className={`order-card__time${isUrgent ? " order-card__time--urgent" : ""}`}

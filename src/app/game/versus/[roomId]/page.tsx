@@ -30,6 +30,7 @@ import AttackProjectileLayer, {
 } from "@/components/game/AttackProjectileLayer";
 import MiniBurgerPreview from "@/components/game/MiniBurgerPreview";
 import type { Ingredient } from "@/types";
+import { useLocale } from "@/providers/LocaleProvider";
 
 interface OpponentState {
   hp: number;
@@ -96,6 +97,7 @@ export default function VersusGamePage() {
   const attackReceivedCount = useGameStore((s) => s.attackReceivedCount);
   const attackReceivedType = useGameStore((s) => s.attackReceivedType);
 
+  const { t } = useLocale();
   const [opponent, setOpponent] = useState<OpponentState>({
     hp: 80,
     queueCount: 3,
@@ -520,7 +522,7 @@ export default function VersusGamePage() {
     return (
       <div className="multi-hub">
         <div className="room-lobby">
-          <p className="room-lobby__title">Link Expired</p>
+          <p className="room-lobby__title">{t.linkExpired}</p>
           <p
             style={{
               fontFamily: "Mulmaru",
@@ -529,11 +531,11 @@ export default function VersusGamePage() {
               textAlign: "center",
             }}
           >
-            This link has already been used or has expired.
+            {t.linkExpiredDesc}
           </p>
         </div>
         <button className="btn btn--ghost" onClick={() => router.push("/")}>
-          Back to Main
+          {t.backToMain}
         </button>
       </div>
     );
@@ -543,7 +545,7 @@ export default function VersusGamePage() {
     return (
       <div className="multi-hub">
         <div className="room-lobby">
-          <p className="room-lobby__title">Versus Lobby</p>
+          <p className="room-lobby__title">{t.versusLobby}</p>
           <div className="room-lobby__players">
             {players.map((p) => (
               <div
@@ -551,9 +553,9 @@ export default function VersusGamePage() {
                 className={`room-lobby__player${p.ready ? " room-lobby__player--ready" : ""}`}
               >
                 <span>
-                  {p.nickname} {p.playerId === playerId ? "(me)" : ""}
+                  {p.nickname} {p.playerId === playerId ? t.me : ""}
                 </span>
-                <span>{p.ready ? "Ready ✓" : "Waiting..."}</span>
+                <span>{p.ready ? t.readyMark : t.waiting}</span>
               </div>
             ))}
             {players.length < 2 && (
@@ -564,7 +566,7 @@ export default function VersusGamePage() {
                   color: "#7a7a9a",
                 }}
               >
-                Waiting for opponent...
+                {t.waitingForOpponent}
               </p>
             )}
           </div>
@@ -572,7 +574,7 @@ export default function VersusGamePage() {
             <>
               <div className="main-nickname" style={{ width: "100%" }}>
                 <label className="main-nickname__label" htmlFor="vs-nickname">
-                  Nickname
+                  {t.nickname}
                 </label>
                 <input
                   id="vs-nickname"
@@ -582,7 +584,7 @@ export default function VersusGamePage() {
                   onKeyDown={(e) =>
                     e.key === "Enter" && nicknameInput.trim() && handleReady()
                   }
-                  placeholder="Enter nickname..."
+                  placeholder={t.nicknamePlaceholder}
                   maxLength={20}
                   autoFocus
                 />
@@ -592,7 +594,7 @@ export default function VersusGamePage() {
                 onClick={handleReady}
                 disabled={!nicknameInput.trim()}
               >
-                Ready
+                {t.ready}
               </button>
             </>
           )}
@@ -603,15 +605,15 @@ export default function VersusGamePage() {
               disabled={!allReady}
             >
               {allReady
-                ? "Start Game"
+                ? t.startGame
                 : players.length < 2
-                  ? "Waiting for all players..."
-                  : "Waiting for opponent to ready up..."}
+                  ? t.waitingForAllPlayers
+                  : t.waitingForOpponentReady}
             </button>
           )}
         </div>
         <button className="btn btn--ghost" onClick={() => router.push("/")}>
-          Cancel
+          {t.cancel}
         </button>
       </div>
     );
@@ -632,7 +634,7 @@ export default function VersusGamePage() {
 
       <div className="versus-opponent" ref={opponentPanelRef}>
         <span className="versus-opponent__name">
-          {opponentEntry?.nickname ?? "Opponent"}
+          {opponentEntry?.nickname ?? t.opponent}
         </span>
         <span className="versus-opponent__hp">HP {Math.ceil(opponent.hp)}</span>{" "}
         /

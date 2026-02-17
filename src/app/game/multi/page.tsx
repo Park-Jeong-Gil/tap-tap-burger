@@ -8,6 +8,7 @@ import { useLobbyRoom } from "@/hooks/useRoom";
 import { getRoomInfo, getRoomPlayers } from "@/lib/supabase";
 import { ACTIVE_ROOM_STORAGE_KEY } from "@/lib/constants";
 import type { GameMode } from "@/types";
+import { useLocale } from "@/providers/LocaleProvider";
 
 export default function MultiHubPage() {
   const router = useRouter();
@@ -25,6 +26,7 @@ export default function MultiHubPage() {
     reset,
     restoreHostRoom,
   } = useRoomStore();
+  const { t } = useLocale();
   const [creating, setCreating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [selectedMode, setSelectedMode] = useState<GameMode | null>(null);
@@ -113,7 +115,7 @@ export default function MultiHubPage() {
     return (
       <div className="multi-hub">
         <div className="room-lobby">
-          <p className="room-lobby__title">Game Expired</p>
+          <p className="room-lobby__title">{t.gameExpired}</p>
           <p
             style={{
               fontFamily: "Mulmaru",
@@ -122,7 +124,7 @@ export default function MultiHubPage() {
               textAlign: "center",
             }}
           >
-            This game has ended and is no longer available.
+            {t.gameExpiredDesc}
           </p>
         </div>
         <button
@@ -131,7 +133,7 @@ export default function MultiHubPage() {
             reset();
           }}
         >
-          OK
+          {t.ok}
         </button>
       </div>
     );
@@ -141,10 +143,10 @@ export default function MultiHubPage() {
     const displayMode = selectedMode ?? mode;
     const lobbyTitle =
       displayMode === "coop"
-        ? "Co-op Lobby"
+        ? t.coopLobby
         : displayMode === "versus"
-          ? "Versus Lobby"
-          : "Multi Lobby";
+          ? t.versusLobby
+          : t.multiLobby;
     return (
       <div className="multi-hub">
         <div className="room-lobby">
@@ -160,7 +162,7 @@ export default function MultiHubPage() {
                 wordBreak: "break-all",
               }}
             >
-              Link copied to clipboard. Share with a friend!
+              {t.linkCopied}
             </p>
             {copied && (
               <span
@@ -170,7 +172,7 @@ export default function MultiHubPage() {
                   fontSize: "0.8em",
                 }}
               >
-                ✓ Copied
+                {t.copied}
               </span>
             )}
           </div>
@@ -184,7 +186,7 @@ export default function MultiHubPage() {
               //   color: "#7a7a9a",
               // }}
             >
-              Players
+              {t.players}
             </p>
             {players.map((p) => (
               <div
@@ -192,9 +194,9 @@ export default function MultiHubPage() {
                 className={`room-lobby__player${p.ready ? " room-lobby__player--ready" : ""}`}
               >
                 <span>
-                  {p.nickname} {p.playerId === playerId ? "(me)" : ""}
+                  {p.nickname} {p.playerId === playerId ? t.me : ""}
                 </span>
-                <span>{p.ready ? "Ready ✓" : "Waiting..."}</span>
+                <span>{p.ready ? t.readyMark : t.waiting}</span>
               </div>
             ))}
             {players.length < 2 && (
@@ -205,14 +207,14 @@ export default function MultiHubPage() {
                   color: "#7a7a9a",
                 }}
               >
-                Waiting for opponent...
+                {t.waitingForOpponent}
               </p>
             )}
           </div>
 
           {!isHost && !myReady && (
             <button className="btn btn--primary" onClick={handleReady}>
-              Ready
+              {t.ready}
             </button>
           )}
 
@@ -222,7 +224,7 @@ export default function MultiHubPage() {
               onClick={handleStart}
               disabled={!allReady}
             >
-              {allReady ? "Start Game" : "Waiting for all players..."}
+              {allReady ? t.startGame : t.waitingForAllPlayers}
             </button>
           )}
         </div>
@@ -234,7 +236,7 @@ export default function MultiHubPage() {
             router.push("/");
           }}
         >
-          Cancel
+          {t.cancel}
         </button>
       </div>
     );
@@ -242,7 +244,7 @@ export default function MultiHubPage() {
 
   return (
     <div className="multi-hub">
-      <h2 className="multi-hub__title">MULTI GAME</h2>
+      <h2 className="multi-hub__title">{t.multiGame}</h2>
 
       <div className="multi-hub__modes">
         <button
@@ -250,19 +252,19 @@ export default function MultiHubPage() {
           onClick={() => handleCreate("coop")}
           disabled={creating || !isInitialized}
         >
-          Co-op MODE
+          {t.coopMode}
         </button>
         <button
           className="btn btn--secondary"
           onClick={() => handleCreate("versus")}
           disabled={creating || !isInitialized}
         >
-          VS MODE
+          {t.versusMode}
         </button>
       </div>
 
       <button className="btn btn--ghost" onClick={() => router.push("/")}>
-        ← Back
+        {t.back}
       </button>
     </div>
   );

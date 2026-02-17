@@ -1,17 +1,21 @@
 "use client";
 
+import { useLocale } from "@/providers/LocaleProvider";
+
 interface HowToPlayProps {
   onClose: () => void;
 }
 
 export default function HowToPlay({ onClose }: HowToPlayProps) {
+  const { t } = useLocale();
+
   return (
     <div className="htp-modal" onClick={onClose}>
       <div className="htp-content" onClick={(e) => e.stopPropagation()}>
         <h2 className="htp-title">HOW TO PLAY</h2>
 
         <div className="htp-section">
-          <p className="htp-section__title">📋 OBJECTIVE</p>
+          <p className="htp-section__title">{t.htpObjective}</p>
           <p
             style={{
               fontFamily: "var(--font-pixel)",
@@ -20,20 +24,20 @@ export default function HowToPlay({ onClose }: HowToPlayProps) {
               color: "#7a7a9a",
             }}
           >
-            Press ingredients in order shown on the ticket to build a burger, then submit!
+            {t.htpObjectiveDesc}
           </p>
         </div>
 
         <div className="htp-section">
-          <p className="htp-section__title">⌨️ CONTROLS</p>
+          <p className="htp-section__title">{t.htpControls}</p>
           {[
-            ["A", "Veggie"],
-            ["D", "Sauce"],
-            ["S", "Cheese"],
-            ["W", "Patty"],
-            ["Q", "Onion"],
-            ["E", "Tomato"],
-            ["Enter / Space", "Submit Burger"],
+            ["A", t.htpVeggie],
+            ["D", t.htpSauce],
+            ["S", t.htpCheese],
+            ["W", t.htpPatty],
+            ["Q", t.htpOnion],
+            ["E", t.htpTomato],
+            ["Enter / Space", t.htpSubmitBurger],
           ].map(([key, label]) => (
             <div className="htp-key-row" key={key}>
               <kbd>{key}</kbd>
@@ -43,7 +47,7 @@ export default function HowToPlay({ onClose }: HowToPlayProps) {
         </div>
 
         <div className="htp-section">
-          <p className="htp-section__title">⚡ COMBO</p>
+          <p className="htp-section__title">{t.htpCombo}</p>
           <p
             style={{
               fontFamily: "var(--font-pixel)",
@@ -52,13 +56,13 @@ export default function HowToPlay({ onClose }: HowToPlayProps) {
               color: "#7a7a9a",
             }}
           >
-            Submit within 65% of the time limit for a combo! More combos = higher score.
+            {t.htpComboDesc}
           </p>
           {[
-            ["1-2 Combo", "×1.5"],
-            ["3-5 Combo", "×2.0"],
-            ["6-9 Combo", "×3.0"],
-            ["10+ Combo", "×5.0"],
+            [t.htpCombo12, "×1.5"],
+            [t.htpCombo35, "×2.0"],
+            [t.htpCombo69, "×3.0"],
+            [t.htpCombo10, "×5.0"],
           ].map(([combo, mult]) => (
             <div className="htp-key-row" key={combo}>
               <kbd>{combo}</kbd>
@@ -68,7 +72,7 @@ export default function HowToPlay({ onClose }: HowToPlayProps) {
         </div>
 
         <div className="htp-section">
-          <p className="htp-section__title">🔥 FEVER</p>
+          <p className="htp-section__title">{t.htpFever}</p>
           <p
             style={{
               fontFamily: "var(--font-pixel)",
@@ -77,17 +81,17 @@ export default function HowToPlay({ onClose }: HowToPlayProps) {
               color: "#7a7a9a",
             }}
           >
-            Every 5 successes triggers FEVER! Tap the highlighted ingredient for 6 seconds to stack points.
+            {t.htpFeverDesc}
           </p>
         </div>
 
         <div className="htp-section">
-          <p className="htp-section__title">❤️ HP</p>
+          <p className="htp-section__title">{t.htpHp}</p>
           {[
-            ["Correct Submit", "+15"],
-            ["Combo Submit", "+20"],
-            ["Wrong Submit", "-10"],
-            ["Time Out", "-20"],
+            [t.htpCorrectSubmit, "+15"],
+            [t.htpComboSubmit, "+20"],
+            [t.htpWrongSubmit, "-10"],
+            [t.htpTimeOut, "-20"],
           ].map(([action, delta]) => (
             <div className="htp-key-row" key={action}>
               <kbd>{action}</kbd>
@@ -103,7 +107,7 @@ export default function HowToPlay({ onClose }: HowToPlayProps) {
               marginTop: "4px",
             }}
           >
-            HP drains over time. Game over at 0!
+            {t.htpHpDesc}
           </p>
         </div>
 
@@ -112,7 +116,7 @@ export default function HowToPlay({ onClose }: HowToPlayProps) {
           onClick={onClose}
           style={{ marginTop: "8px" }}
         >
-          Close
+          {t.close}
         </button>
       </div>
     </div>

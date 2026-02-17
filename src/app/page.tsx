@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { usePlayerStore } from "@/stores/playerStore";
+import { useLocale } from "@/providers/LocaleProvider";
 import HowToPlay from "@/components/ui/HowToPlay";
 
 export default function MainPage() {
   const router = useRouter();
+  const { t } = useLocale();
   const { nickname, setNickname, initSession, saveNickname, isInitialized } =
     usePlayerStore();
   const [showHtp, setShowHtp] = useState(false);
@@ -48,7 +50,7 @@ export default function MainPage() {
 
       <div className="main-nickname">
         <label className="main-nickname__label" htmlFor="nickname">
-          Nickname
+          {t.nickname}
         </label>
         <input
           id="nickname"
@@ -56,29 +58,29 @@ export default function MainPage() {
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onBlur={handleNicknameBlur}
-          placeholder="Enter nickname..."
+          placeholder={t.nicknamePlaceholder}
           maxLength={12}
         />
       </div>
 
       <nav className="main-menu">
         <button className="btn btn--primary" onClick={handleSingle}>
-          SINGLE GAME
+          {t.btnSingle}
         </button>
         <button className="btn btn--secondary" onClick={handleMulti}>
-          MULTI GAME
+          {t.btnMulti}
         </button>
         <button
           className="btn btn--tertiary"
           onClick={() => router.push("/leaderboard")}
         >
-          LEADERBOARD
+          {t.btnLeaderboard}
         </button>
         <button
           className="btn btn--flat btn--how"
           onClick={() => setShowHtp(true)}
         >
-          HOW TO PLAY
+          {t.btnHowToPlay}
         </button>
       </nav>
 

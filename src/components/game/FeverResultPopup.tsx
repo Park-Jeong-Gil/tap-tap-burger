@@ -3,8 +3,10 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useGameStore } from "@/stores/gameStore";
 import { FEVER_SCORE_PER_STACK } from "@/lib/constants";
+import { useLocale } from "@/providers/LocaleProvider";
 
 export default function FeverResultPopup() {
+  const { t } = useLocale();
   const feverResultSeq = useGameStore((s) => s.feverResultSeq);
   const lastFeverResultCount = useGameStore((s) => s.lastFeverResultCount);
 
@@ -38,7 +40,7 @@ export default function FeverResultPopup() {
             {success ? "FEVER CLEAR!" : "FEVER FAIL"}
           </p>
           <p className="fever-result__stack">
-            {success ? `STACK x${lastFeverResultCount}` : "TIME OUT"}
+            {success ? `STACK x${lastFeverResultCount}` : t.timeOut}
           </p>
           <p className="fever-result__score">
             {success ? `+${gained.toLocaleString()} SCORE` : "+0 SCORE"}
