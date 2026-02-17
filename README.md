@@ -1,36 +1,156 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tap Tap Burger
 
-## Getting Started
+주문서 순서대로 재료를 빠르게 쌓아 버거를 완성하는 웹 기반 리듬/캐주얼 아케이드 게임입니다.  
+싱글, 협력(Co-op), 대전(Versus) 모드를 지원하며, Supabase 기반 리더보드와 실시간 멀티플레이를 제공합니다.
 
-First, run the development server:
+## 프로젝트 개요
+
+- 프로젝트명: **Tap Tap Burger: Perfect Order**
+- 장르: 리듬 / 캐주얼 아케이드
+- 플랫폼: 웹 (모바일 우선 반응형 + 데스크톱 지원)
+- 핵심 가치:
+  - 짧은 세션에서도 즉시 재미를 주는 입력-판정 루프
+  - 협력/대전 모드로 소셜 플레이 확장
+  - 최고 점수 중심 리더보드 경쟁
+
+## 게임의 목적
+
+- 주문서의 **정확한 재료 순서**를 입력해 버거를 완성하고 제출합니다.
+- HP가 시간에 따라 감소하므로, 정확도와 속도를 동시에 관리해야 합니다.
+- 콤보와 피버를 활용해 더 높은 점수를 달성하고 모드별 리더보드 상위를 노립니다.
+
+## 주요 포인트
+
+- **멀티 모드 2종 지원**
+  - Co-op: 두 플레이어가 키를 분담해 하나의 버거를 협력 제작
+  - Versus: 실시간 상태 동기화 + 공격 메커닉으로 경쟁
+- **피버 타임 시스템 (구현됨)**
+  - 클리어 누적 기준 주기적으로 피버 주문 등장
+  - 지정 재료를 6초간 최대한 쌓아 보너스 점수 획득
+- **실시간 동기화**
+  - Supabase Realtime broadcast/postgres_changes 기반 룸/상태 동기화
+- **식별 및 기록 관리**
+  - localStorage UUID 세션 기반 익명 플레이어 식별
+  - `(player_id, mode)` 기준 최고 점수 업서트
+- **언어 지원**
+  - 한국어/영어 지원
+  - 최초 접속 시 국가 코드(KR) 기반 locale 쿠키 설정
+
+## 현재 구현 스펙 (Code Truth 기준)
+
+PRD(`TapTapBurger_PRD.md`)는 기획과 코드 스펙을 함께 관리하며, 수치/룰 충돌 시 Current Spec을 우선합니다.
+
+### 코어 룰
+
+- HP: 최대 100, 시작 100
+- HP 변화:
+  - 정답 제출 +15
+  - 콤보 제출 +20
+  - 오답 제출 -10
+  - 일반 주문 시간 초과 -20
+- 콤보 조건: `elapsed < timeLimit * 0.65`
+- 점수: 기본 100점 + 콤보 배율
+  - 1~2: x1.5
+  - 3~5: x2.0
+  - 6~9: x3.0
+  - 10+: x5.0
+
+### 입력
+
+- 키보드: `W/A/S/D + Q/E + Esc/Backspace + Enter/Space`
+- 재료: patty, cheese, veggie, sauce, onion, tomato
+- 모바일: 동일 기능 터치 버튼 제공
+
+### 모드별 특징
+
+- Single: 개인 점수 경쟁
+- Co-op:
+  - 재료 6종을 두 플레이어에게 3개씩 분배
+  - `submit`은 양쪽 공통 제공
+- Versus:
+  - 상대 HUD(HP/점수/콤보/현재 타깃) 실시간 표시
+  - 공격은 상대 큐 마지막 일반 주문에 재료/시간을 가산하는 방식
+
+### 피버 시스템
+
+- 기본 주문 5회 클리어마다 피버 주문 대기
+- 피버 주문:
+  - 제한 시간 6초
+  - 지정 재료만 입력 가능
+  - 성공 점수: `적재 개수 * 50`
+  - 피버 종료 후 일반 루프로 복귀
+
+## 기술 스펙
+
+### 프론트엔드
+
+- Next.js `16.1.6` (App Router)
+- React `19.2.3`
+- TypeScript
+- SCSS (`sass`)
+- Zustand (상태 관리)
+- Framer Motion (일부 애니메이션)
+
+### 백엔드/실시간
+
+- Supabase (`@supabase/supabase-js`)
+- PostgreSQL + RPC(`upsert_best_score`)
+- Realtime 채널
+  - 룸 대기실/상태 변경
+  - Co-op 입력 브로드캐스트
+  - Versus 상태/공격/피버 결과 동기화
+
+### 데이터 모델 (핵심)
+
+- `players`: session_id 기반 플레이어
+- `scores`: 모드별 최고 점수/최대 콤보
+- `rooms`: coop/versus 룸 상태
+- `room_players`: 룸 참가자, ready, coop 할당 키
+
+## 주요 페이지
+
+- `/` 메인 (닉네임, 모드 선택, 리더보드, 게임 방법)
+- `/game/single` 싱글 게임
+- `/game/multi` 멀티 허브/로비
+- `/game/coop/[roomId]` 협력 모드
+- `/game/versus/[roomId]` 대전 모드
+- `/leaderboard` 모드별 순위표
+
+## 실행 방법
+
+### 1) 의존성 설치
+
+```bash
+npm install
+```
+
+### 2) 환경 변수 설정
+
+`.env.local`에 아래 값을 설정합니다.
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+```
+
+### 3) 개발 서버 실행
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+브라우저에서 `http://localhost:3000` 접속
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 스크립트
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `npm run dev`: 개발 서버
+- `npm run build`: 프로덕션 빌드
+- `npm run start`: 프로덕션 실행
+- `npm run lint`: ESLint 검사
 
-## Learn More
+## 문서
 
-To learn more about Next.js, take a look at the following resources:
+- PRD: `TapTapBurger_PRD.md`
+  - 기획 의도 + 현재 코드 스펙 + Fever 스펙(v1) 포함
+- DB 마이그레이션: `supabase/migrations/001_init.sql`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
