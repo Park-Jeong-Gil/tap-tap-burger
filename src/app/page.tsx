@@ -39,11 +39,11 @@ export default function MainPage() {
     <main className="main-page">
       <header className="main-header">
         <h1 className="main-title">
-          TAP TAP
+          TAPTAP
           <br />
           BURGER
         </h1>
-        <p className="main-subtitle">Perfect Order</p>
+        {/* <p className="main-subtitle">Perfect Order</p> */}
       </header>
 
       <div className="main-nickname">
