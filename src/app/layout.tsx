@@ -4,6 +4,7 @@ import "@/styles/globals.scss";
 import { LocaleProvider } from "@/providers/LocaleProvider";
 import { translations } from "@/lib/translations";
 import type { Locale } from "@/lib/translations";
+import { Analytics } from "@vercel/analytics/next";
 
 export async function generateMetadata(): Promise<Metadata> {
   const cookieStore = await cookies();
@@ -53,6 +54,7 @@ export default async function RootLayout({
         <LocaleProvider locale={locale}>
           <div className="container">{children}</div>
         </LocaleProvider>
+        <Analytics />
       </body>
     </html>
   );
