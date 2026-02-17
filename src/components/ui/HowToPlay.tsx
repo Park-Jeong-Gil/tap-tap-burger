@@ -11,7 +11,7 @@ export default function HowToPlay({ onClose }: HowToPlayProps) {
         <h2 className="htp-title">HOW TO PLAY</h2>
 
         <div className="htp-section">
-          <p className="htp-section__title">📋 목표</p>
+          <p className="htp-section__title">📋 OBJECTIVE</p>
           <p
             style={{
               fontFamily: "var(--font-pixel)",
@@ -20,20 +20,20 @@ export default function HowToPlay({ onClose }: HowToPlayProps) {
               color: "#7a7a9a",
             }}
           >
-            주문서에 적힌 순서대로 재료를 눌러 햄버거를 만들고 제출하세요!
+            Press ingredients in order shown on the ticket to build a burger, then submit!
           </p>
         </div>
 
         <div className="htp-section">
-          <p className="htp-section__title">⌨️ 키보드</p>
+          <p className="htp-section__title">⌨️ CONTROLS</p>
           {[
-            ["A", "야채"],
-            ["D", "소스"],
-            ["S", "치즈"],
-            ["W", "패티"],
-            ["Q", "양파"],
-            ["E", "토마토"],
-            ["Enter / Space", "버거 제출"],
+            ["A", "Veggie"],
+            ["D", "Sauce"],
+            ["S", "Cheese"],
+            ["W", "Patty"],
+            ["Q", "Onion"],
+            ["E", "Tomato"],
+            ["Enter / Space", "Submit Burger"],
           ].map(([key, label]) => (
             <div className="htp-key-row" key={key}>
               <kbd>{key}</kbd>
@@ -43,7 +43,7 @@ export default function HowToPlay({ onClose }: HowToPlayProps) {
         </div>
 
         <div className="htp-section">
-          <p className="htp-section__title">⚡ 콤보</p>
+          <p className="htp-section__title">⚡ COMBO</p>
           <p
             style={{
               fontFamily: "var(--font-pixel)",
@@ -52,14 +52,13 @@ export default function HowToPlay({ onClose }: HowToPlayProps) {
               color: "#7a7a9a",
             }}
           >
-            제한 시간의 65% 이내로 제출하면 콤보! 콤보가 쌓일수록 점수가
-            올라가요.
+            Submit within 65% of the time limit for a combo! More combos = higher score.
           </p>
           {[
-            ["1~2콤보", "×1.5"],
-            ["3~5콤보", "×2.0"],
-            ["6~9콤보", "×3.0"],
-            ["10콤보+", "×5.0"],
+            ["1-2 Combo", "×1.5"],
+            ["3-5 Combo", "×2.0"],
+            ["6-9 Combo", "×3.0"],
+            ["10+ Combo", "×5.0"],
           ].map(([combo, mult]) => (
             <div className="htp-key-row" key={combo}>
               <kbd>{combo}</kbd>
@@ -69,7 +68,7 @@ export default function HowToPlay({ onClose }: HowToPlayProps) {
         </div>
 
         <div className="htp-section">
-          <p className="htp-section__title">🔥 피버</p>
+          <p className="htp-section__title">🔥 FEVER</p>
           <p
             style={{
               fontFamily: "var(--font-pixel)",
@@ -78,17 +77,17 @@ export default function HowToPlay({ onClose }: HowToPlayProps) {
               color: "#7a7a9a",
             }}
           >
-            5번 성공마다 피버 돌입! 6초간 지정 재료를 계속 눌러 점수를 쌓으세요.
+            Every 5 successes triggers FEVER! Tap the highlighted ingredient for 6 seconds to stack points.
           </p>
         </div>
 
         <div className="htp-section">
           <p className="htp-section__title">❤️ HP</p>
           {[
-            ["올바른 제출", "+15"],
-            ["콤보 제출", "+20"],
-            ["잘못된 제출", "-10"],
-            ["시간 초과", "-20"],
+            ["Correct Submit", "+15"],
+            ["Combo Submit", "+20"],
+            ["Wrong Submit", "-10"],
+            ["Time Out", "-20"],
           ].map(([action, delta]) => (
             <div className="htp-key-row" key={action}>
               <kbd>{action}</kbd>
@@ -104,7 +103,7 @@ export default function HowToPlay({ onClose }: HowToPlayProps) {
               marginTop: "4px",
             }}
           >
-            시간이 지날수록 HP가 계속 줄어들어요. HP가 0이 되면 게임 오버!
+            HP drains over time. Game over at 0!
           </p>
         </div>
 
@@ -113,7 +112,7 @@ export default function HowToPlay({ onClose }: HowToPlayProps) {
           onClick={onClose}
           style={{ marginTop: "8px" }}
         >
-          닫기
+          Close
         </button>
       </div>
     </div>

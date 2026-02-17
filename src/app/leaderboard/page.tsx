@@ -31,9 +31,9 @@ export default function LeaderboardPage() {
   }, [tab]);
 
   const tabLabel: Record<TabMode, string> = {
-    single: '싱글',
-    coop: '협력',
-    versus: '대전',
+    single: 'Single',
+    coop: 'Co-op',
+    versus: 'Versus',
   };
 
   const rankClass = (i: number) =>
@@ -45,7 +45,7 @@ export default function LeaderboardPage() {
     <div className="leaderboard-page">
       <div className="leaderboard-header">
         <button className="btn btn--ghost" onClick={() => router.push('/')} style={{ fontSize: 'inherit' }}>
-          ← 뒤로
+          ← Back
         </button>
         <h1>LEADERBOARD</h1>
       </div>
@@ -64,7 +64,7 @@ export default function LeaderboardPage() {
 
       {loading && (
         <p style={{ fontFamily: 'Mulmaru', color: '#7a7a9a', textAlign: 'center', marginTop: '32px' }}>
-          로딩 중...
+          Loading...
         </p>
       )}
 
@@ -72,7 +72,7 @@ export default function LeaderboardPage() {
         <div className="leaderboard-table">
           {rows.length === 0 && (
             <p style={{ fontFamily: 'Mulmaru', color: '#7a7a9a', textAlign: 'center', marginTop: '32px' }}>
-              기록이 없습니다
+              No records found
             </p>
           )}
           {rows.map((row, i) => {
@@ -89,8 +89,8 @@ export default function LeaderboardPage() {
                 <span className="leaderboard-rank">
                   {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}
                 </span>
-                <span>{row.players?.nickname ?? '알 수 없음'}</span>
-                <span>{row.score.toLocaleString()}점</span>
+                <span>{row.players?.nickname ?? 'Unknown'}</span>
+                <span>{row.score.toLocaleString()} pts</span>
                 <span>{row.max_combo}x</span>
               </div>
             );

@@ -4,18 +4,18 @@ import { useEffect, useRef } from "react";
 import type { Order, Ingredient } from "@/types";
 
 const INGREDIENT_LABELS: Record<Ingredient, string> = {
-  patty: "🟫 패티",
-  cheese: "🟨 치즈",
-  veggie: "🟩 야채",
-  sauce: "🟥 소스",
-  onion: "🟣 양파",
-  tomato: "🍅 토마토",
+  patty: "🟫 Patty",
+  cheese: "🟨 Cheese",
+  veggie: "🟩 Veggie",
+  sauce: "🟥 Sauce",
+  onion: "🟣 Onion",
+  tomato: "🍅 Tomato",
 };
 
 interface OrderCardProps {
   order: Order;
-  submittedCount: number; // 현재까지 올바르게 입력된 재료 수
-  isFirst: boolean; // 첫 번째 주문서 (현재 타겟)
+  submittedCount: number; // number of correctly submitted ingredients so far
+  isFirst: boolean; // first order card (current target)
   isNew?: boolean;
 }
 
@@ -32,7 +32,7 @@ export default function OrderCard({
   const isFever = order.type === "fever";
   const feverIngredient = order.feverIngredient ?? order.ingredients[0];
 
-  // 입력된 재료에 맞춰 자동 스크롤
+  // Auto-scroll to match submitted ingredient
   useEffect(() => {
     if (!listRef.current || !isFirst) return;
     const items = listRef.current.querySelectorAll<HTMLElement>(
@@ -56,7 +56,7 @@ export default function OrderCard({
         .filter(Boolean)
         .join(" ")}
     >
-      {/* 타임 바 */}
+      {/* Timer bar */}
       {/* <div
         className={`order-card__timer${isUrgent ? ' order-card__timer--urgent' : ''}`}
         style={{ width: `${timePct}%` }}
@@ -64,7 +64,7 @@ export default function OrderCard({
 
       <div className="order-card__header">
         <p className="order-card__index">
-          {isFever ? "피버!" : `#${order.orderIndex + 1}`}
+          {isFever ? "FEVER!" : `#${order.orderIndex + 1}`}
         </p>
         <p
           className={`order-card__time${isUrgent ? " order-card__time--urgent" : ""}`}

@@ -25,7 +25,7 @@ export default function SingleGamePage() {
   const [shaking, setShaking] = useState(false);
   const shakeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // 페이지 진입 시 이전 게임 상태 초기화 (뒤로가기 후 재시작 대응)
+  // Reset previous game state on page entry (handles restart after back navigation)
   useEffect(() => {
     resetGame();
   }, [resetGame]);
@@ -35,14 +35,14 @@ export default function SingleGamePage() {
     startGame("single");
   }, [startGame]);
 
-  // 게임오버 후 resetGame()으로 idle이 되면 카운트다운을 다시 노출한다.
+  // After gameover, resetGame() sets idle — show countdown again.
   useEffect(() => {
     if (status === "idle" && !countingDown) {
       setCountingDown(true);
     }
   }, [status, countingDown]);
 
-  // 오답 → 화면 흔들림
+  // Wrong answer → screen shake
   useEffect(() => {
     if (wrongFlashCount === 0) return;
     if (shakeTimer.current) clearTimeout(shakeTimer.current);

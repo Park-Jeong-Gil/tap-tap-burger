@@ -33,12 +33,12 @@ export default function GameOverScreen({ versusResult }: GameOverScreenProps) {
   }, [playerId, saveScore]);
 
   const handleRestart = () => {
-    // 싱글 재시작은 페이지의 카운트다운 흐름을 다시 타도록 idle로 되돌린다.
+    // Single restart: reset to idle so the page's countdown flow runs again.
     resetGame();
   };
 
   const handleHome = () => {
-    // 멀티 모드: roomStore 먼저 리셋 (roomStatus → 'waiting'으로 초기화해 만료 화면 flash 방지)
+    // Multi mode: reset roomStore first (resets roomStatus → 'waiting' to prevent expired screen flash)
     if (mode === 'versus' || mode === 'coop') resetRoom();
     resetGame();
     router.push('/');
@@ -46,7 +46,7 @@ export default function GameOverScreen({ versusResult }: GameOverScreenProps) {
 
   return (
     <div className="gameover-overlay">
-      {/* 타이틀 */}
+      {/* Title */}
       <motion.h2
         className="gameover-title"
         style={versusResult === 'win' ? { color: '#F5C842' } : undefined}
@@ -54,10 +54,10 @@ export default function GameOverScreen({ versusResult }: GameOverScreenProps) {
         animate={{ scale: 1, opacity: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 420, damping: 22, delay: 0.05 }}
       >
-        {versusResult === 'win' ? '승리!' : versusResult === 'loss' ? '패배...' : 'GAME OVER'}
+        {versusResult === 'win' ? 'VICTORY!' : versusResult === 'loss' ? 'DEFEAT...' : 'GAME OVER'}
       </motion.h2>
 
-      {/* 스탯: stagger */}
+      {/* Stats: stagger */}
       <motion.div
         className="gameover-stats"
         initial="hidden"
@@ -76,12 +76,12 @@ export default function GameOverScreen({ versusResult }: GameOverScreenProps) {
             transition={{ type: 'spring', stiffness: 380, damping: 24 }}
             style={{ color: '#2E9E3E', fontSize: '0.8em' }}
           >
-            ★ 신기록 달성!
+            ★ New Record!
           </motion.p>
         )}
       </motion.div>
 
-      {/* 버튼 */}
+      {/* Buttons */}
       <motion.div
         className="gameover-actions"
         initial={{ opacity: 0, y: 14 }}
@@ -90,11 +90,11 @@ export default function GameOverScreen({ versusResult }: GameOverScreenProps) {
       >
         {mode !== 'versus' && mode !== 'coop' && (
           <button className="btn btn--primary" onClick={handleRestart}>
-            다시 시작
+            RETRY
           </button>
         )}
         <button className="btn btn--ghost" onClick={handleHome}>
-          메인으로
+          MAIN MENU
         </button>
       </motion.div>
     </div>

@@ -520,7 +520,7 @@ export default function VersusGamePage() {
     return (
       <div className="multi-hub">
         <div className="room-lobby">
-          <p className="room-lobby__title">링크 만료</p>
+          <p className="room-lobby__title">Link Expired</p>
           <p
             style={{
               fontFamily: "Mulmaru",
@@ -529,11 +529,11 @@ export default function VersusGamePage() {
               textAlign: "center",
             }}
           >
-            이 게임 링크는 이미 사용되었거나 만료되었습니다.
+            This link has already been used or has expired.
           </p>
         </div>
         <button className="btn btn--ghost" onClick={() => router.push("/")}>
-          메인으로
+          Back to Main
         </button>
       </div>
     );
@@ -543,7 +543,7 @@ export default function VersusGamePage() {
     return (
       <div className="multi-hub">
         <div className="room-lobby">
-          <p className="room-lobby__title">대전 모드 대기실</p>
+          <p className="room-lobby__title">Versus Lobby</p>
           <div className="room-lobby__players">
             {players.map((p) => (
               <div
@@ -551,9 +551,9 @@ export default function VersusGamePage() {
                 className={`room-lobby__player${p.ready ? " room-lobby__player--ready" : ""}`}
               >
                 <span>
-                  {p.nickname} {p.playerId === playerId ? "(나)" : ""}
+                  {p.nickname} {p.playerId === playerId ? "(me)" : ""}
                 </span>
-                <span>{p.ready ? "준비 완료 ✓" : "대기 중..."}</span>
+                <span>{p.ready ? "Ready ✓" : "Waiting..."}</span>
               </div>
             ))}
             {players.length < 2 && (
@@ -564,7 +564,7 @@ export default function VersusGamePage() {
                   color: "#7a7a9a",
                 }}
               >
-                상대방 대기 중...
+                Waiting for opponent...
               </p>
             )}
           </div>
@@ -572,7 +572,7 @@ export default function VersusGamePage() {
             <>
               <div className="main-nickname" style={{ width: "100%" }}>
                 <label className="main-nickname__label" htmlFor="vs-nickname">
-                  닉네임
+                  Nickname
                 </label>
                 <input
                   id="vs-nickname"
@@ -582,7 +582,7 @@ export default function VersusGamePage() {
                   onKeyDown={(e) =>
                     e.key === "Enter" && nicknameInput.trim() && handleReady()
                   }
-                  placeholder="닉네임 입력..."
+                  placeholder="Enter nickname..."
                   maxLength={20}
                   autoFocus
                 />
@@ -592,7 +592,7 @@ export default function VersusGamePage() {
                 onClick={handleReady}
                 disabled={!nicknameInput.trim()}
               >
-                준비
+                Ready
               </button>
             </>
           )}
@@ -603,15 +603,15 @@ export default function VersusGamePage() {
               disabled={!allReady}
             >
               {allReady
-                ? "게임 시작"
+                ? "Start Game"
                 : players.length < 2
-                  ? "모든 플레이어를 기다리는 중..."
-                  : "상대방이 준비를 누르면 시작할 수 있어요"}
+                  ? "Waiting for all players..."
+                  : "Waiting for opponent to ready up..."}
             </button>
           )}
         </div>
         <button className="btn btn--ghost" onClick={() => router.push("/")}>
-          취소
+          Cancel
         </button>
       </div>
     );
@@ -632,7 +632,7 @@ export default function VersusGamePage() {
 
       <div className="versus-opponent" ref={opponentPanelRef}>
         <span className="versus-opponent__name">
-          {opponentEntry?.nickname ?? "상대방"}
+          {opponentEntry?.nickname ?? "Opponent"}
         </span>
         <span className="versus-opponent__hp">HP {Math.ceil(opponent.hp)}</span>{" "}
         /

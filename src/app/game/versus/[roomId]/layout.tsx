@@ -8,9 +8,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { roomId } = await params;
   const hostNickname = await getRoomHostNickname(roomId);
-  const description = `${hostNickname}님이 당신에게 승부를 걸어왔습니다.`;
+  const description = `${hostNickname} has challenged you to a match!`;
   return {
-    title: 'Tap Tap Burger: 대전 모드',
+    title: 'Tap Tap Burger: Versus',
     description,
     openGraph: { description },
   };

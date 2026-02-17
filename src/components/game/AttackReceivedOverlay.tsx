@@ -33,7 +33,7 @@ export default function AttackReceivedOverlay() {
     <AnimatePresence>
       {visible && (
         <>
-          {/* 붉은 전면 플래시 오버레이 */}
+          {/* Red full-screen flash overlay */}
           <motion.div
             key={`overlay-${uid}`}
             className="attack-received-overlay"
@@ -44,7 +44,7 @@ export default function AttackReceivedOverlay() {
             }}
             exit={{ opacity: 0 }}
           />
-          {/* 경고 텍스트 */}
+          {/* Warning text */}
           <motion.div
             key={`label-${uid}`}
             className="attack-received-label"
@@ -65,8 +65,8 @@ export default function AttackReceivedOverlay() {
             <span className="attack-received-label__icon">⚠</span>
             <span className="attack-received-label__text">
               {attackReceivedType === 'fever_delta'
-                ? `피버 우위 공격 +${count}`
-                : `+${count}개 주문 추가!`}
+                ? `FEVER LEAD +${count}`
+                : `+${count} ORDERS ADDED!`}
             </span>
           </motion.div>
         </>

@@ -16,7 +16,7 @@ export default function OrderQueue({ orders, currentBurger }: OrderQueueProps) {
 
   return (
     <div className="ingame__queue">
-      <p className="ingame__queue-label">주문서</p>
+      <p className="ingame__queue-label">ORDERS</p>
       <div className="order-queue">
         {visible.map((order, idx) => (
           <OrderCard

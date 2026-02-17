@@ -72,10 +72,10 @@ export default function OrderPreview({
         .join(" ")}
       ref={containerRef}
     >
-      {/* 헤더: 주문 번호 + 남은 시간 */}
+      {/* Header: order number + remaining time */}
       <div className="order-preview__header">
         <span className="order-preview__index">
-          {isFever ? "피버 타임!" : `주문서 #${order.orderIndex + 1}`}
+          {isFever ? "FEVER TIME!" : `ORDER #${order.orderIndex + 1}`}
         </span>
         <span
           className={`order-preview__time${isUrgent ? " order-preview__time--urgent" : ""}`}
@@ -84,7 +84,7 @@ export default function OrderPreview({
         </span>
       </div>
 
-      {/* 타이머 바 */}
+      {/* Timer bar */}
       <div className="order-preview__timer-wrap">
         <div
           className={`order-preview__timer-bar${isUrgent ? " order-preview__timer-bar--urgent" : ""}`}
@@ -95,7 +95,7 @@ export default function OrderPreview({
       {isFever ? (
         <div className="order-preview__fever">
           <p className="order-preview__fever-text">
-            시간 내에 가장 많이 쌓아서 완성하세요!
+            Stack as many as you can before time runs out!
           </p>
           {feverIngredient && (
             <div className="order-preview__fever-target">
@@ -104,10 +104,10 @@ export default function OrderPreview({
             </div>
           )}
           <p className="order-preview__fever-count">
-            현재 적재: {submittedCount}
+            Stacked: {submittedCount}
           </p>
           <p className="order-preview__fever-score">
-            예상 점수: +{(submittedCount * FEVER_SCORE_PER_STACK).toLocaleString()}
+            Expected: +{(submittedCount * FEVER_SCORE_PER_STACK).toLocaleString()}
           </p>
         </div>
       ) : (

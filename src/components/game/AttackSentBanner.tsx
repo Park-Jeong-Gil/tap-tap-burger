@@ -34,8 +34,8 @@ export default function AttackSentBanner({ attackInfo }: AttackSentBannerProps) 
             <span className="attack-sent-banner__bolt">⚡</span>
             <span className="attack-sent-banner__text">
               {attackInfo.type === "fever_delta"
-                ? `피버 우위 공격 +${attackInfo.count}`
-                : `${attackInfo.count} COMBO 공격!`}
+                ? `FEVER LEAD +${attackInfo.count}`
+                : `${attackInfo.count} COMBO ATTACK!`}
             </span>
           </motion.div>
         )}

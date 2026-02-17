@@ -122,7 +122,7 @@ export default function InputPanel({ allowedActions, onAction }: InputPanelProps
 
   return (
     <div className="ingame__bottom">
-      {/* 플레이 영역: 목표 주문서(좌) | 현재 버거 스택(우) */}
+      {/* Play area: target order (left) | current burger stack (right) */}
       <div className="ingame__play-area">
         <div
           className={`ingame__order-col${!isPlaying ? " ingame__order-col--hidden" : ""}`}
@@ -155,12 +155,12 @@ export default function InputPanel({ allowedActions, onAction }: InputPanelProps
         </div>
       </div>
 
-      {/* 컨트롤: [재료 2×3] [완성] */}
+      {/* Controls: [ingredients 2×3] [submit] */}
       <div className="ingame__controls">
         <div className="ingame__grid">
           <InputBtn
             action="veggie"
-            label="야채"
+            label="VEGGIE"
             className="input-btn--veggie"
             disabled={!isAllowed("veggie") || inputBlocked}
             showKey={isDesktop}
@@ -168,7 +168,7 @@ export default function InputPanel({ allowedActions, onAction }: InputPanelProps
           />
           <InputBtn
             action="sauce"
-            label="소스"
+            label="SAUCE"
             className="input-btn--sauce"
             disabled={!isAllowed("sauce") || inputBlocked}
             showKey={isDesktop}
@@ -176,7 +176,7 @@ export default function InputPanel({ allowedActions, onAction }: InputPanelProps
           />
           <InputBtn
             action="cheese"
-            label="치즈"
+            label="CHEESE"
             className="input-btn--cheese"
             disabled={!isAllowed("cheese") || inputBlocked}
             showKey={isDesktop}
@@ -184,7 +184,7 @@ export default function InputPanel({ allowedActions, onAction }: InputPanelProps
           />
           <InputBtn
             action="patty"
-            label="패티"
+            label="PATTY"
             className="input-btn--patty"
             disabled={!isAllowed("patty") || inputBlocked}
             showKey={isDesktop}
@@ -192,7 +192,7 @@ export default function InputPanel({ allowedActions, onAction }: InputPanelProps
           />
           <InputBtn
             action="onion"
-            label="양파"
+            label="ONION"
             className="input-btn--onion"
             disabled={!isAllowed("onion") || inputBlocked}
             showKey={isDesktop}
@@ -200,7 +200,7 @@ export default function InputPanel({ allowedActions, onAction }: InputPanelProps
           />
           <InputBtn
             action="tomato"
-            label="토마토"
+            label="TOMATO"
             className="input-btn--tomato"
             disabled={!isAllowed("tomato") || inputBlocked}
             showKey={isDesktop}
@@ -210,7 +210,7 @@ export default function InputPanel({ allowedActions, onAction }: InputPanelProps
 
         <InputBtn
           action="submit"
-          label="완성"
+          label="SERVE"
           className="input-btn--submit"
           disabled={!isAllowed("submit") || inputBlocked}
           showKey={isDesktop}

@@ -5,7 +5,7 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// ─── 플레이어 ─────────────────────────────────────────
+// ─── Player ───────────────────────────────────────────
 export async function upsertPlayer(sessionId: string, nickname: string) {
   const { data, error } = await supabase
     .from('players')
@@ -20,7 +20,7 @@ export async function upsertPlayer(sessionId: string, nickname: string) {
   return data;
 }
 
-// ─── 스코어 저장 (최고 점수만 유지) ──────────────────
+// ─── Score (keep only best score) ─────────────────────
 export async function upsertScore(
   playerId: string,
   mode: string,
@@ -47,7 +47,7 @@ export async function getBestScore(playerId: string, mode: string): Promise<numb
   return (data as { score: number } | null)?.score ?? null;
 }
 
-// ─── 리더보드 ─────────────────────────────────────────
+// ─── Leaderboard ──────────────────────────────────────
 export async function getLeaderboard(mode: string) {
   const { data, error } = await supabase
     .from('scores')
@@ -60,7 +60,7 @@ export async function getLeaderboard(mode: string) {
   return data;
 }
 
-// ─── 룸 ──────────────────────────────────────────────
+// ─── Room ─────────────────────────────────────────────
 export async function createRoom(mode: string, hostPlayerId: string) {
   const { data: room, error: roomErr } = await supabase
     .from('rooms')
@@ -137,10 +137,10 @@ export async function getRoomHostNickname(roomId: string): Promise<string> {
     .eq('room_id', roomId)
     .limit(1)
     .single();
-  return (data?.players as unknown as { nickname: string } | null)?.nickname ?? '알 수 없음';
+  return (data?.players as unknown as { nickname: string } | null)?.nickname ?? 'Unknown';
 }
 
-// 페이지 언로드 시에도 완료되는 keepalive PATCH (탭 닫기 대비)
+// keepalive PATCH that completes even on page unload (handles tab close)
 export function markRoomFinishedBeacon(roomId: string): void {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;

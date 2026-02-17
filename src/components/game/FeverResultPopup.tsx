@@ -38,7 +38,7 @@ export default function FeverResultPopup() {
             {success ? "FEVER CLEAR!" : "FEVER FAIL"}
           </p>
           <p className="fever-result__stack">
-            {success ? `STACK x${lastFeverResultCount}` : "시간 초과"}
+            {success ? `STACK x${lastFeverResultCount}` : "TIME OUT"}
           </p>
           <p className="fever-result__score">
             {success ? `+${gained.toLocaleString()} SCORE` : "+0 SCORE"}

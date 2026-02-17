@@ -48,7 +48,7 @@ export default function MainPage() {
 
       <div className="main-nickname">
         <label className="main-nickname__label" htmlFor="nickname">
-          닉네임
+          Nickname
         </label>
         <input
           id="nickname"
@@ -56,7 +56,7 @@ export default function MainPage() {
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onBlur={handleNicknameBlur}
-          placeholder="닉네임 입력..."
+          placeholder="Enter nickname..."
           maxLength={12}
         />
       </div>

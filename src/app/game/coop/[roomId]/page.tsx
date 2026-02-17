@@ -72,27 +72,27 @@ export default function CoopGamePage() {
     initSession();
   }, [initSession]);
 
-  // 닉네임 입력 초기화 (저장된 값 or 현재 닉네임)
+  // Initialize nickname input (saved value or current nickname)
   useEffect(() => {
     if (!isInitialized) return;
     const saved = localStorage.getItem(NICKNAME_STORAGE_KEY);
     setNicknameInput(saved ?? nickname);
   }, [isInitialized, nickname]);
 
-  // 룸 참가
+  // Join room
   useEffect(() => {
     if (!isInitialized || !playerId || joined) return;
     setJoined(true);
 
     const join = async () => {
-      // 룸 상태 확인
+      // Check room status
       const room = await getRoomInfo(roomId);
       if (!room || room.status === "finished") {
         setExpired(true);
         return;
       }
 
-      // 이미 방에 있는지 확인 (방장은 createAndJoin에서 처리)
+      // Check if already in the room (host is handled in createAndJoin)
       const { data } = await supabase
         .from("room_players")
         .select("player_id, ready, assigned_keys")
@@ -101,20 +101,20 @@ export default function CoopGamePage() {
         .maybeSingle();
 
       if (!data) {
-        // 새 플레이어: 방이 진행 중이면 만료 처리
+        // New player: if game is in progress, mark as expired
         if (room.status === "playing") {
           setExpired(true);
           return;
         }
         await joinExisting(roomId, playerId, nickname);
       } else if (room.status === "playing" && roomStatus !== "playing") {
-        // 기존 참여자가 게임 진행 중에 재접속(새로고침 등) → 만료 처리
-        // 단, roomStatus가 이미 'playing'이면 방장이 multi 페이지에서 게임 시작 후 정상 첫 진입한 것
+        // Existing participant reconnecting mid-game (refresh, etc.) → mark as expired
+        // Exception: if roomStatus is already 'playing', host entered normally after starting from multi page
         setExpired(true);
         return;
       }
 
-      // 키 배분: 방장이 전체 키를 배분하고 DB에 저장
+      // Key assignment: host distributes all keys and saves to DB
       const { data: rp } = await supabase
         .from("room_players")
         .select("assigned_keys")
@@ -125,7 +125,7 @@ export default function CoopGamePage() {
       if (rp?.assigned_keys && rp.assigned_keys.length > 0) {
         setAssignedKeys(rp.assigned_keys);
       } else {
-        // roomId를 시드로 두 플레이어가 동일한 분할 계산
+        // Both players compute the same split using roomId as seed
         const [keys1, keys2] = assignCoopKeys(roomId);
         const myKeys = isHost ? keys1 : keys2;
         setAssignedKeys(myKeys);
@@ -148,14 +148,14 @@ export default function CoopGamePage() {
     startLocalGame("coop");
   }, [startLocalGame]);
 
-  // 게임 시작 시 카운트다운 → 로컬 게임 시작
+  // Game start → countdown → start local game
   useEffect(() => {
     if (roomStatus === "playing" && gameStatus === "idle") {
       setCountingDown(true);
     }
   }, [roomStatus, gameStatus]);
 
-  // 게임 오버 시 룸 만료 처리 (링크 재사용 방지)
+  // On game over, mark room as finished (prevent link reuse)
   useEffect(() => {
     if (gameStatus === "gameover" && !finishedRef.current) {
       finishedRef.current = true;
@@ -163,12 +163,12 @@ export default function CoopGamePage() {
     }
   }, [gameStatus, roomId]);
 
-  // 게임 중 나가기 (탭 닫기 / 언마운트) → 룸 만료
+  // Leaving mid-game (tab close / unmount) → mark room as finished
   useEffect(() => {
     const markFinished = () => {
       if (gameStatusRef.current === "playing" && !finishedRef.current) {
         finishedRef.current = true;
-        // 뒤로가기 직후 대기실로 돌아가도 즉시 만료 상태를 보여주기 위해 로컬 상태를 먼저 갱신
+        // Update local state first so expired screen shows immediately on back navigation
         setRoomStatus("finished");
         updateRoomStatus(roomId, "finished").catch(() => {});
         markRoomFinishedBeacon(roomId);
@@ -179,11 +179,11 @@ export default function CoopGamePage() {
     return () => {
       window.removeEventListener("beforeunload", markFinished);
       window.removeEventListener("pagehide", markFinished);
-      markFinished(); // 컴포넌트 언마운트 (SPA 이동) 시에도 실행
+      markFinished(); // Also run on component unmount (SPA navigation)
     };
   }, [roomId, setRoomStatus]);
 
-  // 대기실 10분 타임아웃 → 자동 만료
+  // 10-minute lobby timeout → auto-expire
   useEffect(() => {
     if (roomStatus !== "waiting") return;
     const timer = setTimeout(async () => {
@@ -193,21 +193,21 @@ export default function CoopGamePage() {
     return () => clearTimeout(timer);
   }, [roomId, roomStatus]);
 
-  // 상대방이 만료 처리한 경우 (게임 미시작 상태) → 만료 화면
+  // Opponent marked room as expired (before game starts) → show expired screen
   useEffect(() => {
     if (roomStatus === "finished" && gameStatus === "idle" && !countingDown) {
       setExpired(true);
     }
   }, [roomStatus, gameStatus, countingDown]);
 
-  // 게임 도중 상대가 나가서 룸이 만료되면 즉시 게임오버 처리
+  // If opponent leaves mid-game and room expires, force game over immediately
   useEffect(() => {
     if (roomStatus === "finished" && gameStatus === "playing") {
       forceGameOver();
     }
   }, [roomStatus, gameStatus, forceGameOver]);
 
-  // 오답 제출 시 화면 흔들림
+  // Wrong submission → screen shake
   useEffect(() => {
     if (wrongFlashCount === 0) return;
     if (shakeTimer.current) clearTimeout(shakeTimer.current);
@@ -215,7 +215,7 @@ export default function CoopGamePage() {
     shakeTimer.current = setTimeout(() => setShaking(false), 420);
   }, [wrongFlashCount]);
 
-  // 키보드 입력 → 코업 브로드캐스트
+  // Keyboard input → co-op broadcast
   useEffect(() => {
     if (gameStatus !== "playing" || assignedKeys.length === 0) return;
 
@@ -237,7 +237,7 @@ export default function CoopGamePage() {
       else if (action === "submit") submitBurger();
       else addIngredient(action as Ingredient);
 
-      // 상대방에게 브로드캐스트
+      // Broadcast to opponent
       sendInput(action);
     };
 
@@ -273,29 +273,29 @@ export default function CoopGamePage() {
   const myEntry = players.find((p) => p.playerId === playerId);
   const myReady = myEntry?.ready ?? false;
 
-  // 만료된 링크 화면
+  // Expired link screen
   if (expired) {
     return (
       <div className="multi-hub">
         <div className="room-lobby">
-          <p className="room-lobby__title">링크 만료</p>
+          <p className="room-lobby__title">Link Expired</p>
           <p style={{ fontFamily: "Mulmaru", fontSize: "0.85em", color: "#9B7060", textAlign: "center" }}>
-            이 게임 링크는 이미 사용되었거나 만료되었습니다.
+            This link has already been used or has expired.
           </p>
         </div>
         <button className="btn btn--ghost" onClick={() => router.push("/")}>
-          메인으로
+          Back to Main
         </button>
       </div>
     );
   }
 
-  // 대기실 화면
+  // Lobby screen
   if (roomStatus === "waiting") {
     return (
       <div className="multi-hub">
         <div className="room-lobby">
-          <p className="room-lobby__title">협력 모드 대기실</p>
+          <p className="room-lobby__title">Co-op Lobby</p>
           <div className="room-lobby__players">
             {players.map((p) => (
               <div
@@ -303,9 +303,9 @@ export default function CoopGamePage() {
                 className={`room-lobby__player${p.ready ? " room-lobby__player--ready" : ""}`}
               >
                 <span>
-                  {p.nickname} {p.playerId === playerId ? "(나)" : ""}
+                  {p.nickname} {p.playerId === playerId ? "(me)" : ""}
                 </span>
-                <span>{p.ready ? "준비 완료 ✓" : "대기 중..."}</span>
+                <span>{p.ready ? "Ready ✓" : "Waiting..."}</span>
               </div>
             ))}
             {players.length < 2 && (
@@ -316,21 +316,21 @@ export default function CoopGamePage() {
                   color: "#7a7a9a",
                 }}
               >
-                상대방 대기 중...
+                Waiting for opponent...
               </p>
             )}
           </div>
           {!isHost && !myReady && (
             <>
               <div className="main-nickname" style={{ width: "100%" }}>
-                <label className="main-nickname__label" htmlFor="coop-nickname">닉네임</label>
+                <label className="main-nickname__label" htmlFor="coop-nickname">Nickname</label>
                 <input
                   id="coop-nickname"
                   className="input"
                   value={nicknameInput}
                   onChange={(e) => setNicknameInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && nicknameInput.trim() && handleReady()}
-                  placeholder="닉네임 입력..."
+                  placeholder="Enter nickname..."
                   maxLength={20}
                   autoFocus
                 />
@@ -340,7 +340,7 @@ export default function CoopGamePage() {
                 onClick={handleReady}
                 disabled={!nicknameInput.trim()}
               >
-                준비
+                Ready
               </button>
             </>
           )}
@@ -350,12 +350,12 @@ export default function CoopGamePage() {
               onClick={handleStart}
               disabled={!allReady}
             >
-              {allReady ? "게임 시작" : "대기 중..."}
+              {allReady ? "Start Game" : "Waiting..."}
             </button>
           )}
         </div>
         <button className="btn btn--ghost" onClick={() => router.push("/")}>
-          취소
+          Cancel
         </button>
       </div>
     );

@@ -31,7 +31,7 @@ export default function MultiHubPage() {
 
   useEffect(() => { initSession(); }, [initSession]);
 
-  // 새로고침 복원: localStorage에 활성 룸이 있으면 DB에서 상태 복원
+  // Restore on refresh: if there's an active room in localStorage, restore state from DB
   useEffect(() => {
     if (!isInitialized || roomId) return;
     const saved = localStorage.getItem(ACTIVE_ROOM_STORAGE_KEY);
@@ -50,17 +50,17 @@ export default function MultiHubPage() {
     restore();
   }, [isInitialized, roomId, restoreHostRoom]);
 
-  // 방장 시작 → 게임 페이지 이동
+  // Host starts game → navigate to game page
   useEffect(() => {
     if (roomStatus === 'playing' && roomId && selectedMode) {
       router.push(`/game/${selectedMode}/${roomId}`);
     }
   }, [roomStatus, roomId, selectedMode, router]);
 
-  // 대기실 실시간 동기화
+  // Realtime lobby sync
   useLobbyRoom(roomId ?? '');
 
-  // 뒤로가기로 대기실 페이지에 복귀했을 때도 실제 룸 상태를 즉시 반영
+  // Also sync room status immediately when navigating back to lobby
   useEffect(() => {
     if (!roomId) return;
     const syncRoomStatus = async () => {
@@ -101,20 +101,20 @@ export default function MultiHubPage() {
   const myEntry = players.find((p) => p.playerId === playerId);
   const myReady = myEntry?.ready ?? false;
 
-  // 참가자로 접속한 경우 (roomId가 URL에서 왔을 때)
-  // → /game/coop/[roomId] or /game/versus/[roomId] 에서 직접 처리
+  // When joining as a participant (roomId comes from URL)
+  // → handled directly in /game/coop/[roomId] or /game/versus/[roomId]
 
   if (roomId && roomStatus === 'finished') {
     return (
       <div className="multi-hub">
         <div className="room-lobby">
-          <p className="room-lobby__title">게임 만료</p>
+          <p className="room-lobby__title">Game Expired</p>
           <p style={{ fontFamily: 'Mulmaru', fontSize: '0.85em', color: '#9B7060', textAlign: 'center' }}>
-            이 게임은 종료되어 더 이상 참여할 수 없습니다.
+            This game has ended and is no longer available.
           </p>
         </div>
         <button className="btn btn--ghost" onClick={() => { reset(); }}>
-          확인
+          OK
         </button>
       </div>
     );
@@ -124,10 +124,10 @@ export default function MultiHubPage() {
     const displayMode = selectedMode ?? mode;
     const lobbyTitle =
       displayMode === 'coop'
-        ? '협력 모드 대기실'
+        ? 'Co-op Lobby'
         : displayMode === 'versus'
-          ? '대전 모드 대기실'
-          : '멀티 모드 대기실';
+          ? 'Versus Lobby'
+          : 'Multi Lobby';
     return (
       <div className="multi-hub">
         <div className="room-lobby">
@@ -135,28 +135,28 @@ export default function MultiHubPage() {
 
           <div className="room-lobby__link">
             <p style={{ fontFamily: 'Mulmaru', fontSize: '0.75em', color: '#7a7a9a', flex: 1, wordBreak: 'break-all' }}>
-              링크가 클립보드에 복사되었습니다. 친구에게 공유하세요.
+              Link copied to clipboard. Share with a friend!
             </p>
-            {copied && <span style={{ color: '#4caf50', fontFamily: 'Mulmaru', fontSize: '0.8em' }}>✓ 복사됨</span>}
+            {copied && <span style={{ color: '#4caf50', fontFamily: 'Mulmaru', fontSize: '0.8em' }}>✓ Copied</span>}
           </div>
 
           <div className="room-lobby__players">
-            <p style={{ fontFamily: 'Mulmaru', fontSize: '0.8em', color: '#7a7a9a' }}>참가자</p>
+            <p style={{ fontFamily: 'Mulmaru', fontSize: '0.8em', color: '#7a7a9a' }}>Players</p>
             {players.map((p) => (
               <div key={p.playerId} className={`room-lobby__player${p.ready ? ' room-lobby__player--ready' : ''}`}>
-                <span>{p.nickname} {p.playerId === playerId ? '(나)' : ''}</span>
-                <span>{p.ready ? '준비 완료 ✓' : '대기 중...'}</span>
+                <span>{p.nickname} {p.playerId === playerId ? '(me)' : ''}</span>
+                <span>{p.ready ? 'Ready ✓' : 'Waiting...'}</span>
               </div>
             ))}
             {players.length < 2 && (
               <p style={{ fontFamily: 'Mulmaru', fontSize: '0.75em', color: '#7a7a9a' }}>
-                상대방을 기다리는 중...
+                Waiting for opponent...
               </p>
             )}
           </div>
 
           {!isHost && !myReady && (
-            <button className="btn btn--primary" onClick={handleReady}>준비</button>
+            <button className="btn btn--primary" onClick={handleReady}>Ready</button>
           )}
 
           {isHost && (
@@ -165,13 +165,13 @@ export default function MultiHubPage() {
               onClick={handleStart}
               disabled={!allReady}
             >
-              {allReady ? '게임 시작' : '모든 플레이어를 기다리는 중...'}
+              {allReady ? 'Start Game' : 'Waiting for all players...'}
             </button>
           )}
         </div>
 
         <button className="btn btn--ghost" onClick={() => { reset(); router.push('/'); }}>
-          취소
+          Cancel
         </button>
       </div>
     );
@@ -179,7 +179,7 @@ export default function MultiHubPage() {
 
   return (
     <div className="multi-hub">
-      <h2 className="multi-hub__title">멀티 게임</h2>
+      <h2 className="multi-hub__title">MULTI GAME</h2>
 
       <div className="multi-hub__modes">
         <button
@@ -187,19 +187,19 @@ export default function MultiHubPage() {
           onClick={() => handleCreate('coop')}
           disabled={creating || !isInitialized}
         >
-          협력 모드
+          Co-op
         </button>
         <button
           className="btn btn--secondary"
           onClick={() => handleCreate('versus')}
           disabled={creating || !isInitialized}
         >
-          대전 모드
+          Versus
         </button>
       </div>
 
       <button className="btn btn--ghost" onClick={() => router.push('/')}>
-        ← 뒤로
+        ← Back
       </button>
     </div>
   );
