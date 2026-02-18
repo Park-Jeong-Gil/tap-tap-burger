@@ -1584,7 +1584,8 @@
     width: 100%;
     display: block;
     image-rendering: pixelated;
-
+    position: relative;
+    z-index: 0;
     // 위 번: OrderPreview와 동일하게 마지막 재료 위에 얹힘
     &--top {
       margin-bottom: -28%;
@@ -1595,6 +1596,8 @@
 
   &__ing {
     width: 100%;
+    position: relative;
+    z-index: 1;
     img {
       width: 100%;
       height: auto;

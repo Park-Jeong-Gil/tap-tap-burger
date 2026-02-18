@@ -515,6 +515,20 @@ export default function VersusGamePage() {
     }
   }, [roomStatus, gameStatus, forceGameOver]);
 
+  // 게임 중 상대방이 강제 이탈하면 broadcast가 끊겨 opponent 상태를 받지 못함.
+  // DB room status를 3초마다 폴링해 "finished"가 되면 setRoomStatus → 위 effect가 승리 처리.
+  useEffect(() => {
+    if (gameStatus !== "playing") return;
+    const poll = setInterval(async () => {
+      if (versusResultRef.current !== null) return;
+      const room = await getRoomInfo(roomId);
+      if (room?.status === "finished") {
+        setRoomStatus("finished");
+      }
+    }, 3000);
+    return () => clearInterval(poll);
+  }, [gameStatus, roomId, setRoomStatus]);
+
   const handleReady = async () => {
     if (!playerId) return;
     const trimmed = nicknameInput.trim();
