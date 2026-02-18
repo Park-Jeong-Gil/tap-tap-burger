@@ -73,6 +73,7 @@ export default function VersusGamePage() {
     setReady,
     startGame,
     setRoomStatus,
+    reset: resetRoom,
   } = useRoomStore();
   const {
     status: gameStatus,
@@ -89,6 +90,7 @@ export default function VersusGamePage() {
     startGame: startLocalGame,
     forceGameOver,
     wrongFlashCount,
+    resetGame,
   } = useGameStore();
 
   const attackReceivedFlashCount = useGameStore(
@@ -229,6 +231,15 @@ export default function VersusGamePage() {
       if (shakeTimer.current) clearTimeout(shakeTimer.current);
     };
   }, []);
+
+  // 뒤로가기 등으로 페이지를 벗어날 때 게임/룸 상태 초기화
+  // 미처리 시 다음 게임이 이전 게임의 상태(HP, 주문 등)로 시작되는 버그 방지
+  useEffect(() => {
+    return () => {
+      resetGame();
+      resetRoom();
+    };
+  }, [resetGame, resetRoom]);
 
   useEffect(() => {
     initSession();
