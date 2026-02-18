@@ -31,12 +31,12 @@ export const COMBO_MULTIPLIERS: {
 export const DIFFICULTY_TIERS: { minOrders: number; tier: DifficultyTier }[] = [
   {
     minOrders: 0,
-    tier: { minIngredients: 3, timerMultiplier: 1.5, hpDrainPerSec: 0.3 },
+    tier: { minIngredients: 3, timerMultiplier: 1.6, hpDrainPerSec: 0.3 },
     // tier: { minIngredients: 10, timerMultiplier: 20, hpDrainPerSec: 0.4 },
   }, // 시작
   {
     minOrders: 5,
-    tier: { minIngredients: 4, timerMultiplier: 1.4, hpDrainPerSec: 0.8 },
+    tier: { minIngredients: 4, timerMultiplier: 1.5, hpDrainPerSec: 0.8 },
     // tier: { minIngredients: 4, timerMultiplier: 10, hpDrainPerSec: 0.8 },
   }, // 적응
   {
