@@ -1,8 +1,8 @@
 import type { Ingredient, DifficultyTier } from "@/types";
 
 // ─── HP ───────────────────────────────────────────────
-export const HP_MAX = 10000;
-export const HP_INIT = 10000;
+export const HP_MAX = 100;
+export const HP_INIT = 100;
 
 export const HP_DELTA = {
   correctSubmit: 15,
@@ -31,8 +31,8 @@ export const COMBO_MULTIPLIERS: {
 export const DIFFICULTY_TIERS: { minOrders: number; tier: DifficultyTier }[] = [
   {
     minOrders: 0,
-    // tier: { minIngredients: 3, timerMultiplier: 1.5, hpDrainPerSec: 0.3 },
-    tier: { minIngredients: 10, timerMultiplier: 20, hpDrainPerSec: 0.4 },
+    tier: { minIngredients: 3, timerMultiplier: 1.5, hpDrainPerSec: 0.3 },
+    // tier: { minIngredients: 10, timerMultiplier: 20, hpDrainPerSec: 0.4 },
   }, // 시작
   {
     minOrders: 5,

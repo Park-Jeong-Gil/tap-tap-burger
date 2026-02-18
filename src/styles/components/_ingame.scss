@@ -1499,8 +1499,8 @@
 // ─── 대전 모드 미니 패널 (상대 상태) ─────────────────
 .versus-opponent {
   @include pb.pixel-borders(
-    $corner-size: 1,
-    $border-size: 2px,
+    $corner-size: 2,
+    $border-size: 3px,
     $border-color: v.$color-danger
   );
   background-color: v.$color-surface;
