@@ -40,15 +40,13 @@ export default function GameOverScreen({ versusResult }: GameOverScreenProps) {
   };
 
   const handleHome = () => {
-    // 네비게이션을 먼저 실행 — 상태 리셋보다 먼저 이동하여 로비/게임 화면 플래시 방지
-    const shouldResetRoom = mode === 'versus' || mode === 'coop';
     router.push('/');
-    // 다음 프레임에서 리셋: 이 시점엔 Next.js 네비게이션이 이미 커밋되어
-    // 현재 페이지가 언마운트 중이므로 상태 변경이 화면에 표시되지 않음
-    requestAnimationFrame(() => {
-      if (shouldResetRoom) resetRoom();
-      resetGame();
-    });
+    // versus/coop: 게임 페이지 언마운트 cleanup effect가 resetGame/resetRoom 처리
+    //   → 마운트 중 roomStatus를 'waiting'으로 바꾸면 로비가 렌더되는 플래시 발생
+    // solo: 언마운트 cleanup 없으므로 여기서 직접 리셋
+    if (mode !== 'versus' && mode !== 'coop') {
+      requestAnimationFrame(() => resetGame());
+    }
   };
 
   return (

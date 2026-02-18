@@ -397,6 +397,8 @@
 
 // ─── 멀티 허브 페이지 ─────────────────────────────────
 .multi-hub {
+  max-width: 500px;
+  margin: 0 auto;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;

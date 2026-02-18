@@ -60,6 +60,7 @@
     padding: clamp(6px, 2dvh, #{m.vw(20)}) #{m.vw(10)}
       clamp(4px, 1.5dvh, #{m.vw(10)});
     gap: clamp(8px, 2.5dvh, #{m.vw(28)});
+    // flex: none;
   }
   @include m.desktop {
     padding: clamp(6px, 2dvh, 20px) 10px clamp(4px, 1.5dvh, 10px);
@@ -73,6 +74,8 @@
   min-height: 0;
   display: flex;
   flex-direction: row;
+  max-height: 45dvh;
+
   @include m.mobile {
     gap: m.vw(8);
   }
@@ -414,6 +417,7 @@
   grid-template-rows: auto auto;
   align-items: center;
   flex-shrink: 0;
+  margin-top: 4dvh;
 
   @include m.mobile {
     padding: clamp(4px, 1.2dvh, #{m.vw(10)}) #{m.vw(12)}

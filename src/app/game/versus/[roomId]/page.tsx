@@ -142,6 +142,7 @@ export default function VersusGamePage() {
   const opponentFeverResultsRef = useRef<Record<number, number>>({});
   const resolvedFeverCycleRef = useRef<Set<number>>(new Set());
   const feverAttackCooldownUntilRef = useRef(0);
+  const leavingRef = useRef(false);
   useEffect(() => {
     gameStatusRef.current = gameStatus;
   }, [gameStatus]);
@@ -236,6 +237,9 @@ export default function VersusGamePage() {
   // 미처리 시 다음 게임이 이전 게임의 상태(HP, 주문 등)로 시작되는 버그 방지
   useEffect(() => {
     return () => {
+      // resetRoom()이 roomStatus를 'waiting'으로 초기화하면 useLobbyRoom이 재실행되며
+      // 대기실 화면이 2~3초 렌더되는 플래시 발생 → leavingRef로 렌더를 차단
+      leavingRef.current = true;
       resetGame();
       resetRoom();
     };
@@ -530,6 +534,8 @@ export default function VersusGamePage() {
   const myEntry = players.find((p) => p.playerId === playerId);
   const myReady = myEntry?.ready ?? false;
   const opponentEntry = players.find((p) => p.playerId !== playerId);
+
+  if (leavingRef.current) return null;
 
   if (expired) {
     return (
