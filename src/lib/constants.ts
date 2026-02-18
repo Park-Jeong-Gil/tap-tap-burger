@@ -9,6 +9,7 @@ export const HP_DELTA = {
   comboSubmit: 20,
   wrongSubmit: -10,
   orderTimeout: -20,
+  orderPass: -10,
 } as const;
 
 // ─── 점수 ─────────────────────────────────────────────
