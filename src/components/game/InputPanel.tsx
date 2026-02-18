@@ -79,6 +79,7 @@ export default function InputPanel({ allowedActions, onAction }: InputPanelProps
   const addIngredient = useGameStore((s) => s.addIngredient);
   const clearBurger = useGameStore((s) => s.clearBurger);
   const submitBurger = useGameStore((s) => s.submitBurger);
+  const passOrder = useGameStore((s) => s.passOrder);
   const currentBurger = useGameStore((s) => s.currentBurger);
   const status = useGameStore((s) => s.status);
   const orders = useGameStore((s) => s.orders);
@@ -126,31 +127,44 @@ export default function InputPanel({ allowedActions, onAction }: InputPanelProps
     <div className="ingame__bottom">
       {/* Play area: target order (left) | current burger stack (right) */}
       <div className="ingame__play-area">
-        <div
-          className={`ingame__order-col${!isPlaying ? " ingame__order-col--hidden" : ""}`}
-        >
-          <AnimatePresence mode="wait">
-            {isPlaying && firstOrder && (
-              <motion.div
-                key={firstOrder.orderIndex}
-                style={{ width: "100%", height: "100%", position: "relative", zIndex: 3 }}
-                initial={{ scale: 0.84, opacity: 0, y: 8 }}
-                animate={{ scale: 1, opacity: 1, y: 0 }}
-                transition={{ type: "spring", stiffness: 360, damping: 28 }}
-                exit={{
-                  x: -80,
-                  scale: 0.88,
-                  opacity: 0,
-                  transition: { duration: 0.19, ease: "easeIn" },
-                }}
-              >
-                <OrderPreview
-                  order={firstOrder}
-                  submittedCount={currentBurger.length}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
+        <div className="ingame__order-wrap">
+          <div
+            className={`ingame__order-col${!isPlaying ? " ingame__order-col--hidden" : ""}`}
+          >
+            <AnimatePresence mode="wait">
+              {isPlaying && firstOrder && (
+                <motion.div
+                  key={firstOrder.orderIndex}
+                  style={{ width: "100%", height: "100%", position: "relative", zIndex: 3 }}
+                  initial={{ scale: 0.84, opacity: 0, y: 8 }}
+                  animate={{ scale: 1, opacity: 1, y: 0 }}
+                  transition={{ type: "spring", stiffness: 360, damping: 28 }}
+                  exit={{
+                    x: -80,
+                    scale: 0.88,
+                    opacity: 0,
+                    transition: { duration: 0.19, ease: "easeIn" },
+                  }}
+                >
+                  <OrderPreview
+                    order={firstOrder}
+                    submittedCount={currentBurger.length}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {isPlaying && firstOrder && !isFeverActive && (
+            <button
+              className="ingame__pass-btn"
+              onClick={passOrder}
+              disabled={inputBlocked}
+            >
+              <span className="ingame__pass-btn__label">{t.passBtn}</span>
+              <span className="ingame__pass-btn__cost">{t.passHpCost}</span>
+            </button>
+          )}
         </div>
         <div className="ingame__burger-area">
           <BurgerStack ingredients={currentBurger} />

@@ -70,6 +70,7 @@ interface GameState {
   removeLastIngredient: () => void;
   clearBurger: () => void;
   submitBurger: () => void;
+  passOrder: () => void;
   tick: (delta: number) => void;
   saveScore: (playerId: string) => Promise<boolean>;
   addOrdersFromAttack: (count: number, attackType?: 'combo' | 'fever_delta') => void;
@@ -400,6 +401,54 @@ export const useGameStore = create<GameState>((set, get) => ({
       pendingFeverOrder: next.nextPendingFeverOrder,
       nextFeverClearTarget: nextFeverTarget,
       feverCycleCounter: next.nextFeverCycleCounter,
+      ...feverState,
+    });
+  },
+
+  passOrder: () => {
+    const {
+      status,
+      orders,
+      hp,
+      orderCounter,
+      mode,
+      pendingFeverOrder,
+      feverCycleCounter,
+      inputLockedAt,
+    } = get();
+
+    if (status !== 'playing' || orders.length === 0) return;
+    if (inputLockedAt > 0 && Date.now() - inputLockedAt < ORDER_REFRESH_DELAY_MS) return;
+
+    const active = orders[0];
+    if (active.type === 'fever') return;
+
+    const newHp = Math.max(0, hp + HP_DELTA.orderPass);
+    const remaining = orders.slice(1);
+    const maxIng = mode !== 'single' ? MULTI_MAX_INGREDIENTS : undefined;
+    const useSeed = mode === 'coop';
+
+    const next = makeNextOrder({
+      orderCounter,
+      pendingFeverOrder,
+      feverCycleCounter,
+      maxIngredients: maxIng,
+      useSeed,
+    });
+
+    const newOrders = [...remaining, next.order];
+    const feverState = getActiveFeverState(newOrders, []);
+
+    set({
+      hp: newHp,
+      orders: newOrders,
+      currentBurger: [],
+      combo: 0,
+      orderCounter: next.nextOrderCounter,
+      pendingFeverOrder: next.nextPendingFeverOrder,
+      feverCycleCounter: next.nextFeverCycleCounter,
+      status: newHp <= 0 ? 'gameover' : 'playing',
+      inputLockedAt: Date.now(),
       ...feverState,
     });
   },

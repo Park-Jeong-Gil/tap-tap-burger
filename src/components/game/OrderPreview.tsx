@@ -37,7 +37,8 @@ export default function OrderPreview({
       ? `${remaining.toFixed(1)}s`
       : `${Math.ceil(remaining)}s`;
 
-  // 재료가 바뀔 때마다 food가 주문서 컬럼 영역을 넘으면 너비를 줄여서 축소
+  // 재료가 바뀔 때마다 food가 ingame__order-col 영역을 넘으면 너비를 줄여서 축소
+  // ingame__order-col은 flex:1 in wrapper → definite height → 측정 기준으로 사용 가능
   useEffect(() => {
     const container = containerRef.current;
     const food = foodRef.current;
@@ -46,12 +47,10 @@ export default function OrderPreview({
     food.style.width = "100%";
     food.style.margin = "";
 
-    // ingame__play-area: flex:1 + min-height:0으로 definite height를 가짐
-    // ingame__order-col은 align-self:center(auto height)라 측정 기준으로 부적합
-    const playArea = container.closest('.ingame__play-area');
-    if (!playArea) return;
+    const orderCol = container.closest(".ingame__order-col");
+    if (!orderCol) return;
 
-    const columnBottom = playArea.getBoundingClientRect().bottom;
+    const columnBottom = orderCol.getBoundingClientRect().bottom;
     const foodTop = food.getBoundingClientRect().top;
     const availableH = columnBottom - foodTop;
     const naturalH = food.scrollHeight;
