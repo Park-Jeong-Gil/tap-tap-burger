@@ -20,6 +20,7 @@ export default function SingleGamePage() {
   const startGame = useGameStore((s) => s.startGame);
   const resetGame = useGameStore((s) => s.resetGame);
   const wrongFlashCount = useGameStore((s) => s.wrongFlashCount);
+  const timeoutFlashCount = useGameStore((s) => s.timeoutFlashCount);
 
   const [countingDown, setCountingDown] = useState(true);
   const [shaking, setShaking] = useState(false);
@@ -42,13 +43,20 @@ export default function SingleGamePage() {
     }
   }, [status, countingDown]);
 
-  // Wrong answer → screen shake
+  // Wrong answer or timeout → screen shake
   useEffect(() => {
     if (wrongFlashCount === 0) return;
     if (shakeTimer.current) clearTimeout(shakeTimer.current);
     setShaking(true);
     shakeTimer.current = setTimeout(() => setShaking(false), 400);
   }, [wrongFlashCount]);
+
+  useEffect(() => {
+    if (timeoutFlashCount === 0) return;
+    if (shakeTimer.current) clearTimeout(shakeTimer.current);
+    setShaking(true);
+    shakeTimer.current = setTimeout(() => setShaking(false), 400);
+  }, [timeoutFlashCount]);
 
   useGameLoop();
   useKeyboard({ enabled: status === "playing" });
