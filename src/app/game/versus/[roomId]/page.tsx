@@ -14,7 +14,7 @@ import {
   updateRoomStatus,
   markRoomFinishedBeacon,
 } from "@/lib/supabase";
-import { NICKNAME_STORAGE_KEY } from "@/lib/constants";
+import { NICKNAME_STORAGE_KEY, HP_INIT } from "@/lib/constants";
 import HpBar from "@/components/game/HpBar";
 import ScoreBoard from "@/components/game/ScoreBoard";
 import InputPanel from "@/components/game/InputPanel";
@@ -99,7 +99,7 @@ export default function VersusGamePage() {
 
   const { t } = useLocale();
   const [opponent, setOpponent] = useState<OpponentState>({
-    hp: 80,
+    hp: HP_INIT,
     queueCount: 3,
     score: 0,
     combo: 0,
@@ -470,11 +470,13 @@ export default function VersusGamePage() {
 
   useEffect(() => {
     if (gameStatus === "gameover" && versusResultRef.current === null) {
-      const result = score > opponent.score ? "win" : "loss";
+      // HP 기준: 상대방이 먼저 gameover됐으면(=내 forceGameOver 유발) 승리,
+      // 내 HP가 먼저 0이 됐으면 패배
+      const result = opponent.status === "gameover" ? "win" : "loss";
       versusResultRef.current = result;
       setVersusResult(result);
     }
-  }, [gameStatus, score, opponent.score]);
+  }, [gameStatus, opponent.status]);
 
   useEffect(() => {
     if (

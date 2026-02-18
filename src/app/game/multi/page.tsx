@@ -86,9 +86,13 @@ export default function MultiHubPage() {
       const newRoomId = await createAndJoin(mode, playerId, nickname);
       setSelectedMode(mode);
       const url = `${window.location.origin}/game/${mode}/${newRoomId}`;
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 3000);
+      try {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 3000);
+      } catch {
+        // HTTP 환경 또는 브라우저 미지원 시 clipboard API 없음 — 방 생성은 정상 완료
+      }
     } finally {
       setCreating(false);
     }

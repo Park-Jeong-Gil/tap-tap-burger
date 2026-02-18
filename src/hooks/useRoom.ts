@@ -217,9 +217,10 @@ async function fetchRoomPlayers(roomId: string) {
 export function useLobbyRoom(roomId: string) {
   const setPlayers = useRoomStore((s) => s.setPlayers);
   const setRoomStatus = useRoomStore((s) => s.setRoomStatus);
+  const roomStatus = useRoomStore((s) => s.roomStatus);
 
   useEffect(() => {
-    if (!roomId) return;
+    if (!roomId || roomStatus !== 'waiting') return;
 
     let polling: ReturnType<typeof setInterval> | null = null;
 
@@ -277,5 +278,5 @@ export function useLobbyRoom(roomId: string) {
       if (polling) clearInterval(polling);
       supabase.removeChannel(channel);
     };
-  }, [roomId, setPlayers, setRoomStatus]);
+  }, [roomId, roomStatus, setPlayers, setRoomStatus]);
 }

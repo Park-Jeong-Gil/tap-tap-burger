@@ -40,10 +40,15 @@ export default function GameOverScreen({ versusResult }: GameOverScreenProps) {
   };
 
   const handleHome = () => {
-    // Multi mode: reset roomStore first (resets roomStatus → 'waiting' to prevent expired screen flash)
-    if (mode === 'versus' || mode === 'coop') resetRoom();
-    resetGame();
+    // 네비게이션을 먼저 실행 — 상태 리셋보다 먼저 이동하여 로비/게임 화면 플래시 방지
+    const shouldResetRoom = mode === 'versus' || mode === 'coop';
     router.push('/');
+    // 다음 프레임에서 리셋: 이 시점엔 Next.js 네비게이션이 이미 커밋되어
+    // 현재 페이지가 언마운트 중이므로 상태 변경이 화면에 표시되지 않음
+    requestAnimationFrame(() => {
+      if (shouldResetRoom) resetRoom();
+      resetGame();
+    });
   };
 
   return (
