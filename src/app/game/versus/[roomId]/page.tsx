@@ -126,6 +126,7 @@ export default function VersusGamePage() {
   const [shaking, setShaking] = useState(false);
   const [opponentFeverResultTick, setOpponentFeverResultTick] = useState(0);
   const [projectiles, setProjectiles] = useState<AttackProjectilePulse[]>([]);
+  const [forcedTerminationWin, setForcedTerminationWin] = useState(false);
 
   const attackSentIdRef = useRef(0);
   const projectileIdRef = useRef(0);
@@ -509,6 +510,7 @@ export default function VersusGamePage() {
       gameStatus === "playing" &&
       versusResultRef.current === null
     ) {
+      setForcedTerminationWin(true);
       versusResultRef.current = "win";
       setVersusResult("win");
       forceGameOver();
@@ -696,7 +698,12 @@ export default function VersusGamePage() {
         <ScoreBoard score={score} />
       </div>
       <InputPanel />
-      {gameStatus === "gameover" && <GameOverScreen versusResult={versusResult ?? undefined} />}
+      {gameStatus === "gameover" && (
+        <GameOverScreen
+          versusResult={versusResult ?? undefined}
+          allowZeroScoreSave={forcedTerminationWin && versusResult === "win"}
+        />
+      )}
     </div>
   );
 }

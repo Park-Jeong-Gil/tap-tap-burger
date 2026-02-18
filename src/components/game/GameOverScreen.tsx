@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useGameStore } from '@/stores/gameStore';
 import { usePlayerStore } from '@/stores/playerStore';
-import { useRoomStore } from '@/stores/roomStore';
 import { useLocale } from '@/providers/LocaleProvider';
 
 const fadeUp = {
@@ -15,9 +14,10 @@ const fadeUp = {
 
 interface GameOverScreenProps {
   versusResult?: 'win' | 'loss';
+  allowZeroScoreSave?: boolean;
 }
 
-export default function GameOverScreen({ versusResult }: GameOverScreenProps) {
+export default function GameOverScreen({ versusResult, allowZeroScoreSave = false }: GameOverScreenProps) {
   const { t } = useLocale();
   const router = useRouter();
   const score = useGameStore((s) => s.score);
@@ -26,13 +26,42 @@ export default function GameOverScreen({ versusResult }: GameOverScreenProps) {
   const saveScore = useGameStore((s) => s.saveScore);
   const mode = useGameStore((s) => s.mode);
   const playerId = usePlayerStore((s) => s.playerId);
-  const resetRoom = useRoomStore((s) => s.reset);
   const [isNewRecord, setIsNewRecord] = useState<boolean | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!playerId) return;
-    saveScore(playerId).then((newRecord) => setIsNewRecord(newRecord));
-  }, [playerId, saveScore]);
+
+    let cancelled = false;
+    const runSave = async () => {
+      const first = await saveScore(playerId, { allowZeroScore: allowZeroScoreSave });
+      if (cancelled) return;
+
+      if (first.reason === 'saved') {
+        setIsNewRecord(first.isNewRecord);
+        return;
+      }
+
+      if (first.reason === 'skipped_zero_multi') {
+        return;
+      }
+
+      const second = await saveScore(playerId, { allowZeroScore: allowZeroScoreSave });
+      if (cancelled) return;
+
+      if (second.reason === 'saved') {
+        setIsNewRecord(second.isNewRecord);
+        return;
+      }
+
+      setToastMessage(t.saveFailed);
+    };
+
+    runSave();
+    return () => {
+      cancelled = true;
+    };
+  }, [allowZeroScoreSave, playerId, saveScore, t.saveFailed]);
 
   const handleRestart = () => {
     // Single restart: reset to idle so the page's countdown flow runs again.
@@ -85,6 +114,17 @@ export default function GameOverScreen({ versusResult }: GameOverScreenProps) {
           </motion.p>
         )}
       </motion.div>
+
+      {toastMessage && (
+        <motion.p
+          className="gameover-toast"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2, ease: 'easeOut' }}
+        >
+          {toastMessage}
+        </motion.p>
+      )}
 
       {/* Buttons */}
       <motion.div

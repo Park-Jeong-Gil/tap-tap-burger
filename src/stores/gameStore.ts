@@ -72,10 +72,17 @@ interface GameState {
   submitBurger: () => void;
   passOrder: () => void;
   tick: (delta: number) => void;
-  saveScore: (playerId: string) => Promise<boolean>;
+  saveScore: (playerId: string, options?: { allowZeroScore?: boolean }) => Promise<SaveScoreResult>;
   addOrdersFromAttack: (count: number, attackType?: 'combo' | 'fever_delta') => void;
   forceGameOver: () => void;
   clearFlash: () => void;
+}
+
+export interface SaveScoreResult {
+  saved: boolean;
+  isNewRecord: boolean;
+  reason: 'saved' | 'skipped_zero_multi' | 'error';
+  errorMessage?: string;
 }
 
 function createInitialOrders(
@@ -552,14 +559,39 @@ export const useGameStore = create<GameState>((set, get) => ({
     });
   },
 
-  saveScore: async (playerId: string) => {
+  saveScore: async (playerId: string, options?: { allowZeroScore?: boolean }) => {
     const { score, maxCombo, mode } = get();
+    if (mode !== 'single' && score <= 0 && !options?.allowZeroScore) {
+      return {
+        saved: false,
+        isNewRecord: false,
+        reason: 'skipped_zero_multi',
+      };
+    }
+
     try {
       const prev = await getBestScore(playerId, mode);
       await upsertScore(playerId, mode, score, maxCombo);
-      return prev === null || score > prev;
-    } catch {
-      return false;
+      return {
+        saved: true,
+        isNewRecord: prev === null || score > prev,
+        reason: 'saved',
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('[saveScore] failed to save score', {
+        playerId,
+        mode,
+        score,
+        maxCombo,
+        error,
+      });
+      return {
+        saved: false,
+        isNewRecord: false,
+        reason: 'error',
+        errorMessage,
+      };
     }
   },
 

@@ -721,6 +721,24 @@
   }
 }
 
+.gameover-toast {
+  font-family: v.$font-pixel;
+  text-align: center;
+  color: #ffb4b4;
+  background: rgba(20, 10, 10, 0.8);
+  border: 2px solid #ff7d7d;
+  max-width: 560px;
+
+  @include m.mobile {
+    font-size: m.vw(12);
+    padding: m.vw(8) m.vw(10);
+  }
+  @include m.desktop {
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+}
+
 // ─── 화면 흔들림 (오답 시) ────────────────────────────
 .ingame--shake {
   animation: screen-shake 0.38s ease-out;

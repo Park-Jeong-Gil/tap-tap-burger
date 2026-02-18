@@ -52,6 +52,7 @@ export const translations = {
     victory: "VICTORY!",
     defeat: "DEFEAT...",
     newRecord: "★ New Record!",
+    saveFailed: "Failed to save score. Please try again.",
     retry: "RETRY",
     mainMenu: "MAIN MENU",
     // Orders
@@ -166,6 +167,7 @@ export const translations = {
     victory: "승리!",
     defeat: "패배...",
     newRecord: "★ 신기록 달성!",
+    saveFailed: "점수 저장에 실패했습니다. 다시 시도해 주세요.",
     retry: "다시 시작",
     mainMenu: "메인으로",
     // Orders
