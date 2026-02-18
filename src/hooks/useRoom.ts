@@ -232,8 +232,11 @@ export function useLobbyRoom(roomId: string) {
       const room = await getRoomInfo(roomId);
       if (!room || room.status !== 'waiting') return;
 
-      // 폴링: 2초마다 룸 상태 확인 (postgres_changes 누락 대비)
+      // 폴링: 2초마다 룸 상태 + 플레이어 ready 상태 확인 (postgres_changes 누락 대비)
       polling = setInterval(async () => {
+        const players = await fetchRoomPlayers(roomId);
+        setPlayers(players);
+
         const r = await getRoomInfo(roomId);
         if (r?.status && r.status !== 'waiting') {
           setRoomStatus(r.status as 'waiting' | 'playing' | 'finished');

@@ -462,7 +462,7 @@
   font-family: v.$font-pixel;
   color: v.$color-primary;
   @include m.mobile {
-    font-size: m.vw(28);
+    font-size: m.vw(20);
   }
   @include m.desktop {
     font-size: 28px;
@@ -489,7 +489,7 @@
     color: v.$color-primary;
 
     @include m.mobile {
-      font-size: m.vw(20);
+      font-size: m.vw(18);
     }
     @include m.desktop {
       font-size: 20px;
