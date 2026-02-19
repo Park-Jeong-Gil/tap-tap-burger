@@ -1,4 +1,4 @@
-# Tap Tap Burger: Perfect Order — PRD
+# Tab Tab Burger: Perfect Order — PRD
 
 > 문서 상태 (2026-02-16)
 > - 이 문서는 `기획 의도(PRD)`와 `현재 구현 스펙(Code Truth)`를 함께 관리합니다.
@@ -10,7 +10,7 @@
 
 | 항목 | 내용 |
 |---|---|
-| 프로젝트명 | Tap Tap Burger: Perfect Order |
+| 프로젝트명 | Tab Tab Burger: Perfect Order |
 | 장르 | 리듬 / 캐주얼 아케이드 |
 | 플랫폼 | 웹 (PC / 모바일) |
 | 프론트엔드 | Next.js 15, SCSS |
