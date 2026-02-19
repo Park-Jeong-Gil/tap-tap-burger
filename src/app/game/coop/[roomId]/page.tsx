@@ -47,6 +47,7 @@ export default function CoopGamePage() {
     addIngredient,
     removeLastIngredient,
     submitBurger,
+    passOrder,
     forceGameOver,
     wrongFlashCount,
     resetGame,
@@ -243,11 +244,12 @@ export default function CoopGamePage() {
 
       const allowedDuringFever =
         isFeverActive && (action === "submit" || action === feverIngredient);
-      if (!allowedDuringFever && !assignedKeys.includes(action)) return;
+      if (!allowedDuringFever && action !== "pass" && !assignedKeys.includes(action)) return;
 
       e.preventDefault();
       if (action === "cancel") removeLastIngredient();
       else if (action === "submit") submitBurger();
+      else if (action === "pass") { passOrder(); sendInput("pass"); return; }
       else addIngredient(action as Ingredient);
 
       // Broadcast to opponent
@@ -264,6 +266,7 @@ export default function CoopGamePage() {
     addIngredient,
     removeLastIngredient,
     submitBurger,
+    passOrder,
     sendInput,
   ]);
 

@@ -17,6 +17,7 @@ export function useKeyboard({
   const addIngredient = useGameStore((s) => s.addIngredient);
   const clearBurger = useGameStore((s) => s.clearBurger);
   const submitBurger = useGameStore((s) => s.submitBurger);
+  const passOrder = useGameStore((s) => s.passOrder);
   const status = useGameStore((s) => s.status);
 
   useEffect(() => {
@@ -41,6 +42,8 @@ export function useKeyboard({
         // clearBurger();
       } else if (action === "submit") {
         submitBurger();
+      } else if (action === "pass") {
+        passOrder();
       } else {
         addIngredient(action as Ingredient);
       }
@@ -55,5 +58,6 @@ export function useKeyboard({
     addIngredient,
     clearBurger,
     submitBurger,
+    passOrder,
   ]);
 }

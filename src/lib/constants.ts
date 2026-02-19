@@ -84,7 +84,7 @@ export const INGREDIENTS: Ingredient[] = [
 ];
 
 // ─── 키 맵핑 ──────────────────────────────────────────
-export const KEY_MAP: Record<string, Ingredient | "cancel" | "submit"> = {
+export const KEY_MAP: Record<string, Ingredient | "cancel" | "submit" | "pass"> = {
   w: "patty",
   W: "patty",
   s: "cheese",
@@ -97,6 +97,8 @@ export const KEY_MAP: Record<string, Ingredient | "cancel" | "submit"> = {
   Q: "onion",
   e: "tomato",
   E: "tomato",
+  p: "pass",
+  P: "pass",
   Escape: "cancel",
   Backspace: "cancel",
   Enter: "submit",

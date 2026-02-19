@@ -95,6 +95,7 @@ export const translations = {
     htpOnion: "Onion",
     htpTomato: "Tomato",
     htpSubmitBurger: "Submit Burger",
+    htpPassOrder: "Pass Order (-10 HP)",
     htpCombo: "⚡ COMBO",
     htpComboDesc:
       "Submit within 65% of the time limit for a combo! More combos = higher score.",
@@ -110,6 +111,7 @@ export const translations = {
     htpComboSubmit: "Combo Submit",
     htpWrongSubmit: "Wrong Submit",
     htpTimeOut: "Time Out",
+    htpPassOrderHp: "Order Pass",
     htpHpDesc: "HP drains over time. Game over at 0!",
     // Metadata
     metaDesc: "Stack ingredients in the exact order to fulfill every order!",
@@ -210,6 +212,7 @@ export const translations = {
     htpOnion: "양파",
     htpTomato: "토마토",
     htpSubmitBurger: "버거 제출",
+    htpPassOrder: "주문 패스 (-10 HP)",
     htpCombo: "⚡ 콤보",
     htpComboDesc:
       "제한 시간의 65% 이내로 제출하면 콤보! 콤보가 쌓일수록 점수가 올라가요.",
@@ -225,6 +228,7 @@ export const translations = {
     htpComboSubmit: "콤보 제출",
     htpWrongSubmit: "잘못된 제출",
     htpTimeOut: "시간 초과",
+    htpPassOrderHp: "주문 패스",
     htpHpDesc: "시간이 지날수록 HP가 계속 줄어들어요. HP가 0이 되면 게임 오버!",
     // Metadata
     metaDesc: "주문에 맞게 재료를 정확히 쌓아라!",

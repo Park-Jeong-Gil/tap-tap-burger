@@ -13,6 +13,7 @@ export function useCoopRoom(roomId: string, playerId: string) {
   const addIngredient = useGameStore((s) => s.addIngredient);
   const removeLastIngredient = useGameStore((s) => s.removeLastIngredient);
   const submitBurger = useGameStore((s) => s.submitBurger);
+  const passOrder = useGameStore((s) => s.passOrder);
   const setRoomStatus = useRoomStore((s) => s.setRoomStatus);
 
   const broadcast = useCallback((type: string, payload: Record<string, unknown>) => {
@@ -31,6 +32,7 @@ export function useCoopRoom(roomId: string, playerId: string) {
       const { action } = payload as { action: string };
       if (action === 'cancel') removeLastIngredient();
       else if (action === 'submit') submitBurger();
+      else if (action === 'pass') passOrder();
       else addIngredient(action as Ingredient);
     });
 
@@ -56,7 +58,7 @@ export function useCoopRoom(roomId: string, playerId: string) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [roomId, addIngredient, removeLastIngredient, submitBurger, setRoomStatus]);
+  }, [roomId, addIngredient, removeLastIngredient, submitBurger, passOrder, setRoomStatus]);
 
   // 내 입력을 상대방에게 브로드캐스트
   const sendInput = useCallback((action: string) => {

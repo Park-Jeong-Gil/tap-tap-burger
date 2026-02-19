@@ -38,6 +38,7 @@ export default function HowToPlay({ onClose }: HowToPlayProps) {
             ["Q", t.htpOnion],
             ["E", t.htpTomato],
             ["Enter / Space", t.htpSubmitBurger],
+            ["P", t.htpPassOrder],
           ].map(([key, label]) => (
             <div className="htp-key-row" key={key}>
               <kbd>{key}</kbd>
@@ -92,6 +93,7 @@ export default function HowToPlay({ onClose }: HowToPlayProps) {
             [t.htpComboSubmit, "+20"],
             [t.htpWrongSubmit, "-10"],
             [t.htpTimeOut, "-20"],
+            [t.htpPassOrderHp, "-10"],
           ].map(([action, delta]) => (
             <div className="htp-key-row" key={action}>
               <kbd>{action}</kbd>

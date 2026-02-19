@@ -158,7 +158,7 @@ export default function InputPanel({ allowedActions, onAction }: InputPanelProps
           {isPlaying && firstOrder && !isFeverActive && (
             <button
               className="ingame__pass-btn"
-              onClick={passOrder}
+              onClick={() => { passOrder(); onAction?.("pass"); }}
               disabled={inputBlocked}
             >
               <span className="ingame__pass-btn__label">{t.passBtn}</span>
