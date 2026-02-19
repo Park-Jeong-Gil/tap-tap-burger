@@ -712,11 +712,12 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-
   @include m.mobile {
     gap: m.vw(10);
   }
   @include m.desktop {
+    max-width: 500px;
+    margin: 0 auto;
     gap: 10px;
   }
 }
