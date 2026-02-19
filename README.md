@@ -1,11 +1,11 @@
-# Tab Tab Burger
+# Tap Tap Burger
 
 주문서 순서대로 재료를 빠르게 쌓아 버거를 완성하는 웹 기반 리듬/캐주얼 아케이드 게임입니다.  
 싱글, 협력(Co-op), 대전(Versus) 모드를 지원하며, Supabase 기반 리더보드와 실시간 멀티플레이를 제공합니다.
 
 ## 프로젝트 개요
 
-- 프로젝트명: **Tab Tab Burger: Perfect Order**
+- 프로젝트명: **Tap Tap Burger: Perfect Order**
 - 장르: 리듬 / 캐주얼 아케이드
 - 플랫폼: 웹 (모바일 우선 반응형 + 데스크톱 지원)
 - 핵심 가치:

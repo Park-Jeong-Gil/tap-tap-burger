@@ -12,20 +12,20 @@ export async function generateMetadata(): Promise<Metadata> {
   const t = translations[locale];
 
   return {
-    title: "Tab Tab Burger",
+    title: "Tap Tap Burger",
     description: t.metaDesc,
     icons: {
       icon: "/burgercon.ico",
     },
     openGraph: {
-      title: "Tab Tab Burger",
+      title: "Tap Tap Burger",
       description: t.metaDesc,
       images: [
         {
           url: "/thumbnail.jpg",
           width: 1200,
           height: 630,
-          alt: "Tab Tab Burger",
+          alt: "Tap Tap Burger",
         },
       ],
       type: "website",
@@ -33,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: "Tab Tab Burger",
+      title: "Tap Tap Burger",
       description: t.metaDesc,
       images: ["/thumbnail.jpg"],
     },

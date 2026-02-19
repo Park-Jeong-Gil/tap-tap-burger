@@ -115,8 +115,8 @@ export const translations = {
     htpHpDesc: "HP drains over time. Game over at 0!",
     // Metadata
     metaDesc: "Stack ingredients in the exact order to fulfill every order!",
-    coopLayoutTitle: "Tab Tab Burger: Co-op",
-    versusLayoutTitle: "Tab Tab Burger: Versus",
+    coopLayoutTitle: "Tap Tap Burger: Co-op",
+    versusLayoutTitle: "Tap Tap Burger: Versus",
   },
   ko: {
     // Main page
@@ -232,8 +232,8 @@ export const translations = {
     htpHpDesc: "시간이 지날수록 HP가 계속 줄어들어요. HP가 0이 되면 게임 오버!",
     // Metadata
     metaDesc: "주문에 맞게 재료를 정확히 쌓아라!",
-    coopLayoutTitle: "Tab Tab Burger: 협동 모드",
-    versusLayoutTitle: "Tab Tab Burger: 대전 모드",
+    coopLayoutTitle: "Tap Tap Burger: 협동 모드",
+    versusLayoutTitle: "Tap Tap Burger: 대전 모드",
   },
 } as const;
 
