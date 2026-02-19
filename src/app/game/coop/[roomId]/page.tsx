@@ -7,7 +7,13 @@ import { useRoomStore } from "@/stores/roomStore";
 import { useGameStore } from "@/stores/gameStore";
 import { useGameLoop } from "@/hooks/useGameLoop";
 import { useCoopRoom, useLobbyRoom } from "@/hooks/useRoom";
-import { supabase, getRoomInfo, updateRoomStatus, markRoomFinishedBeacon } from "@/lib/supabase";
+import {
+  supabase,
+  getRoomInfo,
+  updateRoomStatus,
+  markRoomFinishedBeacon,
+  upsertCoopTeamScore,
+} from "@/lib/supabase";
 import { assignCoopKeys } from "@/lib/gameLogic";
 import { KEY_MAP, NICKNAME_STORAGE_KEY } from "@/lib/constants";
 import HpBar from "@/components/game/HpBar";
@@ -41,6 +47,7 @@ export default function CoopGamePage() {
     status: gameStatus,
     hp,
     score,
+    maxCombo,
     isFeverActive,
     feverIngredient,
     startGame: startLocalGame,
@@ -61,6 +68,8 @@ export default function CoopGamePage() {
   const [shaking, setShaking] = useState(false);
   const [nicknameInput, setNicknameInput] = useState("");
   const finishedRef = useRef(false);
+  const teamScoreSavedRef = useRef(false);
+  const teamScoreSavingRef = useRef(false);
   const gameStatusRef = useRef(gameStatus);
   const shakeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
@@ -176,6 +185,81 @@ export default function CoopGamePage() {
       updateRoomStatus(roomId, "finished").catch(() => {});
     }
   }, [gameStatus, roomId]);
+
+  // Co-op leaderboard: persist one team entry (nickname1 | nickname2) per pair.
+  useEffect(() => {
+    if (gameStatus !== "gameover" || teamScoreSavedRef.current || teamScoreSavingRef.current) return;
+
+    teamScoreSavingRef.current = true;
+
+    const sleep = (ms: number) => new Promise<void>((resolve) => {
+      setTimeout(resolve, ms);
+    });
+
+    const getTeamPlayerIds = async (): Promise<string[]> => {
+      const fromStore = Array.from(
+        new Set(
+          players
+            .map((p) => p.playerId)
+            .filter((id): id is string => Boolean(id)),
+        ),
+      );
+      if (fromStore.length >= 2) return fromStore.sort();
+
+      const { data, error } = await supabase
+        .from("room_players")
+        .select("player_id")
+        .eq("room_id", roomId);
+      if (error) throw error;
+
+      return Array.from(
+        new Set(
+          (data ?? [])
+            .map((row) => row.player_id as string | null)
+            .filter((id): id is string => Boolean(id)),
+        ),
+      ).sort();
+    };
+
+    const persistTeamScore = async () => {
+      try {
+        for (let attempt = 1; attempt <= 5; attempt++) {
+          try {
+            const playerIds = await getTeamPlayerIds();
+            if (playerIds.length < 2) {
+              throw new Error("not enough players to persist coop team score");
+            }
+
+            const [idA, idB] = playerIds;
+            await upsertCoopTeamScore(roomId, idA, idB, score, maxCombo);
+            teamScoreSavedRef.current = true;
+            console.info("[coop] team score persisted", {
+              roomId,
+              score,
+              maxCombo,
+              playerIds,
+            });
+            return;
+          } catch (error) {
+            if (attempt === 5) throw error;
+            await sleep(300 * attempt);
+          }
+        }
+      } catch (error) {
+        console.error("[coop] failed to persist team score after retries", {
+          roomId,
+          score,
+          maxCombo,
+          playersFromStore: players.map((p) => p.playerId),
+          error,
+        });
+      } finally {
+        teamScoreSavingRef.current = false;
+      }
+    };
+
+    persistTeamScore();
+  }, [gameStatus, maxCombo, players, roomId, score]);
 
   // Leaving mid-game (tab close / unmount) → mark room as finished
   useEffect(() => {

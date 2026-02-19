@@ -27,43 +27,110 @@ export default function LeaderboardPage() {
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
-  // refs to avoid stale closures in IntersectionObserver callback
-  const loadingRef = useRef(true);
-  const loadingMoreRef = useRef(false);
+  // Mutable state refs — read inside callbacks to avoid stale closures
+  const busyRef = useRef(false);       // true while any fetch is in-flight
   const hasMoreRef = useRef(true);
+  const offsetRef = useRef(0);
   const tabRef = useRef<TabMode>(tab);
-  const rowCountRef = useRef(0);
 
-  tabRef.current = tab;
+  // loadMoreRef always points to the latest loadMore closure
+  const loadMoreRef = useRef<() => void>(() => {});
 
-  // Tab change: reset and load first page
+  useEffect(() => { tabRef.current = tab; }, [tab]);
+
+  // Defined each render so it captures up-to-date state/refs
+  const loadMore = () => {
+    if (busyRef.current || !hasMoreRef.current) return;
+
+    const offset = offsetRef.current;
+    busyRef.current = true;
+    setLoadingMore(true);
+
+    getLeaderboard(tabRef.current, offset, offset + PAGE_SIZE - 1)
+      .then((data) => {
+        const entries = (data as unknown as LeaderEntry[]) ?? [];
+        setRows((prev) => {
+          const updated = [...prev, ...entries];
+          offsetRef.current = updated.length;
+          return updated;
+        });
+        const more = entries.length === PAGE_SIZE;
+        setHasMore(more);
+        hasMoreRef.current = more;
+      })
+      .catch((error) => {
+        console.error("[leaderboard] failed to load more rows", {
+          tab: tabRef.current,
+          offset,
+          error,
+        });
+      })
+      .finally(() => {
+        busyRef.current = false;
+        setLoadingMore(false);
+
+        // 더 불러올 데이터가 있고 sentinel이 여전히 뷰포트 안에 있으면 재트리거
+        if (hasMoreRef.current) {
+          const sentinel = sentinelRef.current;
+          const obs = observerRef.current;
+          if (sentinel && obs) {
+            obs.unobserve(sentinel);
+            obs.observe(sentinel);
+          }
+        }
+      });
+  };
+
+  // Keep ref in sync so the observer always calls the latest function
   useEffect(() => {
-    setRows([]);
-    rowCountRef.current = 0;
+    loadMoreRef.current = loadMore;
+  }, [loadMore]);
+
+  // Tab change: reset state and load first page
+  useEffect(() => {
+    // Reset all mutable state before new fetch
+    busyRef.current = true;
+    offsetRef.current = 0;
     hasMoreRef.current = true;
+    setRows([]);
     setHasMore(true);
     setLoading(true);
-    loadingRef.current = true;
 
     getLeaderboard(tab, 0, PAGE_SIZE - 1)
       .then((data) => {
         const entries = (data as unknown as LeaderEntry[]) ?? [];
         setRows(entries);
-        rowCountRef.current = entries.length;
+        offsetRef.current = entries.length;
         const more = entries.length === PAGE_SIZE;
         setHasMore(more);
         hasMoreRef.current = more;
       })
-      .catch(() => setRows([]))
+      .catch((error) => {
+        console.error("[leaderboard] failed to load rows", { tab, error });
+        setRows([]);
+      })
       .finally(() => {
+        busyRef.current = false;
         setLoading(false);
-        loadingRef.current = false;
+
+        // 핵심 수정: 초기 로드 완료 후 sentinel이 여전히 뷰포트 안에 있으면
+        // IntersectionObserver는 교차 상태가 바뀌지 않아서 재발화하지 않는다.
+        // unobserve → observe로 강제 재검사.
+        const sentinel = sentinelRef.current;
+        const obs = observerRef.current;
+        if (sentinel && obs) {
+          obs.unobserve(sentinel);
+          obs.observe(sentinel);
+        }
       });
   }, [tab]);
 
-  // IntersectionObserver — set up once, reads mutable state via refs
+  // IntersectionObserver — 마운트 시 한 번만 설정
+  // 콜백은 loadMoreRef를 통해 항상 최신 함수를 호출
   useEffect(() => {
     const sentinel = sentinelRef.current;
     if (!sentinel) return;
@@ -71,35 +138,18 @@ export default function LeaderboardPage() {
     const observer = new IntersectionObserver(
       (entries) => {
         if (!entries[0].isIntersecting) return;
-        if (loadingRef.current || loadingMoreRef.current || !hasMoreRef.current) return;
-
-        const offset = rowCountRef.current;
-        loadingMoreRef.current = true;
-        setLoadingMore(true);
-
-        getLeaderboard(tabRef.current, offset, offset + PAGE_SIZE - 1)
-          .then((data) => {
-            const newEntries = (data as unknown as LeaderEntry[]) ?? [];
-            setRows((prev) => {
-              const updated = [...prev, ...newEntries];
-              rowCountRef.current = updated.length;
-              return updated;
-            });
-            const more = newEntries.length === PAGE_SIZE;
-            setHasMore(more);
-            hasMoreRef.current = more;
-          })
-          .catch(() => {})
-          .finally(() => {
-            loadingMoreRef.current = false;
-            setLoadingMore(false);
-          });
+        loadMoreRef.current();
       },
-      { threshold: 0.5 }
+      { threshold: 0 }
     );
 
+    observerRef.current = observer;
     observer.observe(sentinel);
-    return () => observer.disconnect();
+
+    return () => {
+      observer.disconnect();
+      observerRef.current = null;
+    };
   }, []);
 
   const tabLabel: Record<TabMode, string> = {
@@ -170,7 +220,13 @@ export default function LeaderboardPage() {
             </p>
           )}
           {rows.map((row, i) => {
-            const isMine = playerId && row.players?.id === playerId;
+            const isMine = Boolean(
+              playerId &&
+              row.players?.id
+                ?.split("|")
+                .filter(Boolean)
+                .includes(playerId),
+            );
             return (
               <div
                 key={row.id}
@@ -200,7 +256,7 @@ export default function LeaderboardPage() {
         </div>
       )}
 
-      {/* Sentinel always in DOM so IntersectionObserver survives tab switches */}
+      {/* Sentinel — 항상 DOM에 유지 */}
       <div ref={sentinelRef} style={{ height: "1px" }} />
 
       {loadingMore && (

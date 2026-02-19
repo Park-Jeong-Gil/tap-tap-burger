@@ -81,7 +81,7 @@ interface GameState {
 export interface SaveScoreResult {
   saved: boolean;
   isNewRecord: boolean;
-  reason: 'saved' | 'skipped_zero_multi' | 'error';
+  reason: 'saved' | 'skipped_zero_multi' | 'skipped_coop_team_mode' | 'error';
   errorMessage?: string;
 }
 
@@ -561,6 +561,14 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   saveScore: async (playerId: string, options?: { allowZeroScore?: boolean }) => {
     const { score, maxCombo, mode } = get();
+    if (mode === 'coop') {
+      return {
+        saved: false,
+        isNewRecord: false,
+        reason: 'skipped_coop_team_mode',
+      };
+    }
+
     if (mode !== 'single' && score <= 0 && !options?.allowZeroScore) {
       return {
         saved: false,

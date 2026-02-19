@@ -5,12 +5,36 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+type LeaderboardRow = {
+  id: string;
+  score: number;
+  max_combo: number;
+  players: { id: string; nickname: string } | null;
+};
+
+function makeGuestNickname(seed: string): string {
+  let hash = 2166136261;
+  for (let i = 0; i < seed.length; i++) {
+    hash ^= seed.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  const num = Math.abs(hash >>> 0) % 10000;
+  return `player${num.toString().padStart(4, '0')}`;
+}
+
+function normalizeNicknameValue(nickname: string | null | undefined, seed: string): string {
+  const trimmed = (nickname ?? '').trim();
+  return trimmed.length > 0 ? trimmed : makeGuestNickname(seed);
+}
+
 // ─── Player ───────────────────────────────────────────
 export async function upsertPlayer(sessionId: string, nickname: string) {
+  const safeNickname = normalizeNicknameValue(nickname, sessionId);
+
   const { data, error } = await supabase
     .from('players')
     .upsert(
-      { session_id: sessionId, nickname, updated_at: new Date().toISOString() },
+      { session_id: sessionId, nickname: safeNickname, updated_at: new Date().toISOString() },
       { onConflict: 'session_id' }
     )
     .select()
@@ -37,6 +61,63 @@ export async function upsertScore(
   if (error) throw error;
 }
 
+export async function upsertCoopTeamScore(
+  roomId: string,
+  playerAId: string,
+  playerBId: string,
+  score: number,
+  maxCombo: number,
+) {
+  const [player1Id, player2Id] = [playerAId, playerBId].sort();
+
+  const { error } = await supabase.rpc('upsert_coop_team_score', {
+    p_room_id: roomId,
+    p_player_a_id: player1Id,
+    p_player_b_id: player2Id,
+    p_score: score,
+    p_max_combo: maxCombo,
+  });
+
+  if (!error) return;
+
+  // Fallback for environments where RPC execute grant/schema cache is not ready.
+  const { data: existing, error: existingError } = await supabase
+    .from('coop_team_scores')
+    .select('id, score, max_combo')
+    .eq('player1_id', player1Id)
+    .eq('player2_id', player2Id)
+    .maybeSingle();
+
+  if (existingError) throw existingError;
+
+  if (!existing) {
+    const { error: insertError } = await supabase
+      .from('coop_team_scores')
+      .insert({
+        room_id: roomId,
+        player1_id: player1Id,
+        player2_id: player2Id,
+        score,
+        max_combo: maxCombo,
+      });
+
+    if (insertError) throw insertError;
+    return;
+  }
+
+  const { error: updateError } = await supabase
+    .from('coop_team_scores')
+    .update({
+      room_id: roomId,
+      score: Math.max(existing.score, score),
+      max_combo: Math.max(existing.max_combo, maxCombo),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', existing.id);
+
+  if (updateError) throw updateError;
+}
+
 export async function getBestScore(playerId: string, mode: string): Promise<number | null> {
   const { data } = await supabase
     .from('scores')
@@ -49,6 +130,81 @@ export async function getBestScore(playerId: string, mode: string): Promise<numb
 
 // ─── Leaderboard ──────────────────────────────────────
 export async function getLeaderboard(mode: string, from = 0, to = 9) {
+  if (mode === 'coop') {
+    const { data, error } = await supabase
+      .from('coop_team_scores')
+      .select('id, score, max_combo, player1_id, player2_id')
+      .order('score', { ascending: false })
+      .range(from, to);
+
+    if (error) throw error;
+
+    const teamRows = ((data ?? []) as unknown as Array<{
+      id: string;
+      score: number;
+      max_combo: number;
+      player1_id: string;
+      player2_id: string;
+    }>);
+
+    // Backward compatibility:
+    // legacy coop records were stored in scores(mode='coop') with single player_id only.
+    if (teamRows.length === 0) {
+      const { data: legacyData, error: legacyError } = await supabase
+        .from('scores')
+        .select('id, score, max_combo, players(id, nickname)')
+        .eq('mode', 'coop')
+        .order('score', { ascending: false })
+        .range(from, to);
+
+      if (legacyError) throw legacyError;
+
+      // Legacy coop rows in `scores` don't contain teammate identity.
+      // Do not render placeholder entries like "name | ?" in coop leaderboard.
+      void legacyData;
+      return [];
+    }
+
+    const allPlayerIds = Array.from(
+      new Set(teamRows.flatMap((row) => [row.player1_id, row.player2_id]).filter(Boolean)),
+    );
+
+    const { data: players, error: playersError } = allPlayerIds.length
+      ? await supabase
+          .from('players')
+          .select('id, nickname')
+          .in('id', allPlayerIds)
+      : { data: [], error: null };
+
+    if (playersError) {
+      console.error('[leaderboard] failed to load coop player nicknames', playersError);
+    }
+
+    const playerNameMap = new Map(
+      ((players ?? []) as Array<{ id: string; nickname: string }>).map((player) => [
+        player.id,
+        player.nickname,
+      ]),
+    );
+
+    const mapped = teamRows.map((row) => {
+      const name1 = normalizeNicknameValue(playerNameMap.get(row.player1_id), row.player1_id);
+      const name2 = normalizeNicknameValue(playerNameMap.get(row.player2_id), row.player2_id);
+
+      return {
+        id: row.id,
+        score: row.score,
+        max_combo: row.max_combo,
+        players: {
+          id: `${row.player1_id}|${row.player2_id}`,
+          nickname: `${name1} | ${name2}`,
+        },
+      } satisfies LeaderboardRow;
+    });
+
+    return mapped;
+  }
+
   const { data, error } = await supabase
     .from('scores')
     .select('id, score, max_combo, created_at, players(id, nickname)')
@@ -57,7 +213,23 @@ export async function getLeaderboard(mode: string, from = 0, to = 9) {
     .range(from, to);
 
   if (error) throw error;
-  return data;
+  const rows = ((data ?? []) as unknown as Array<{
+    id: string;
+    score: number;
+    max_combo: number;
+    players: { id: string; nickname: string } | null;
+  }>).map((row) => {
+    if (!row.players) return row;
+    return {
+      ...row,
+      players: {
+        ...row.players,
+        nickname: normalizeNicknameValue(row.players.nickname, row.players.id),
+      },
+    };
+  });
+
+  return rows as unknown as LeaderboardRow[];
 }
 
 // ─── Room ─────────────────────────────────────────────

@@ -42,7 +42,7 @@ export default function GameOverScreen({ versusResult, allowZeroScoreSave = fals
         return;
       }
 
-      if (first.reason === 'skipped_zero_multi') {
+      if (first.reason === 'skipped_zero_multi' || first.reason === 'skipped_coop_team_mode') {
         return;
       }
 

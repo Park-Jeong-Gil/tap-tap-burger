@@ -37,7 +37,15 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
     try {
       const player = await upsertPlayer(sessionId, savedNickname);
-      set({ playerId: player.id, isInitialized: true });
+      const syncedNickname = (player.nickname ?? '').trim();
+      if (syncedNickname) {
+        localStorage.setItem(NICKNAME_STORAGE_KEY, syncedNickname);
+      }
+      set({
+        playerId: player.id,
+        nickname: syncedNickname || savedNickname,
+        isInitialized: true,
+      });
     } catch {
       // Supabase 없이도 로컬에서 동작하도록
       set({ playerId: sessionId, isInitialized: true });
@@ -57,7 +65,14 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     if (!sessionId) return;
     try {
       const player = await upsertPlayer(sessionId, nickname);
-      set({ playerId: player.id });
+      const syncedNickname = (player.nickname ?? '').trim();
+      if (syncedNickname) {
+        localStorage.setItem(NICKNAME_STORAGE_KEY, syncedNickname);
+      }
+      set({
+        playerId: player.id,
+        nickname: syncedNickname || nickname,
+      });
     } catch {
       // ignore
     }
