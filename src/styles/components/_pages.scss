@@ -343,7 +343,8 @@
   align-items: center;
   font-family: v.$font-pixel;
   color: v.$color-text;
-  background-color: rgb(221, 221, 221);
+  // background-color: rgb(221, 221, 221);
+  background-color: v.$color-surface;
 
   @include pb.pixel-borders(
     $corner-size: 1,
@@ -373,16 +374,37 @@
   }
 
   &--top1 {
-    color: #ffd700;
-    background-color: v.$color-surface;
+    // color: #ffd700;
+    // background-color: v.$color-surface;
+    color: #fff;
+    background: linear-gradient(90deg, #ffde00, #ffc000);
+    text-shadow:
+      1px 1px 0 #000,
+      -1px 1px 0 #000,
+      1px -1px 0 #000,
+      -1px -1px 0 #000;
   }
   &--top2 {
-    color: #c0c0c0;
-    background-color: v.$color-surface;
+    // color: #c0c0c0;
+    // background-color: v.$color-surface;
+    color: #fff;
+    background: linear-gradient(90deg, #c0c0c0, #a0a0a0);
+    text-shadow:
+      1px 1px 0 #000,
+      -1px 1px 0 #000,
+      1px -1px 0 #000,
+      -1px -1px 0 #000;
   }
   &--top3 {
-    color: #cd7f32;
-    background-color: v.$color-surface;
+    // color: #cd7f32;
+    // background-color: v.$color-surface;
+    color: #fff;
+    background: linear-gradient(90deg, #cd7f32, #b06c1c);
+    text-shadow:
+      1px 1px 0 #000,
+      -1px 1px 0 #000,
+      1px -1px 0 #000,
+      -1px -1px 0 #000;
   }
 }
 
