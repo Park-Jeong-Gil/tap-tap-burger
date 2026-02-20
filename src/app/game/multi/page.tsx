@@ -180,6 +180,9 @@ export default function MultiHubPage() {
               </span>
             )}
           </div>
+          {isHost && (
+            <p className="room-lobby__notice">{t.keepLobbyOpenNotice}</p>
+          )}
 
           <div className="room-lobby__players">
             <p
