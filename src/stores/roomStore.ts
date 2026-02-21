@@ -2,7 +2,7 @@
 
 import { create } from 'zustand';
 import type { GameMode, RoomPlayer } from '@/types';
-import { createRoom, joinRoom, setPlayerReady, updateRoomStatus } from '@/lib/supabase';
+import { createRoom, joinRoom, setPlayerReady, startRoom } from '@/lib/supabase';
 import { ACTIVE_ROOM_STORAGE_KEY } from '@/lib/constants';
 
 interface RoomState {
@@ -15,7 +15,7 @@ interface RoomState {
   createAndJoin: (mode: GameMode, playerId: string, nickname: string) => Promise<string>;
   joinExisting: (roomId: string, playerId: string, nickname: string) => Promise<void>;
   setReady: (roomId: string, playerId: string) => Promise<void>;
-  startGame: (roomId: string) => Promise<void>;
+  startGame: (roomId: string, playerId: string) => Promise<void>;
   setPlayers: (players: RoomPlayer[]) => void;
   setRoomStatus: (status: 'waiting' | 'playing' | 'finished') => void;
   restoreHostRoom: (roomId: string, mode: GameMode, players: RoomPlayer[]) => void;
@@ -31,8 +31,6 @@ export const useRoomStore = create<RoomState>((set) => ({
 
   createAndJoin: async (mode, playerId, nickname) => {
     const room = await createRoom(mode, playerId);
-    // 게임 생성자는 즉시 준비 완료 처리
-    await setPlayerReady(room.id, playerId, true);
     // 새로고침 복원을 위해 localStorage에 저장
     if (typeof window !== 'undefined') {
       localStorage.setItem(ACTIVE_ROOM_STORAGE_KEY, JSON.stringify({ roomId: room.id, mode: room.mode }));
@@ -41,7 +39,7 @@ export const useRoomStore = create<RoomState>((set) => ({
       roomId: room.id,
       mode: room.mode,
       isHost: true,
-      players: [{ playerId, nickname, ready: true }],
+      players: [{ playerId, nickname, ready: false }],
       roomStatus: 'waiting',
     });
     return room.id;
@@ -66,8 +64,8 @@ export const useRoomStore = create<RoomState>((set) => ({
     }));
   },
 
-  startGame: async (roomId) => {
-    await updateRoomStatus(roomId, 'playing');
+  startGame: async (roomId, playerId) => {
+    await startRoom(roomId, playerId);
     if (typeof window !== 'undefined') {
       localStorage.removeItem(ACTIVE_ROOM_STORAGE_KEY);
     }

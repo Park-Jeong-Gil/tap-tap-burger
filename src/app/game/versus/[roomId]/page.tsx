@@ -13,6 +13,8 @@ import {
   getRoomInfo,
   updateRoomStatus,
   markRoomFinishedBeacon,
+  leaveRoom,
+  leaveRoomBeacon,
 } from "@/lib/supabase";
 import { NICKNAME_STORAGE_KEY, HP_INIT } from "@/lib/constants";
 import HpBar from "@/components/game/HpBar";
@@ -66,7 +68,6 @@ export default function VersusGamePage() {
     isInitialized,
   } = usePlayerStore();
   const {
-    isHost,
     players,
     roomStatus,
     joinExisting,
@@ -127,6 +128,7 @@ export default function VersusGamePage() {
   const [opponentFeverResultTick, setOpponentFeverResultTick] = useState(0);
   const [projectiles, setProjectiles] = useState<AttackProjectilePulse[]>([]);
   const [forcedTerminationWin, setForcedTerminationWin] = useState(false);
+  const [isLeaving, setIsLeaving] = useState(false);
 
   const attackSentIdRef = useRef(0);
   const projectileIdRef = useRef(0);
@@ -143,10 +145,13 @@ export default function VersusGamePage() {
   const opponentFeverResultsRef = useRef<Record<number, number>>({});
   const resolvedFeverCycleRef = useRef<Set<number>>(new Set());
   const feverAttackCooldownUntilRef = useRef(0);
-  const leavingRef = useRef(false);
+  const roomStatusRef = useRef(roomStatus);
   useEffect(() => {
     gameStatusRef.current = gameStatus;
   }, [gameStatus]);
+  useEffect(() => {
+    roomStatusRef.current = roomStatus;
+  }, [roomStatus]);
 
   const showAttackBanner = useCallback((count: number, type: "combo" | "fever_delta") => {
     if (attackSentTimer.current) clearTimeout(attackSentTimer.current);
@@ -239,8 +244,8 @@ export default function VersusGamePage() {
   useEffect(() => {
     return () => {
       // resetRoom()이 roomStatus를 'waiting'으로 초기화하면 useLobbyRoom이 재실행되며
-      // 대기실 화면이 2~3초 렌더되는 플래시 발생 → leavingRef로 렌더를 차단
-      leavingRef.current = true;
+      // 대기실 화면이 2~3초 렌더되는 플래시 발생 → leaving state로 렌더를 차단
+      setIsLeaving(true);
       resetGame();
       resetRoom();
     };
@@ -260,40 +265,52 @@ export default function VersusGamePage() {
     if (!isInitialized || !playerId || joined) return;
     setJoined(true);
     const join = async () => {
-      const room = await getRoomInfo(roomId);
-      if (!room || room.status === "finished") {
-        setExpired(true);
-        return;
+      try {
+        const room = await getRoomInfo(roomId);
+        if (!room || room.status === "finished") {
+          setExpired(true);
+          return;
+        }
+
+        const { data: myRow } = await supabase
+          .from("room_players")
+          .select("player_id")
+          .eq("room_id", roomId)
+          .eq("player_id", playerId)
+          .maybeSingle();
+
+        if (myRow) {
+          if (room.status === "playing" && roomStatus !== "playing") setExpired(true);
+          return;
+        }
+
+        if (room.status === "playing") {
+          setExpired(true);
+          return;
+        }
+
+        const { count } = await supabase
+          .from("room_players")
+          .select("player_id", { count: "exact", head: true })
+          .eq("room_id", roomId);
+
+        if (count !== null && count >= 2) {
+          setExpired(true);
+          return;
+        }
+
+        await joinExisting(roomId, playerId, nickname);
+      } catch (error) {
+        const code = (error as Error & { code?: string }).code ?? (error as Error).message;
+        if (
+          code === "expired" ||
+          code === "room_full" ||
+          code === "not_waiting" ||
+          code === "not_found"
+        ) {
+          setExpired(true);
+        }
       }
-
-      const { data: myRow } = await supabase
-        .from("room_players")
-        .select("player_id")
-        .eq("room_id", roomId)
-        .eq("player_id", playerId)
-        .maybeSingle();
-
-      if (myRow) {
-        if (room.status === "playing" && roomStatus !== "playing") setExpired(true);
-        return;
-      }
-
-      if (room.status === "playing") {
-        setExpired(true);
-        return;
-      }
-
-      const { count } = await supabase
-        .from("room_players")
-        .select("player_id", { count: "exact", head: true })
-        .eq("room_id", roomId);
-
-      if (count !== null && count >= 2) {
-        setExpired(true);
-        return;
-      }
-
-      await joinExisting(roomId, playerId, nickname);
     };
     join();
   }, [isInitialized, playerId, joined, roomId, nickname, joinExisting, roomStatus]);
@@ -466,6 +483,26 @@ export default function VersusGamePage() {
     };
   }, [roomId]);
 
+  // Leaving lobby before game start → remove my seat row
+  useEffect(() => {
+    if (!playerId) return;
+    const leaveWaitingRoom = () => {
+      if (roomStatusRef.current === "waiting") {
+        leaveRoomBeacon(roomId, playerId);
+      }
+    };
+    window.addEventListener("beforeunload", leaveWaitingRoom);
+    window.addEventListener("pagehide", leaveWaitingRoom);
+    return () => {
+      window.removeEventListener("beforeunload", leaveWaitingRoom);
+      window.removeEventListener("pagehide", leaveWaitingRoom);
+      if (roomStatusRef.current === "waiting") {
+        leaveRoom(roomId, playerId).catch(() => {});
+        leaveRoomBeacon(roomId, playerId);
+      }
+    };
+  }, [roomId, playerId]);
+
   useEffect(() => {
     if (roomStatus !== "waiting") return;
     const timer = setTimeout(
@@ -542,8 +579,19 @@ export default function VersusGamePage() {
   };
 
   const handleStart = async () => {
-    await startGame(roomId);
-    setRoomStatus("playing");
+    if (!playerId) return;
+    try {
+      await startGame(roomId, playerId);
+      setRoomStatus("playing");
+    } catch (error) {
+      const code = (error as Error & { code?: string }).code ?? (error as Error).message;
+      if (code === "expired") {
+        setRoomStatus("finished");
+        setExpired(true);
+      } else if (code === "not_waiting") {
+        setRoomStatus("playing");
+      }
+    }
   };
 
   const allReady = players.length >= 2 && players.every((p) => p.ready);
@@ -551,7 +599,7 @@ export default function VersusGamePage() {
   const myReady = myEntry?.ready ?? false;
   const opponentEntry = players.find((p) => p.playerId !== playerId);
 
-  if (leavingRef.current) return null;
+  if (isLeaving) return null;
 
   if (expired) {
     return (
@@ -605,7 +653,7 @@ export default function VersusGamePage() {
               </p>
             )}
           </div>
-          {!isHost && !myReady && (
+          {!myReady && (
             <>
               <div className="main-nickname" style={{ width: "100%" }}>
                 <label className="main-nickname__label" htmlFor="vs-nickname">
@@ -633,7 +681,7 @@ export default function VersusGamePage() {
               </button>
             </>
           )}
-          {isHost && (
+          {myReady && (
             <button
               className="btn btn--primary"
               onClick={handleStart}

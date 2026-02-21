@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { usePlayerStore } from "@/stores/playerStore";
 import { useRoomStore } from "@/stores/roomStore";
 import { useLobbyRoom } from "@/hooks/useRoom";
-import { getRoomInfo, getRoomPlayers } from "@/lib/supabase";
+import { getRoomInfo, getRoomPlayers, leaveRoom, leaveRoomBeacon } from "@/lib/supabase";
 import { ACTIVE_ROOM_STORAGE_KEY } from "@/lib/constants";
 import type { GameMode } from "@/types";
 import { useLocale } from "@/providers/LocaleProvider";
@@ -30,6 +30,11 @@ export default function MultiHubPage() {
   const [creating, setCreating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [selectedMode, setSelectedMode] = useState<GameMode | null>(null);
+  const roomStatusRef = useRef(roomStatus);
+
+  useEffect(() => {
+    roomStatusRef.current = roomStatus;
+  }, [roomStatus]);
 
   useEffect(() => {
     initSession();
@@ -79,6 +84,25 @@ export default function MultiHubPage() {
     syncRoomStatus();
   }, [roomId, setRoomStatus]);
 
+  useEffect(() => {
+    if (!roomId || !playerId) return;
+    const leaveWaitingRoom = () => {
+      if (roomStatusRef.current === "waiting") {
+        leaveRoomBeacon(roomId, playerId);
+      }
+    };
+    window.addEventListener("beforeunload", leaveWaitingRoom);
+    window.addEventListener("pagehide", leaveWaitingRoom);
+    return () => {
+      window.removeEventListener("beforeunload", leaveWaitingRoom);
+      window.removeEventListener("pagehide", leaveWaitingRoom);
+      if (roomStatusRef.current === "waiting") {
+        leaveRoom(roomId, playerId).catch(() => {});
+        leaveRoomBeacon(roomId, playerId);
+      }
+    };
+  }, [roomId, playerId]);
+
   const handleCreate = async (mode: GameMode) => {
     if (!playerId || !isInitialized) return;
     setCreating(true);
@@ -104,8 +128,17 @@ export default function MultiHubPage() {
   };
 
   const handleStart = async () => {
-    if (!roomId) return;
-    await startGame(roomId);
+    if (!roomId || !playerId) return;
+    try {
+      await startGame(roomId, playerId);
+    } catch (error) {
+      const code = (error as Error & { code?: string }).code ?? (error as Error).message;
+      if (code === "expired") {
+        setRoomStatus("finished");
+      } else if (code === "not_waiting") {
+        setRoomStatus("playing");
+      }
+    }
   };
 
   const allReady = players.length >= 2 && players.every((p) => p.ready);
@@ -219,26 +252,33 @@ export default function MultiHubPage() {
             )}
           </div>
 
-          {!isHost && !myReady && (
+          {!myReady && (
             <button className="btn btn--primary" onClick={handleReady}>
               {t.ready}
             </button>
           )}
 
-          {isHost && (
+          {myReady && (
             <button
               className="btn btn--primary"
               onClick={handleStart}
               disabled={!allReady}
             >
-              {allReady ? t.startGame : t.waitingForAllPlayers}
+              {allReady
+                ? t.startGame
+                : players.length < 2
+                  ? t.waitingForAllPlayers
+                  : t.waitingForOpponentReady}
             </button>
           )}
         </div>
 
         <button
           className="btn btn--ghost"
-          onClick={() => {
+          onClick={async () => {
+            if (roomId && playerId && roomStatus === "waiting") {
+              await leaveRoom(roomId, playerId).catch(() => {});
+            }
             reset();
             router.push("/");
           }}

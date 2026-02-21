@@ -34,7 +34,7 @@ export const translations = {
     versusMode: "Versus",
     linkCopied: "Link copied to clipboard. Share with a friend!",
     keepLobbyOpenNotice:
-      "Keep this browser open. Share the copied link, then return to this lobby.",
+      "This lobby is available for 10 minutes. Share the link and get ready to play.",
     copied: "✓ Copied",
     players: "Players",
     me: "(me)",
@@ -153,7 +153,7 @@ export const translations = {
     versusMode: "대전 모드",
     linkCopied: "링크가 클립보드에 복사되었습니다. 친구에게 공유하세요.",
     keepLobbyOpenNotice:
-      "현재 브라우저를 닫지 말고, 복사한 링크를 공유한 뒤 이 대기실로 돌아오세요.",
+      "이 대기실은 10분 동안 접속 가능합니다. 링크 공유 및 게임을 준비하세요.",
     copied: "✓ 복사됨",
     players: "참가자",
     me: "(나)",

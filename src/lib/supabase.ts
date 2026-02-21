@@ -12,6 +12,11 @@ type LeaderboardRow = {
   players: { id: string; nickname: string } | null;
 };
 
+type RoomRpcResult = {
+  ok: boolean;
+  reason: string;
+};
+
 function makeGuestNickname(seed: string): string {
   let hash = 2166136261;
   for (let i = 0; i < seed.length; i++) {
@@ -251,14 +256,19 @@ export async function createRoom(mode: string, hostPlayerId: string) {
 }
 
 export async function joinRoom(roomId: string, playerId: string) {
-  const { data, error } = await supabase
-    .from('room_players')
-    .insert({ room_id: roomId, player_id: playerId, ready: false })
-    .select()
-    .single();
-
+  const { data, error } = await supabase.rpc('join_room_if_available', {
+    p_room_id: roomId,
+    p_player_id: playerId,
+  });
   if (error) throw error;
-  return data;
+
+  const result = (data ?? { ok: false, reason: 'unknown' }) as RoomRpcResult;
+  if (!result.ok) {
+    const e = new Error(result.reason);
+    (e as Error & { code?: string }).code = result.reason;
+    throw e;
+  }
+  return result;
 }
 
 export async function setPlayerReady(roomId: string, playerId: string, ready: boolean) {
@@ -278,6 +288,22 @@ export async function updateRoomStatus(roomId: string, status: string) {
     .eq('id', roomId);
 
   if (error) throw error;
+}
+
+export async function startRoom(roomId: string, playerId: string) {
+  const { data, error } = await supabase.rpc('start_room_if_ready', {
+    p_room_id: roomId,
+    p_player_id: playerId,
+  });
+  if (error) throw error;
+
+  const result = (data ?? { ok: false, reason: 'unknown' }) as RoomRpcResult;
+  if (!result.ok) {
+    const e = new Error(result.reason);
+    (e as Error & { code?: string }).code = result.reason;
+    throw e;
+  }
+  return result;
 }
 
 export async function getRoomPlayers(roomId: string) {
@@ -300,6 +326,15 @@ export async function getRoomInfo(roomId: string) {
     .eq('id', roomId)
     .maybeSingle();
   return data as { id: string; status: string } | null;
+}
+
+export async function leaveRoom(roomId: string, playerId: string) {
+  const { error } = await supabase
+    .from('room_players')
+    .delete()
+    .eq('room_id', roomId)
+    .eq('player_id', playerId);
+  if (error) throw error;
 }
 
 export async function getRoomHostNickname(roomId: string): Promise<string> {
@@ -326,6 +361,23 @@ export function markRoomFinishedBeacon(roomId: string): void {
       'Prefer': 'return=minimal',
     },
     body: JSON.stringify({ status: 'finished' }),
+    keepalive: true,
+  }).catch(() => {});
+}
+
+export function leaveRoomBeacon(roomId: string, playerId: string): void {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) return;
+  const roomIdEq = encodeURIComponent(`eq.${roomId}`);
+  const playerIdEq = encodeURIComponent(`eq.${playerId}`);
+  fetch(`${url}/rest/v1/room_players?room_id=${roomIdEq}&player_id=${playerIdEq}`, {
+    method: 'DELETE',
+    headers: {
+      'apikey': key,
+      'Authorization': `Bearer ${key}`,
+      'Prefer': 'return=minimal',
+    },
     keepalive: true,
   }).catch(() => {});
 }

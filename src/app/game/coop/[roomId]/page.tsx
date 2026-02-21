@@ -12,6 +12,8 @@ import {
   getRoomInfo,
   updateRoomStatus,
   markRoomFinishedBeacon,
+  leaveRoom,
+  leaveRoomBeacon,
   upsertCoopTeamScore,
 } from "@/lib/supabase";
 import { assignCoopKeys } from "@/lib/gameLogic";
@@ -34,7 +36,6 @@ export default function CoopGamePage() {
 
   const { playerId, nickname, setNickname, saveNickname, initSession, isInitialized } = usePlayerStore();
   const {
-    isHost,
     players,
     roomStatus,
     joinExisting,
@@ -71,10 +72,14 @@ export default function CoopGamePage() {
   const teamScoreSavedRef = useRef(false);
   const teamScoreSavingRef = useRef(false);
   const gameStatusRef = useRef(gameStatus);
+  const roomStatusRef = useRef(roomStatus);
   const shakeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     gameStatusRef.current = gameStatus;
   }, [gameStatus]);
+  useEffect(() => {
+    roomStatusRef.current = roomStatus;
+  }, [roomStatus]);
 
   useEffect(() => {
     return () => {
@@ -108,59 +113,82 @@ export default function CoopGamePage() {
     setJoined(true);
 
     const join = async () => {
-      // Check room status
-      const room = await getRoomInfo(roomId);
-      if (!room || room.status === "finished") {
-        setExpired(true);
-        return;
-      }
-
-      // Check if already in the room (host is handled in createAndJoin)
-      const { data } = await supabase
-        .from("room_players")
-        .select("player_id, ready, assigned_keys")
-        .eq("room_id", roomId)
-        .eq("player_id", playerId)
-        .maybeSingle();
-
-      if (!data) {
-        // New player: if game is in progress, mark as expired
-        if (room.status === "playing") {
+      try {
+        // Check room status
+        const room = await getRoomInfo(roomId);
+        if (!room || room.status === "finished") {
           setExpired(true);
           return;
         }
-        await joinExisting(roomId, playerId, nickname);
-      } else if (room.status === "playing" && roomStatus !== "playing") {
-        // Existing participant reconnecting mid-game (refresh, etc.) → mark as expired
-        // Exception: if roomStatus is already 'playing', host entered normally after starting from multi page
-        setExpired(true);
-        return;
-      }
 
-      // Key assignment: host distributes all keys and saves to DB
-      const { data: rp } = await supabase
-        .from("room_players")
-        .select("assigned_keys")
-        .eq("room_id", roomId)
-        .eq("player_id", playerId)
-        .single();
-
-      if (rp?.assigned_keys && rp.assigned_keys.length > 0) {
-        setAssignedKeys(rp.assigned_keys);
-      } else {
-        // Both players compute the same split using roomId as seed
-        const [keys1, keys2] = assignCoopKeys(roomId);
-        const myKeys = isHost ? keys1 : keys2;
-        setAssignedKeys(myKeys);
-        await supabase
+        // Check if already in the room
+        const { data } = await supabase
           .from("room_players")
-          .update({ assigned_keys: myKeys })
+          .select("player_id, ready, assigned_keys")
           .eq("room_id", roomId)
-          .eq("player_id", playerId);
+          .eq("player_id", playerId)
+          .maybeSingle();
+
+        if (!data) {
+          // New player: if game is in progress, mark as expired
+          if (room.status === "playing") {
+            setExpired(true);
+            return;
+          }
+          await joinExisting(roomId, playerId, nickname);
+        } else if (room.status === "playing" && roomStatus !== "playing") {
+          // Existing participant reconnecting mid-game (refresh, etc.) → mark as expired
+          // Exception: if roomStatus is already 'playing', host entered normally after starting from multi page
+          setExpired(true);
+          return;
+        }
+
+        // Key assignment: based on deterministic player_id order
+        const { data: rp } = await supabase
+          .from("room_players")
+          .select("assigned_keys")
+          .eq("room_id", roomId)
+          .eq("player_id", playerId)
+          .single();
+
+        if (rp?.assigned_keys && rp.assigned_keys.length > 0) {
+          setAssignedKeys(rp.assigned_keys);
+        } else {
+          const [keys1, keys2] = assignCoopKeys(roomId);
+          const { data: members } = await supabase
+            .from("room_players")
+            .select("player_id")
+            .eq("room_id", roomId);
+          const orderedIds = Array.from(
+            new Set(
+              (members ?? [])
+                .map((row) => row.player_id as string | null)
+                .filter((id): id is string => Boolean(id)),
+            ),
+          ).sort();
+          const myIndex = orderedIds.findIndex((id) => id === playerId);
+          const myKeys = myIndex > 0 ? keys2 : keys1;
+          setAssignedKeys(myKeys);
+          await supabase
+            .from("room_players")
+            .update({ assigned_keys: myKeys })
+            .eq("room_id", roomId)
+            .eq("player_id", playerId);
+        }
+      } catch (error) {
+        const code = (error as Error & { code?: string }).code ?? (error as Error).message;
+        if (
+          code === "expired" ||
+          code === "room_full" ||
+          code === "not_waiting" ||
+          code === "not_found"
+        ) {
+          setExpired(true);
+        }
       }
     };
     join();
-  }, [isInitialized, playerId, joined, roomId, nickname, isHost, joinExisting, roomStatus]);
+  }, [isInitialized, playerId, joined, roomId, nickname, joinExisting, roomStatus]);
 
   const { sendInput } = useCoopRoom(roomId, playerId ?? "");
   useLobbyRoom(roomId);
@@ -281,6 +309,26 @@ export default function CoopGamePage() {
     };
   }, [roomId, setRoomStatus]);
 
+  // Leaving lobby before game start → remove my seat row
+  useEffect(() => {
+    if (!playerId) return;
+    const leaveWaitingRoom = () => {
+      if (roomStatusRef.current === "waiting") {
+        leaveRoomBeacon(roomId, playerId);
+      }
+    };
+    window.addEventListener("beforeunload", leaveWaitingRoom);
+    window.addEventListener("pagehide", leaveWaitingRoom);
+    return () => {
+      window.removeEventListener("beforeunload", leaveWaitingRoom);
+      window.removeEventListener("pagehide", leaveWaitingRoom);
+      if (roomStatusRef.current === "waiting") {
+        leaveRoom(roomId, playerId).catch(() => {});
+        leaveRoomBeacon(roomId, playerId);
+      }
+    };
+  }, [roomId, playerId]);
+
   // 10-minute lobby timeout → auto-expire
   useEffect(() => {
     if (roomStatus !== "waiting") return;
@@ -365,8 +413,19 @@ export default function CoopGamePage() {
   };
 
   const handleStart = async () => {
-    await startGame(roomId);
-    setRoomStatus("playing");
+    if (!playerId) return;
+    try {
+      await startGame(roomId, playerId);
+      setRoomStatus("playing");
+    } catch (error) {
+      const code = (error as Error & { code?: string }).code ?? (error as Error).message;
+      if (code === "expired") {
+        setRoomStatus("finished");
+        setExpired(true);
+      } else if (code === "not_waiting") {
+        setRoomStatus("playing");
+      }
+    }
   };
 
   const allReady = players.length >= 2 && players.every((p) => p.ready);
@@ -420,7 +479,7 @@ export default function CoopGamePage() {
               </p>
             )}
           </div>
-          {!isHost && !myReady && (
+          {!myReady && (
             <>
               <div className="main-nickname" style={{ width: "100%" }}>
                 <label className="main-nickname__label" htmlFor="coop-nickname">{t.nickname}</label>
@@ -444,13 +503,17 @@ export default function CoopGamePage() {
               </button>
             </>
           )}
-          {isHost && (
+          {myReady && (
             <button
               className="btn btn--primary"
               onClick={handleStart}
               disabled={!allReady}
             >
-              {allReady ? t.startGame : t.waiting}
+              {allReady
+                ? t.startGame
+                : players.length < 2
+                  ? t.waitingForAllPlayers
+                  : t.waitingForOpponentReady}
             </button>
           )}
         </div>
